@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://laxoshedu.github.io/quizcolo/sitemap.xml
+Sitemap: https://laxoshedu.github.io/quizkaro/sitemap.xml
