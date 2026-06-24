@@ -1,0 +1,18 @@
+old robots
+
+User-agent: *
+Allow: /
+
+Sitemap: https://laxoshedu.github.io/quizkaro/sitemap.xml
+
+
+
+old site maps
+
+
+This XML file does not appear to have any style information associated with it. The document tree is shown below.
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemap>
+<loc>https://script.google.com/macros/s/AKfycbwOUNYl8bwGj7xKiZmteJu02qRuMIP-I9AUcaxBDV0bVDJJJ8V-rad8GsAgBenH5OD5rQ/exec?action=sitemap</loc>
+</sitemap>
+</sitemapindex>
