@@ -34,6 +34,7 @@
 
         body {
             min-height: 100vh;
+            width: 100%;
             background: var(--bg-gradient);
             color: var(--text-main);
             display: flex;
@@ -764,9 +765,25 @@
     </div>
 
     <script>
-        // =========================================================================
-        // ⚠️ REPLACE WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL HERE:
-        // =========================================================================
+        // Safe Storage Fallback for restricted iframe contexts in Chrome
+        const safeStorage = {
+            _mem: {},
+            getItem: function(key) {
+                try {
+                    return localStorage.getItem(key);
+                } catch (e) {
+                    return this._mem[key] || null;
+                }
+            },
+            setItem: function(key, val) {
+                try {
+                    localStorage.setItem(key, val);
+                } catch (e) {
+                    this._mem[key] = String(val);
+                }
+            }
+        };
+
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1_5PZkKCcd8poujLOOfNKi2YmMI0ipkXKEbIaC2yBdxomHBtUmHPlRUSA9MqpEuUE/exec";
 
         const defaultEnglishQuestions = [
@@ -841,15 +858,15 @@
         }
 
         function isSubjectCompletedToday(subject) {
-            return localStorage.getItem(`quiz_completed_${subject}`) === getTodayString();
+            return safeStorage.getItem(`quiz_completed_${subject}`) === getTodayString();
         }
 
         function setSubjectCompletedToday(subject) {
-            localStorage.setItem(`quiz_completed_${subject}`, getTodayString());
+            safeStorage.setItem(`quiz_completed_${subject}`, getTodayString());
         }
 
         function getUserName() {
-            return localStorage.getItem('quiz_user_name');
+            return safeStorage.getItem('quiz_user_name');
         }
 
         function promptUserName(onComplete) {
@@ -863,7 +880,7 @@
                 alert("Please enter your name to proceed!");
                 return;
             }
-            localStorage.setItem('quiz_user_name', val);
+            safeStorage.setItem('quiz_user_name', val);
             document.getElementById('name-modal').style.display = 'none';
             if (pendingAction) {
                 pendingAction();
@@ -872,21 +889,26 @@
         }
 
         function initApp() {
-            const firstVisitDate = localStorage.getItem('quiz_first_visit_date');
-            const lastVisitDate = localStorage.getItem('quiz_last_visit_date');
-            const today = getTodayString();
+            try {
+                const firstVisitDate = safeStorage.getItem('quiz_first_visit_date');
+                const lastVisitDate = safeStorage.getItem('quiz_last_visit_date');
+                const today = getTodayString();
 
-            localStorage.setItem('quiz_last_visit_date', today);
+                safeStorage.setItem('quiz_last_visit_date', today);
 
-            if (!firstVisitDate) {
-                localStorage.setItem('quiz_first_visit_date', today);
-                currentSubject = "English";
+                if (!firstVisitDate) {
+                    safeStorage.setItem('quiz_first_visit_date', today);
+                    currentSubject = "English";
+                }
+
+                renderSubjectChips();
+                selectSubject(currentSubject);
+                fetchBackendSubjects(lastVisitDate !== today && firstVisitDate !== null);
+                setupInfiniteScrollEngine();
+            } catch(e) {
+                console.error("Init fallback triggered:", e);
+                selectSubject("English");
             }
-
-            renderSubjectChips();
-            selectSubject(currentSubject);
-            fetchBackendSubjects(lastVisitDate !== today && firstVisitDate !== null);
-            setupInfiniteScrollEngine();
         }
 
         async function fetchBackendSubjects(isNextDay) {
@@ -911,7 +933,7 @@
                     backendStatus.innerText = "Connected";
                 }
             } catch (err) {
-                console.log("Backend offline or URL not configured yet:", err);
+                console.log("Backend offline or URL restricted:", err);
                 backendStatus.innerText = "Default Mode";
             }
         }
@@ -962,18 +984,15 @@
             });
         }
 
-        // Handle Subject Selection
         async function selectSubject(subject) {
             currentSubject = subject;
 
-            // Instantly clear old leaderboard data to avoid cross-subject leaks
             todayLeaderboard = [];
             renderLeaderboardUI();
 
             renderSubjectChips();
             fetchLeaderboard(currentSubject);
 
-            // In-card notice if already completed today
             if (isSubjectCompletedToday(subject)) {
                 quizView.style.display = 'none';
                 resultScreen.style.display = 'none';
@@ -982,7 +1001,6 @@
                 return;
             }
 
-            // Normal Quiz Mode
             alreadyCompletedScreen.style.display = 'none';
             resultScreen.style.display = 'none';
             quizView.style.display = 'block';
@@ -1179,7 +1197,6 @@
                 const res = await fetch(`${APPS_SCRIPT_URL}?action=getLeaderboard&subject=${encodeURIComponent(subject)}`);
                 const data = await res.json();
                 
-                // Guard: Only update if returned subject matches currently selected subject
                 if (data.success && data.subject && data.subject.toLowerCase() === currentSubject.toLowerCase() && Array.isArray(data.leaderboard)) {
                     todayLeaderboard = data.leaderboard;
                     renderLeaderboardUI();
@@ -1256,4 +1273,3 @@
     </script>
 </body>
 </html>
-
