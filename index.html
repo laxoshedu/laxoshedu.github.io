@@ -42,7 +42,6 @@
             --accent: #3182ce;
             --nav-bg: rgba(255, 255, 255, 0.7);
 
-            /* Light mode adjusted smart colors */
             --physics-color: #0284c7;
             --chem-color: #059669;
             --bio-color: #db2777;
@@ -71,7 +70,6 @@
             padding-top: 120px;
         }
 
-        /* --- FIXED LIQUID NAV --- */
         .top-navbar {
             position: fixed;
             top: 20px;
@@ -94,7 +92,6 @@
         .nav-logo { font-weight: 700; font-size: 1.15rem; cursor: default; white-space: nowrap; }
         .nav-logo span { color: var(--accent); }
 
-        /* --- DESKTOP MENU BAR --- */
         .desktop-menu {
             display: flex;
             align-items: center;
@@ -117,7 +114,6 @@
             color: var(--accent);
         }
 
-        /* Theme Button Styles */
         .theme-toggle-btn {
             background: transparent;
             border: none;
@@ -135,7 +131,6 @@
             justify-content: center;
         }
 
-        /* Mobile Hamburger Icon */
         .menu-trigger {
             cursor: pointer;
             font-size: 1.8rem;
@@ -146,7 +141,6 @@
             align-items: center;
         }
 
-        /* --- MOBILE DROPDOWN MENU --- */
         .menu-overlay {
             position: fixed;
             top: 100px;
@@ -197,7 +191,6 @@
             .menu-overlay { display: none !important; }
         }
 
-        /* --- MAIN WRAPPER --- */
         .main-wrapper {
             width: 100%;
             max-width: var(--container-width);
@@ -214,7 +207,6 @@
             gap: 25px;
         }
 
-        /* --- HIGHLIGHT ANIMATION FOR SHARED LINKS --- */
         @keyframes highlightPulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.7); }
             50% { transform: scale(1.02); box-shadow: 0 0 40px 15px var(--accent); border-color: var(--accent); background: rgba(0, 229, 255, 0.12); }
@@ -225,7 +217,6 @@
             border-color: var(--accent) !important;
         }
 
-        /* --- CARD TOP BAR (VIEWS ON LEFT TOP CORNER & SHARE ON RIGHT TOP CORNER) --- */
         .card-top-bar {
             width: 100%;
             display: flex;
@@ -271,7 +262,6 @@
             transform: translateY(-2px);
         }
 
-        /* --- HERO APP CARD --- */
         #home-app { scroll-margin-top: 130px; }
         .main-app-link { text-decoration: none; display: block; opacity: 0; transform: translateY(30px); }
 
@@ -348,7 +338,6 @@
         .featured-title { font-size: 2.3rem; color: var(--text-main); line-height: 1.15; margin-bottom: 15px; }
         .featured-desc { color: var(--text-muted); line-height: 1.6; font-size: 1.05rem; }
 
-        /* --- EMBEDDED IFRAME SECTION (FULL MOBILE WIDTH & NEUTRAL BORDER) --- */
         .iframe-section-wrapper {
             display: flex;
             flex-direction: column;
@@ -422,7 +411,6 @@
             }
         }
 
-        /* --- SECTION HEADING --- */
         .main-section-heading {
             text-align: center;
             margin: 10px 0 10px;
@@ -447,7 +435,6 @@
             border-radius: 4px;
         }
 
-        /* --- CATEGORY INTRO CARD --- */
         .category-intro-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -509,7 +496,6 @@
         .intro-academic { --cat-color: var(--acad-color); }
         .intro-other { --cat-color: var(--other-color); }
 
-        /* --- APP GRID & CARDS --- */
         .app-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -635,7 +621,6 @@
         }
         .app-icon-small .letter-avatar { font-size: 2.2rem; }
 
-        /* --- ABOUT SECTION --- */
         #about { scroll-margin-top: 130px; }
         .content-section {
             background: var(--card-bg);
@@ -685,7 +670,6 @@
         .attention-text .status { font-size: 1.2rem; font-weight: 700; color: var(--text-main); letter-spacing: 1px; text-transform: uppercase; }
         .attention-text .subtext { font-size: 0.95rem; color: var(--text-muted); }
 
-        /* --- VISITOR ANALYTICS CARD --- */
         .visitor-stats-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -788,7 +772,6 @@
     <nav class="top-navbar">
         <div class="nav-logo">Laxosh<span>Edu</span></div>
         
-        <!-- DESKTOP MENU -->
         <div class="desktop-menu">
             <a href="#home-app">Home</a>
             <a href="#physics-tools">Physics</a>
@@ -801,11 +784,9 @@
             </button>
         </div>
 
-        <!-- MOBILE MENU BUTTON -->
         <button class="menu-trigger" id="menuBtn">🍔</button>
     </nav>
 
-    <!-- MOBILE OVERLAY MENU -->
     <div class="menu-overlay" id="menuOverlay">
         <a href="#home-app">🏠 Home App</a>
         <a href="#physics-tools">⚡ Physics Tools</a>
@@ -821,7 +802,7 @@
 
     <div class="main-wrapper">
         
-        <!-- TRANSPARENT EMBEDDED DAY QUIZZER IFRAME SECTION -->
+        <!-- EMBEDDED IFRAME SECTION (UPDATED WITH STORAGE ACCESS PERMISSIONS) -->
         <div class="iframe-section-wrapper animate-target" id="section-dayquizzer" data-share-title="Day Quizzer">
             <div class="iframe-top-bar">
                 <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="section-dayquizzer">0</span> Views</div>
@@ -829,14 +810,17 @@
                 <button class="share-btn" onclick="shareSection('section-dayquizzer', 'Day Quizzer')">🔗 Share</button>
             </div>
             <div class="iframe-container" id="iframe-touch-box">
-                <iframe src="https://laxoshedu.github.io/tools/dayquizzer.html" class="transparent-iframe" id="dayquizzer-iframe" title="Day Quizzer" scrolling="no"></iframe>
+                <iframe src="https://laxoshedu.github.io/tools/dayquizzer.html" 
+                        class="transparent-iframe" 
+                        id="dayquizzer-iframe" 
+                        title="Day Quizzer" 
+                        scrolling="no" 
+                        allow="storage-access *; scripts; same-origin"></iframe>
             </div>
         </div>
 
-        <!-- MAIN APP HERO CARD -->
         <div class="main-app-link animate-target" id="home-app" data-share-title="The Ultimate Online Quiz Maker & Practice Tool">
             <div class="featured-card">
-                <!-- TOP BAR FOR HERO CARD: VIEWS (LEFT) & SHARE (RIGHT) -->
                 <div class="card-top-bar">
                     <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="home-app">0</span> Views</div>
                     <button class="share-btn" onclick="shareSection('home-app', 'The Ultimate Online Quiz Maker & Practice Tool')">🔗 Share</button>
@@ -859,7 +843,6 @@
             </div>
         </div>
 
-        <!-- HEADING UNDER MAIN HERO TOOL -->
         <div class="main-section-heading animate-target">
             <h2>Explore Our Other Tools</h2>
             <div class="heading-accent-line"></div>
@@ -878,7 +861,6 @@
             </div>
 
             <div class="app-grid">
-                <!-- Physics Tool 1 -->
                 <div class="app-card animate-target" id="tool-typesofmotions" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-typesofmotions">0</span> Views</div>
@@ -896,7 +878,6 @@
                     </div>
                 </div>
 
-                <!-- Physics Tool 2 -->
                 <div class="app-card animate-target" id="tool-interactivetransparencylab" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-interactivetransparencylab">0</span> Views</div>
@@ -914,7 +895,6 @@
                     </div>
                 </div>
 
-                <!-- Physics Tool 3 -->
                 <div class="app-card animate-target" id="tool-eclipselab" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-eclipselab">0</span> Views</div>
@@ -932,7 +912,6 @@
                     </div>
                 </div>
 
-                <!-- Physics Tool 4 -->
                 <div class="app-card animate-target" id="tool-light" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-light">0</span> Views</div>
@@ -950,7 +929,6 @@
                     </div>
                 </div>
 
-                <!-- Physics Tool 5 -->
                 <div class="app-card animate-target" id="tool-virtualmagnetism" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-virtualmagnetism">0</span> Views</div>
@@ -968,7 +946,6 @@
                     </div>
                 </div>
 
-                <!-- Physics Tool 6 -->
                 <div class="app-card animate-target" id="tool-electricitylab" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-electricitylab">0</span> Views</div>
@@ -1001,7 +978,6 @@
             </div>
 
             <div class="app-grid">
-                <!-- Tool 1 -->
                 <div class="app-card animate-target" id="tool-physicalpropertiesofmetalsandnonmetals" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-physicalpropertiesofmetalsandnonmetals">0</span> Views</div>
@@ -1019,7 +995,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 2 -->
                 <div class="app-card animate-target" id="tool-acidsbasesandsaltslab" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-acidsbasesandsaltslab">0</span> Views</div>
@@ -1037,7 +1012,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 3 -->
                 <div class="app-card animate-target" id="tool-dischargetubeelectron" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-dischargetubeelectron">0</span> Views</div>
@@ -1055,7 +1029,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 4 -->
                 <div class="app-card animate-target" id="tool-discoveryofneutron" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-discoveryofneutron">0</span> Views</div>
@@ -1073,7 +1046,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 5 -->
                 <div class="app-card animate-target" id="tool-discoveryofproton" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-discoveryofproton">0</span> Views</div>
@@ -1091,7 +1063,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 6 -->
                 <div class="app-card animate-target" id="tool-animatedperiodictable" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-animatedperiodictable">0</span> Views</div>
@@ -1109,7 +1080,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 7 -->
                 <div class="app-card animate-target" id="tool-atomicstructuresimulator" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-atomicstructuresimulator">0</span> Views</div>
@@ -1127,8 +1097,6 @@
                     </div>
                 </div>
 
-
-                <!-- Tool 8 -->
                 <div class="app-card animate-target" id="tool-rutherfordgoldfoilexperiment" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-rutherfordgoldfoilexperiment">0</span> Views</div>
@@ -1146,8 +1114,6 @@
                     </div>
                 </div>
 
-
-                <!-- Tool 9 -->
                 <div class="app-card animate-target" id="tool-statesofmatter" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-statesofmatter">0</span> Views</div>
@@ -1164,7 +1130,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Tool 10 -->
+
                 <div class="app-card animate-target" id="tool-thermalequilibriumsimulation" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-thermalequilibriumsimulation">0</span> Views</div>
@@ -1182,8 +1148,6 @@
                     </div>
                 </div>
 
-
-                <!-- Tool 11 -->
                 <div class="app-card animate-target" id="tool-molecularkinetictheorysimulator" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-molecularkinetictheorysimulator">0</span> Views</div>
@@ -1201,8 +1165,6 @@
                     </div>
                 </div>
 
-
-                <!-- Tool 12 -->
                 <div class="app-card animate-target" id="tool-idealgasgaslawssimulation" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-idealgasgaslawssimulation">0</span> Views</div>
@@ -1220,8 +1182,6 @@
                     </div>
                 </div>
                 
-                
-                <!-- Tool 13 -->
                 <div class="app-card animate-target" id="tool-diffusionandeffusion" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-diffusionandeffusion">0</span> Views</div>
@@ -1254,7 +1214,6 @@
             </div>
 
             <div class="app-grid">
-                <!-- Tool 1 -->
                 <div class="app-card animate-target" id="tool-examroomsallotingtool" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-examroomsallotingtool">0</span> Views</div>
@@ -1272,7 +1231,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 2 -->
                 <div class="app-card animate-target" id="tool-schooltimetablegenerator" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-schooltimetablegenerator">0</span> Views</div>
@@ -1290,7 +1248,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 3 -->
                 <div class="app-card animate-target" id="tool-reportgenerator" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-reportgenerator">0</span> Views</div>
@@ -1308,7 +1265,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 5 -->
                 <div class="app-card animate-target" id="tool-mcqsslideshowgenerator" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-mcqsslideshowgenerator">0</span> Views</div>
@@ -1326,7 +1282,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 6 -->
                 <div class="app-card animate-target" id="tool-educationalshortvideogenerator" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-educationalshortvideogenerator">0</span> Views</div>
@@ -1344,7 +1299,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 7 -->
                 <div class="app-card animate-target" id="tool-englishpranonciator" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-englishpranonciator">0</span> Views</div>
@@ -1362,7 +1316,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 11 -->
                 <div class="app-card animate-target" id="tool-calculatesemestergpa" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-calculatesemestergpa">0</span> Views</div>
@@ -1380,7 +1333,6 @@
                     </div>
                 </div>
 
-                <!-- Tool 12 -->
                 <div class="app-card animate-target" id="tool-idcardmaker" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-idcardmaker">0</span> Views</div>
@@ -1430,7 +1382,6 @@
                     </div>
                 </div>
 
-                <!-- Light My House -->
                 <div class="app-card animate-target" id="tool-lightmyhouse" data-demo-url="">
                     <div class="card-top-bar">
                         <div class="views-badge">👁️ <span class="view-count-num" data-tool-id="tool-lightmyhouse">0</span> Views</div>
@@ -1463,7 +1414,6 @@
                 At LAXOSHEDU, we believe that technology should make education smarter, more collaborative, and more enjoyable. We are committed to continuously developing innovative solutions that help educators teach more effectively, students learn with confidence, and professionals access practical tools that support their daily educational and administrative needs. 
             </p>
             
-            <!-- ATTENTION GRABBER (SYSTEM ONLINE ANIMATION) -->
             <div class="attention-container">
                 <div class="attention-wrapper">
                     <div class="attention-blob"></div>
@@ -1476,7 +1426,7 @@
             </div>
         </section>
 
-        <!-- VISITOR STATISTICS SECTION (BELOW ABOUT SECTION) -->
+        <!-- VISITOR STATISTICS SECTION -->
         <section class="visitor-stats-card animate-target" id="visitor-analytics">
             <div class="visitor-stats-header">
                 <h3>📊 Portal Traffic & Visitor Analytics</h3>
@@ -1515,12 +1465,18 @@
     </footer>
 
     <script>
-        // =========================================================================
-        // GOOGLE APPS SCRIPT BACKEND URL CONFIGURATION
-        // =========================================================================
         const LAXOSHEDU_BACKEND_URL = "https://script.google.com/macros/s/AKfycbyzZOCR-QLyff6-hVLAjepY54qx6XPuq-6MLX46hEtCr9Qt1_Rtq2pLdKdA4GbQ1LWq/exec";
 
-        // --- AUTOMATIC QUERY PARAMETER (?tool=) SHARE LINK ENGINE ---
+        // Safe Storage Helper for Parent Page
+        const parentStorage = {
+            getItem: function(key) {
+                try { return localStorage.getItem(key); } catch (e) { return null; }
+            },
+            setItem: function(key, val) {
+                try { localStorage.setItem(key, val); } catch (e) {}
+            }
+        };
+
         function shareSection(elementId, toolTitle) {
             const currentDomain = window.location.origin + window.location.pathname;
             const shareUrl = `${currentDomain}?tool=${elementId}`;
@@ -1541,51 +1497,37 @@
             }
         }
 
-        // --- TOOL CLICK & VIEW INCREMENT HANDLER ---
         let lastClickTimeMap = {};
         function onToolClicked(toolId, toolName) {
-            // Anti-spam debounce (2 seconds per tool ID)
             const now = Date.now();
             if (lastClickTimeMap[toolId] && (now - lastClickTimeMap[toolId] < 2000)) {
                 return;
             }
             lastClickTimeMap[toolId] = now;
 
-            // Optimistic UI update for immediate feedback
             const counterSpan = document.querySelector(`.view-count-num[data-tool-id="${toolId}"]`);
             if (counterSpan) {
                 let currentVal = parseInt(counterSpan.innerText.replace(/,/g, '')) || 0;
                 counterSpan.innerText = (currentVal + 1).toLocaleString();
             }
 
-            // Sync increment to Google Sheets backend
             if (LAXOSHEDU_BACKEND_URL && LAXOSHEDU_BACKEND_URL !== "") {
                 const targetUrl = `${LAXOSHEDU_BACKEND_URL}?action=tool_view&toolId=${encodeURIComponent(toolId)}&toolName=${encodeURIComponent(toolName)}`;
                 fetch(targetUrl, { mode: 'cors' }).catch(err => console.log('Tool view sync error:', err));
             }
         }
 
-        // --- IFRAME INTERACTION & VIEW DETECTOR ENGINE ---
         function initIframeViewTracker() {
             let iframeInteracted = false;
-            const iframeBox = document.getElementById('iframe-touch-box');
             
             const triggerIframeView = () => {
                 if (!iframeInteracted) {
                     iframeInteracted = true;
                     onToolClicked('section-dayquizzer', 'Day Quizzer');
-                    // Reset lock after 10 seconds to allow subsequent interaction views in long sessions
                     setTimeout(() => { iframeInteracted = false; }, 10000);
                 }
             };
 
-            if (iframeBox) {
-                iframeBox.addEventListener('pointerdown', triggerIframeView);
-                iframeBox.addEventListener('touchstart', triggerIframeView);
-                iframeBox.addEventListener('click', triggerIframeView);
-            }
-
-            // Detect focus shift when clicking inside the cross-origin iframe
             window.addEventListener('blur', () => {
                 if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
                     triggerIframeView();
@@ -1593,7 +1535,6 @@
             });
         }
 
-        // --- VISIT REGISTRATION AND STATS SYNC ENGINE ---
         function registerVisitAndFetchStats() {
             if (!LAXOSHEDU_BACKEND_URL || LAXOSHEDU_BACKEND_URL === "") return;
 
@@ -1608,7 +1549,6 @@
                 .catch(err => console.log('Visit registration error:', err));
         }
 
-        // --- UPDATE UI COUNTERS FROM BACKEND DATA ---
         function updateStatsUI(stats) {
             if (stats.visitors) {
                 document.getElementById('stat-daily').innerText = (stats.visitors.daily || 0).toLocaleString();
@@ -1628,7 +1568,6 @@
             }
         }
 
-        // --- WATCH DEMO VIDEO TAG ENGINE ---
         function initDemoVideoTags() {
             const cards = document.querySelectorAll('.app-card');
 
@@ -1653,7 +1592,6 @@
             });
         }
 
-        // --- LOGO FALLBACK ENGINE ---
         function initLogoFallbacks() {
             const cards = document.querySelectorAll('.featured-card, .app-card');
 
@@ -1682,14 +1620,12 @@
             });
         }
 
-        // --- THEME ENGINE (DARK MODE DEFAULT ON FIRST TIME OPEN) ---
         const body = document.body;
         const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
         const themeIcons = document.querySelectorAll('.theme-icon');
         const themeTexts = document.querySelectorAll('.theme-text');
 
-        // Check stored theme; default to 'dark' for first-time visitors
-        const savedTheme = localStorage.getItem('portalTheme');
+        const savedTheme = parentStorage.getItem('portalTheme');
         const currentTheme = savedTheme ? savedTheme : 'dark';
         body.setAttribute('data-theme', currentTheme);
         updateUI(currentTheme);
@@ -1701,7 +1637,7 @@
                 const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
                 
                 body.setAttribute('data-theme', newTheme);
-                localStorage.setItem('portalTheme', newTheme);
+                parentStorage.setItem('portalTheme', newTheme);
                 updateUI(newTheme);
             });
         });
@@ -1715,7 +1651,6 @@
             });
         }
 
-        // --- MOBILE MENU ENGINE ---
         const menuBtn = document.getElementById('menuBtn');
         const menuOverlay = document.getElementById('menuOverlay');
         
@@ -1732,7 +1667,6 @@
             link.addEventListener('click', () => { menuOverlay.style.display = 'none'; });
         });
 
-        // --- DOM LOAD INITIALIZATION ENGINE ---
         document.addEventListener("DOMContentLoaded", () => {
             initLogoFallbacks();
             initDemoVideoTags();
@@ -1746,7 +1680,6 @@
                 }, index * 80);
             });
 
-            // Handle query parameter (?tool=...) scrolling, highlighting & view tracking
             const urlParams = new URLSearchParams(window.location.search);
             const targetToolId = urlParams.get('tool');
             if (targetToolId) {
