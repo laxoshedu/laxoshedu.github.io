@@ -34,7 +34,6 @@
 
         body {
             min-height: 100vh;
-            width: 100%;
             background: var(--bg-gradient);
             color: var(--text-main);
             display: flex;
@@ -192,6 +191,7 @@
             line-height: 1.45;
             margin-bottom: 20px;
             color: #ffffff;
+            min-height: 58px;
         }
 
         .options-grid {
@@ -637,8 +637,8 @@
             <!-- ACTIVE QUIZ VIEW -->
             <div id="quiz-view">
                 <div class="quiz-meta">
-                    <span id="current-subject-title">Subject: English</span>
-                    <span id="question-tracker">Question 1/5</span>
+                    <span id="current-subject-title">Subject: Loading...</span>
+                    <span id="question-tracker">Question 0/0</span>
                 </div>
                 
                 <div class="progress-bar-container">
@@ -646,7 +646,7 @@
                 </div>
 
                 <div id="question-box">
-                    <h2 class="question-title" id="question-title">Loading Question...</h2>
+                    <h2 class="question-title" id="question-title">Preparing Quiz...</h2>
                     <div class="options-grid" id="options-grid"></div>
                     
                     <div class="explanation-card" id="explanation-card">
@@ -665,7 +665,7 @@
             <div class="result-screen" id="result-screen">
                 <div class="badge-icon" id="result-badge">✨</div>
                 <div class="score-circle">
-                    <span class="score-number" id="score-text">0/5</span>
+                    <span class="score-number" id="score-text">0/0</span>
                     <span class="score-label">Final Score</span>
                 </div>
                 
@@ -715,7 +715,7 @@
         <div class="subject-nav-container">
             <div class="subject-nav-header">
                 <span>Select Subject</span>
-                <span id="backend-status" style="font-size: 0.72rem; color: #c084fc; text-transform: none;">Syncing backend...</span>
+                <span id="backend-status" style="font-size: 0.72rem; color: #c084fc; text-transform: none;">Connecting backend...</span>
             </div>
             
             <div class="chips-scroll-container" id="chips-container">
@@ -765,71 +765,23 @@
     </div>
 
     <script>
-        // Safe Storage Fallback for restricted iframe contexts in Chrome
-        const safeStorage = {
-            _mem: {},
-            getItem: function(key) {
-                try {
-                    return localStorage.getItem(key);
-                } catch (e) {
-                    return this._mem[key] || null;
-                }
-            },
-            setItem: function(key, val) {
-                try {
-                    localStorage.setItem(key, val);
-                } catch (e) {
-                    this._mem[key] = String(val);
-                }
-            }
-        };
+        // =========================================================================
+        // ⚠️ DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
+        // =========================================================================
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFsKbR6OiBlO4Wg0iLJkf5C72uIehjPIrBN9jBBgSf0hZUN1jRUCklK0aoYGlKa0Mq/exec";
 
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1_5PZkKCcd8poujLOOfNKi2YmMI0ipkXKEbIaC2yBdxomHBtUmHPlRUSA9MqpEuUE/exec";
-
-        const defaultEnglishQuestions = [
-            {
-                question: "Which word is a synonym of 'Happy'?",
-                options: ["Joyful", "Sad", "Angry", "Tired"],
-                correct: 0,
-                explanation: "'Joyful' means feeling or expressing great happiness."
-            },
-            {
-                question: "Choose the correctly spelled word:",
-                options: ["Neccessary", "Necessary", "Necesary", "Neccesary"],
-                correct: 1,
-                explanation: "The correct spelling is 'Necessary' (one C, two S's)."
-            },
-            {
-                question: "What is the past tense of the verb 'Go'?",
-                options: ["Gone", "Going", "Went", "Goes"],
-                correct: 2,
-                explanation: "The simple past tense of 'go' is 'went'."
-            },
-            {
-                question: "Identify the adjective in: 'She wore a beautiful dress.'",
-                options: ["She", "Wore", "Beautiful", "Dress"],
-                correct: 2,
-                explanation: "'Beautiful' is an adjective modifying the noun 'dress'."
-            },
-            {
-                question: "Complete the sentence: 'Neither of the boys ___ present.'",
-                options: ["was", "were", "are", "have"],
-                correct: 0,
-                explanation: "'Neither' is singular and takes the singular verb 'was'."
-            }
-        ];
-
-        // State Variables
-        let currentSubject = "English";
-        let quizQuestions = [...defaultEnglishQuestions];
+        // Dynamic State Variables
+        let currentSubject = "";
+        let quizQuestions = [];
         let currentQuestion = 0;
-        let userAnswers = new Array(defaultEnglishQuestions.length).fill(null);
+        let userAnswers = [];
         let backendSubjects = [];
         let todayLeaderboard = [];
 
         // Time Tracking & User State
         let quizStartTime = null;
         let pendingAction = null;
+        let loadingInterval = null;
 
         // Auto-scroll State
         let isUserInteracting = false;
@@ -858,15 +810,17 @@
         }
 
         function isSubjectCompletedToday(subject) {
-            return safeStorage.getItem(`quiz_completed_${subject}`) === getTodayString();
+            if (!subject) return false;
+            return localStorage.getItem(`quiz_completed_${subject}`) === getTodayString();
         }
 
         function setSubjectCompletedToday(subject) {
-            safeStorage.setItem(`quiz_completed_${subject}`, getTodayString());
+            if (!subject) return;
+            localStorage.setItem(`quiz_completed_${subject}`, getTodayString());
         }
 
         function getUserName() {
-            return safeStorage.getItem('quiz_user_name');
+            return localStorage.getItem('quiz_user_name');
         }
 
         function promptUserName(onComplete) {
@@ -880,7 +834,7 @@
                 alert("Please enter your name to proceed!");
                 return;
             }
-            safeStorage.setItem('quiz_user_name', val);
+            localStorage.setItem('quiz_user_name', val);
             document.getElementById('name-modal').style.display = 'none';
             if (pendingAction) {
                 pendingAction();
@@ -889,60 +843,45 @@
         }
 
         function initApp() {
-            try {
-                const firstVisitDate = safeStorage.getItem('quiz_first_visit_date');
-                const lastVisitDate = safeStorage.getItem('quiz_last_visit_date');
-                const today = getTodayString();
+            const today = getTodayString();
+            localStorage.setItem('quiz_last_visit_date', today);
 
-                safeStorage.setItem('quiz_last_visit_date', today);
-
-                if (!firstVisitDate) {
-                    safeStorage.setItem('quiz_first_visit_date', today);
-                    currentSubject = "English";
-                }
-
-                renderSubjectChips();
-                selectSubject(currentSubject);
-                fetchBackendSubjects(lastVisitDate !== today && firstVisitDate !== null);
-                setupInfiniteScrollEngine();
-            } catch(e) {
-                console.error("Init fallback triggered:", e);
-                selectSubject("English");
-            }
+            setupInfiniteScrollEngine();
+            fetchBackendSubjects();
         }
 
-        async function fetchBackendSubjects(isNextDay) {
+        async function fetchBackendSubjects() {
             try {
                 const response = await fetch(`${APPS_SCRIPT_URL}?action=getSubjects`);
                 const data = await response.json();
 
                 if (data.success && data.subjects.length > 0) {
-                    backendSubjects = data.subjects.filter(s => s !== "English");
-                    backendStatus.innerText = "Synced";
-
-                    if (isNextDay) {
-                        const allAvailable = [...data.subjects];
-                        const nextUncompleted = allAvailable.find(s => !isSubjectCompletedToday(s)) || data.subjects[0];
-                        if (nextUncompleted && nextUncompleted !== currentSubject) {
-                            selectSubject(nextUncompleted);
-                            return;
-                        }
-                    }
-                    renderSubjectChips();
-                } else {
+                    backendSubjects = data.subjects;
                     backendStatus.innerText = "Connected";
+
+                    const uncompleted = backendSubjects.find(s => !isSubjectCompletedToday(s));
+                    currentSubject = uncompleted || backendSubjects[0];
+
+                    renderSubjectChips();
+                    selectSubject(currentSubject);
+                } else {
+                    backendStatus.innerText = "No Subjects Found";
+                    questionTitle.innerText = "No subjects available in backend spreadsheet.";
                 }
             } catch (err) {
-                console.log("Backend offline or URL restricted:", err);
-                backendStatus.innerText = "Default Mode";
+                console.error("Backend offline or URL not configured yet:", err);
+                backendStatus.innerText = "Connection Failed";
+                questionTitle.innerText = "Unable to connect to backend server.";
             }
         }
 
         function renderSubjectChips() {
-            const baseSubjects = ["English", ...backendSubjects];
+            if (backendSubjects.length === 0) return;
             chipsTrack.innerHTML = '';
 
-            const loopSubjects = [...baseSubjects, ...baseSubjects];
+            const loopSubjects = backendSubjects.length < 5 
+                ? [...backendSubjects, ...backendSubjects, ...backendSubjects] 
+                : [...backendSubjects, ...backendSubjects];
 
             loopSubjects.forEach((subject) => {
                 const chip = document.createElement('div');
@@ -984,16 +923,20 @@
             });
         }
 
+        // Handle Subject Selection
         async function selectSubject(subject) {
+            if (!subject) return;
             currentSubject = subject;
 
+            // Clear old leaderboard state
             todayLeaderboard = [];
             renderLeaderboardUI();
-
             renderSubjectChips();
             fetchLeaderboard(currentSubject);
 
+            // Notice if completed today
             if (isSubjectCompletedToday(subject)) {
+                if (loadingInterval) clearInterval(loadingInterval);
                 quizView.style.display = 'none';
                 resultScreen.style.display = 'none';
                 completedSubjectHeader.innerText = `${subject} - Completed Today!`;
@@ -1001,40 +944,55 @@
                 return;
             }
 
+            // Reset View
             alreadyCompletedScreen.style.display = 'none';
             resultScreen.style.display = 'none';
             quizView.style.display = 'block';
 
-            if (subject === "English") {
-                quizQuestions = [...defaultEnglishQuestions];
-                userAnswers = new Array(quizQuestions.length).fill(null);
-                currentQuestion = 0;
-                quizStartTime = Date.now();
-                loadQuestion();
-            } else {
-                questionTitle.innerText = "LOADING...";
-                optionsGrid.innerHTML = '<div class="spinner"></div>';
-                explanationCard.classList.remove('show');
+            // Loading Engagement Sequence
+            if (loadingInterval) clearInterval(loadingInterval);
+            let step = 0;
+            const messages = [
+                "Ready...",
+                "Set...",
+                "Go! Fetching fresh questions..."
+            ];
 
-                try {
-                    const response = await fetch(`${APPS_SCRIPT_URL}?action=getQuestions&subject=${encodeURIComponent(subject)}&count=10`);
-                    const data = await response.json();
+            questionTitle.innerText = messages[0];
+            optionsGrid.innerHTML = '<div class="spinner"></div>';
+            explanationCard.classList.remove('show');
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
 
-                    if (data.success && data.questions.length > 0) {
-                        quizQuestions = data.questions;
-                        userAnswers = new Array(quizQuestions.length).fill(null);
-                        currentQuestion = 0;
-                        quizStartTime = Date.now();
-                        loadQuestion();
-                    } else {
-                        questionTitle.innerText = `No questions found in tab "${subject}".`;
-                        optionsGrid.innerHTML = '';
-                    }
-                } catch (err) {
-                    console.error("Error fetching subject questions:", err);
-                    questionTitle.innerText = "Failed to load questions from backend.";
+            loadingInterval = setInterval(() => {
+                step++;
+                if (step < messages.length) {
+                    questionTitle.innerText = messages[step];
+                }
+            }, 600);
+
+            try {
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=getQuestions&subject=${encodeURIComponent(subject)}&count=10`);
+                const data = await response.json();
+
+                if (loadingInterval) clearInterval(loadingInterval);
+
+                if (data.success && data.questions.length > 0) {
+                    // Questions loaded in exact row-by-row sequence from Google Sheets
+                    quizQuestions = data.questions;
+                    userAnswers = new Array(quizQuestions.length).fill(null);
+                    currentQuestion = 0;
+                    quizStartTime = Date.now();
+                    loadQuestion();
+                } else {
+                    questionTitle.innerText = `No questions added yet under "${subject}".`;
                     optionsGrid.innerHTML = '';
                 }
+            } catch (err) {
+                if (loadingInterval) clearInterval(loadingInterval);
+                console.error("Error fetching subject questions:", err);
+                questionTitle.innerText = "Failed to load questions from backend.";
+                optionsGrid.innerHTML = '';
             }
         }
 
@@ -1258,8 +1216,7 @@
             resultScreen.style.display = 'none';
             alreadyCompletedScreen.style.display = 'none';
             
-            const allSubjects = ["English", ...backendSubjects];
-            const nextSubject = allSubjects.find(s => !isSubjectCompletedToday(s));
+            const nextSubject = backendSubjects.find(s => !isSubjectCompletedToday(s));
 
             if (nextSubject) {
                 selectSubject(nextSubject);
