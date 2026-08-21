@@ -504,6 +504,27 @@
             color: #34d399;
         }
 
+        /* --- TRANSPARENT ADVERTISEMENT CARD --- */
+        .ad-card-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 0;
+            background: transparent;
+            margin-top: 4px;
+        }
+
+        .ad-container {
+            width: 320px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            overflow: hidden;
+        }
+
         /* --- MODALS --- */
         .modal-overlay {
             position: fixed;
@@ -723,6 +744,11 @@
             </div>
         </div>
 
+        <!-- TRANSPARENT ADVERTISEMENT CARD CONTAINER -->
+        <div class="ad-card-wrapper">
+            <div id="ad-container" class="ad-container"></div>
+        </div>
+
     </div>
 
     <!-- MANDATORY NAME INPUT MODAL -->
@@ -842,12 +868,40 @@
             }
         }
 
+        // DYNAMIC ADVERTISEMENT INJECTION & REFRESH ENGINE
+        function refreshAd() {
+            const adBox = document.getElementById('ad-container');
+            if (!adBox) return;
+
+            adBox.innerHTML = ''; // Clear container for fresh render
+
+            window.atOptions = {
+                'key' : '04e1533a2d74643ee0271edd3477c5cc',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+            };
+
+            const scriptConf = document.createElement('script');
+            scriptConf.type = 'text/javascript';
+            scriptConf.text = `atOptions = ${JSON.stringify(window.atOptions)};`;
+
+            const scriptSrc = document.createElement('script');
+            scriptSrc.type = 'text/javascript';
+            scriptSrc.src = 'https://www.highperformanceformat.com/04e1533a2d74643ee0271edd3477c5cc/invoke.js';
+
+            adBox.appendChild(scriptConf);
+            adBox.appendChild(scriptSrc);
+        }
+
         function initApp() {
             const today = getTodayString();
             localStorage.setItem('quiz_last_visit_date', today);
 
             setupInfiniteScrollEngine();
             fetchBackendSubjects();
+            refreshAd();
         }
 
         async function fetchBackendSubjects() {
@@ -978,11 +1032,11 @@
                 if (loadingInterval) clearInterval(loadingInterval);
 
                 if (data.success && data.questions.length > 0) {
-                    // Questions loaded in exact row-by-row sequence from Google Sheets
                     quizQuestions = data.questions;
                     userAnswers = new Array(quizQuestions.length).fill(null);
                     currentQuestion = 0;
                     quizStartTime = Date.now();
+                    refreshAd();
                     loadQuestion();
                 } else {
                     questionTitle.innerText = `No questions added yet under "${subject}".`;
@@ -998,6 +1052,11 @@
 
         function loadQuestion() {
             if (!quizStartTime) quizStartTime = Date.now();
+
+            // Refresh Ad after every 2 questions (i.e. at Question 3 [index 2], Question 5 [index 4], etc.)
+            if (currentQuestion > 0 && currentQuestion % 2 === 0) {
+                refreshAd();
+            }
 
             const q = quizQuestions[currentQuestion];
             const savedAns = userAnswers[currentQuestion];
