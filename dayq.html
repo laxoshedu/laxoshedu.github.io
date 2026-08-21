@@ -304,28 +304,30 @@
         }
 
         /* --- ADVERTISEMENT CARD --- */
-        .ad-card {
+        .ad-container {
             margin-top: 20px;
-            padding: 10px;
-            border-radius: 16px;
+            padding: 12px;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
             text-align: center;
+            min-height: 70px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 60px;
             overflow: hidden;
+            width: 100%;
         }
 
         .ad-label {
             font-size: 0.65rem;
-            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 4px;
-            opacity: 0.7;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            opacity: 0.6;
+            font-weight: 600;
         }
 
         .btn {
@@ -685,9 +687,9 @@
                     <button class="btn btn-primary" id="next-btn" onclick="navigateQuestion(1)" disabled>Next Question</button>
                 </div>
 
-                <!-- ADVERTISEMENT RECTANGULAR CARD -->
-                <div class="ad-card">
-                    <span class="ad-label">ADVERTISEMENT</span>
+                <!-- ADVERTISEMENT CONTAINER UNDER NAVIGATION BUTTONS -->
+                <div class="ad-container">
+                    <div class="ad-label">ADVERTISEMENT</div>
                     <script>(function(s){s.dataset.zone='11625706',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
                 </div>
             </div>
@@ -799,7 +801,7 @@
         // =========================================================================
         // ⚠️ DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
         // =========================================================================
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFsKbR6OiBlO4Wg0iLJkf5C72uIehjPIrBN9jBBgSf0hZUN1jRUCklK0aoYGlKa0Mq/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1_5PZkKCcd8poujLOOfNKi2YmMI0ipkXKEbIaC2yBdxomHBtUmHPlRUSA9MqpEuUE/exec";
 
         // Dynamic State Variables
         let currentSubject = "";
