@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Daily Interactive Quiz - Free Daily Online Tests & Practice</title>
-    <meta name="title" content="Daily quizzer - Free Daily Online Tests & Practice">
-    <meta name="description" content="Elevate your everyday learning routine with our Daily Interactive Quiz platform—the ultimate destination for daily online tests, topic quizzes, and practice challenges! Test your knowledge across essential subjects including English grammar, General Knowledge, Technology, Hindi, Telugu, and competitive exam topics. Specially designed for students, job seekers, exam aspirants, and trivia enthusiasts, our daily online test system delivers brand-new, structured practice questions every 24 hours. Track your problem-solving speed and accuracy with instant answer feedback, detailed explanations for every correct option, and real-time score calculation. Compete directly with thousands of daily participants to secure your top rank on today’s live leaderboard. Whether you are aiming to crack competitive exams, test your memory retention, or simply build an enjoyable habit of daily brain exercise, our smooth, mobile-optimized online test tool ensures a seamless experience. Simply pick a subject, complete your 10-question daily quiz batch, monitor your completion time down to the second, and check back every day for a fresh set of questions. Take today's online test right now, track your rank against top scorers, and make daily learning your most rewarding habit!">
-    <meta name="keywords" content="daily quiz, dailyquizzer, daily online test, today quiz, day online test, daily test quiz, free daily practice test, daily general knowledge test, subject wise daily quiz, today leaderboard quiz, online daily test series, daily interactive quiz challenge, attempt today online quiz, day wise quiz test online">
-    <meta name="robots" content="index, follow">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Interactive Quiz</title>
     <style>
         /* --- CSS VARIABLES & THEME --- */
         :root {
@@ -428,6 +426,13 @@
             gap: 12px;
         }
 
+        .countdown-text {
+            font-weight: 800;
+            color: #34d399;
+            font-family: monospace;
+            font-size: 1.05rem;
+        }
+
         /* --- SUBJECT SCROLL CONTAINER --- */
         .subject-nav-container {
             background: transparent;
@@ -699,7 +704,7 @@
                     <span style="font-size: 1.5rem;">📅</span>
                     <div>
                         <strong>Subject Completed For Today!</strong><br>
-                        You have finished your questions for this subject today. Try another subject below or visit tomorrow!
+                        Next day batch unlocks in: <span id="result-countdown" class="countdown-text">00h 00m 00s</span>
                     </div>
                 </div>
 
@@ -717,8 +722,8 @@
                 <div class="notice-card">
                     <span style="font-size: 1.5rem;">📅</span>
                     <div>
-                        <strong>Visit Next Day Or Try Another Subject!</strong><br>
-                        Please visit next day for new questions or try another subject below. You can also check your rank in the leaderboard.
+                        <strong>Next Batch Unlocks Soon!</strong><br>
+                        Time remaining for next day questions: <span id="completed-countdown" class="countdown-text">00h 00m 00s</span>
                     </div>
                 </div>
 
@@ -810,6 +815,8 @@
         let quizStartTime = null;
         let pendingAction = null;
         let loadingInterval = null;
+        let countdownTimerInterval = null;
+        let activeCheckDate = "";
 
         // Auto-scroll State
         let isUserInteracting = false;
@@ -833,18 +840,23 @@
         const backendStatus = document.getElementById('backend-status');
         const rankTickerTrack = document.getElementById('rank-ticker-track');
 
-        function getTodayString() {
-            return new Date().toISOString().split('T')[0];
+        // Exact local calendar string (YYYY-MM-DD)
+        function getTodayLocalString() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
         }
 
         function isSubjectCompletedToday(subject) {
             if (!subject) return false;
-            return localStorage.getItem(`quiz_completed_${subject}`) === getTodayString();
+            return localStorage.getItem(`quiz_completed_${subject}`) === getTodayLocalString();
         }
 
         function setSubjectCompletedToday(subject) {
             if (!subject) return;
-            localStorage.setItem(`quiz_completed_${subject}`, getTodayString());
+            localStorage.setItem(`quiz_completed_${subject}`, getTodayLocalString());
         }
 
         function getUserName() {
@@ -870,12 +882,62 @@
             }
         }
 
-        // DYNAMIC ADVERTISEMENT INJECTION & REFRESH ENGINE
+        // REAL-TIME COUNTDOWN TIMER TO MIDNIGHT (12:00 AM)
+        function startMidnightCountdown() {
+            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+
+            function updateCountdownUI() {
+                const now = new Date();
+                const currentDateStr = getTodayLocalString();
+
+                // Check if date switched while user is on page
+                if (activeCheckDate && activeCheckDate !== currentDateStr) {
+                    activeCheckDate = currentDateStr;
+                    clearInterval(countdownTimerInterval);
+                    handleMidnightRollover();
+                    return;
+                }
+
+                const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+                const diffMs = tomorrow - now;
+
+                if (diffMs <= 0) {
+                    clearInterval(countdownTimerInterval);
+                    handleMidnightRollover();
+                    return;
+                }
+
+                const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+                const timeFormatted = `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+
+                const resCountdown = document.getElementById('result-countdown');
+                const compCountdown = document.getElementById('completed-countdown');
+
+                if (resCountdown) resCountdown.innerText = timeFormatted;
+                if (compCountdown) compCountdown.innerText = timeFormatted;
+            }
+
+            updateCountdownUI();
+            countdownTimerInterval = setInterval(updateCountdownUI, 1000);
+        }
+
+        function handleMidnightRollover() {
+            activeCheckDate = getTodayLocalString();
+            renderSubjectChips();
+            if (currentSubject) {
+                selectSubject(currentSubject);
+            }
+        }
+
+        // DYNAMIC ADVERTISEMENT INJECTION
         function refreshAd() {
             const adBox = document.getElementById('ad-container');
             if (!adBox) return;
 
-            adBox.innerHTML = ''; // Clear container for fresh render
+            adBox.innerHTML = '';
 
             window.atOptions = {
                 'key' : '04e1533a2d74643ee0271edd3477c5cc',
@@ -898,9 +960,7 @@
         }
 
         function initApp() {
-            const today = getTodayString();
-            localStorage.setItem('quiz_last_visit_date', today);
-
+            activeCheckDate = getTodayLocalString();
             setupInfiniteScrollEngine();
             fetchBackendSubjects();
             refreshAd();
@@ -997,6 +1057,7 @@
                 resultScreen.style.display = 'none';
                 completedSubjectHeader.innerText = `${subject} - Completed Today!`;
                 alreadyCompletedScreen.style.display = 'block';
+                startMidnightCountdown();
                 return;
             }
 
@@ -1004,6 +1065,7 @@
             alreadyCompletedScreen.style.display = 'none';
             resultScreen.style.display = 'none';
             quizView.style.display = 'block';
+            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
 
             // Loading Engagement Sequence
             if (loadingInterval) clearInterval(loadingInterval);
@@ -1055,7 +1117,7 @@
         function loadQuestion() {
             if (!quizStartTime) quizStartTime = Date.now();
 
-            // Refresh Ad after every 2 questions (i.e. at Question 3 [index 2], Question 5 [index 4], etc.)
+            // Refresh Ad after every 2 questions
             if (currentQuestion > 0 && currentQuestion % 2 === 0) {
                 refreshAd();
             }
@@ -1192,6 +1254,7 @@
                 descEl.innerText = "Keep practicing! Review explanations and try another subject.";
             }
 
+            startMidnightCountdown();
             await submitScoreToBackend(userName, score, quizQuestions.length, totalTimeSec);
         }
 
@@ -1276,6 +1339,7 @@
         function tryAnotherSubject() {
             resultScreen.style.display = 'none';
             alreadyCompletedScreen.style.display = 'none';
+            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
             
             const nextSubject = backendSubjects.find(s => !isSubjectCompletedToday(s));
 
