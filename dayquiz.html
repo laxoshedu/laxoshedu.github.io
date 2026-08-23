@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Interactive Quiz</title>
+    <title>Quiz Daily</title>
     <style>
         /* --- CSS VARIABLES & THEME --- */
         :root {
@@ -330,12 +330,30 @@
             transform: none !important;
         }
 
-        /* --- RESULT & ALREADY COMPLETED SCREENS --- */
+        /* --- RESULT & ALREADY COMPLETED SCREENS (INTERNAL SCROLLING) --- */
         .result-screen {
             display: none;
             text-align: center;
-            padding: 10px 0;
+            padding: 10px 4px 10px 0;
             animation: fadeIn 0.4s ease forwards;
+            max-height: 540px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(168, 85, 247, 0.5) rgba(255, 255, 255, 0.05);
+        }
+
+        .result-screen::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .result-screen::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .result-screen::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.5);
+            border-radius: 10px;
         }
 
         .badge-icon {
@@ -747,6 +765,7 @@
             .app-title { font-size: 1.6rem; }
             .quiz-card { padding: 20px 18px; }
             .subject-nav-container { padding: 5px 4px; }
+            .result-screen { max-height: 480px; }
         }
     </style>
 </head>
@@ -796,7 +815,7 @@
                 </div>
             </div>
 
-            <!-- RESULT SCREEN (JUST COMPLETED) -->
+            <!-- RESULT SCREEN (JUST COMPLETED - SCROLLABLE INSIDE CARD) -->
             <div class="result-screen" id="result-screen">
                 <div class="badge-icon" id="result-badge">✨</div>
                 <div class="score-circle">
@@ -1405,6 +1424,10 @@
 
             renderReviewSection();
             startMidnightCountdown();
+
+            // Auto-scroll result card to top when completed
+            resultScreen.scrollTop = 0;
+
             await submitScoreToBackend(userName, score, quizQuestions.length, totalTimeSec);
         }
 
