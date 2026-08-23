@@ -239,59 +239,21 @@
             flex-shrink: 0;
         }
 
-        .option-chip.correct {
-            background: var(--correct-bg) !important;
-            border-color: var(--correct-border) !important;
-            color: var(--correct-text) !important;
+        /* Selected State during Quiz */
+        .option-chip.selected {
+            background: rgba(168, 85, 247, 0.25) !important;
+            border-color: #a855f7 !important;
+            color: #ffffff !important;
             font-weight: 600;
         }
 
-        .option-chip.correct .option-prefix {
-            background: var(--correct-border);
-            color: #fff;
-        }
-
-        .option-chip.incorrect {
-            background: var(--incorrect-bg) !important;
-            border-color: var(--incorrect-border) !important;
-            color: var(--incorrect-text) !important;
-        }
-
-        .option-chip.incorrect .option-prefix {
-            background: var(--incorrect-border);
+        .option-chip.selected .option-prefix {
+            background: #a855f7;
             color: #fff;
         }
 
         .option-chip.disabled {
             cursor: default;
-        }
-
-        .explanation-card {
-            margin-top: 20px;
-            padding: 16px 20px;
-            border-radius: 16px;
-            background: rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            display: none;
-            animation: fadeIn 0.35s ease forwards;
-        }
-
-        .explanation-card.show {
-            display: block;
-        }
-
-        .explanation-header {
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #c084fc;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-
-        .explanation-text {
-            font-size: 0.93rem;
-            line-height: 1.45;
-            color: #e2e8f0;
         }
 
         .quiz-footer {
@@ -348,6 +310,17 @@
 
         .btn-submit:hover:not(:disabled) {
             box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-share {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-share:hover:not(:disabled) {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
             transform: translateY(-2px);
         }
 
@@ -431,6 +404,124 @@
             color: #34d399;
             font-family: monospace;
             font-size: 1.05rem;
+        }
+
+        /* --- DETAILED QUESTION REVIEW STYLING --- */
+        .review-section {
+            margin-top: 26px;
+            text-align: left;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding-top: 20px;
+        }
+
+        .review-header-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #c084fc;
+            margin-bottom: 16px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .review-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+        }
+
+        .review-q-header {
+            font-size: 0.98rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.4;
+        }
+
+        .review-status-badge {
+            font-size: 0.78rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .review-status-badge.correct {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid #10b981;
+        }
+
+        .review-status-badge.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid #ef4444;
+        }
+
+        .review-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .review-opt {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .review-opt.is-correct {
+            background: var(--correct-bg) !important;
+            border-color: var(--correct-border) !important;
+            color: var(--correct-text) !important;
+            font-weight: 600;
+        }
+
+        .review-opt.is-wrong-user {
+            background: var(--incorrect-bg) !important;
+            border-color: var(--incorrect-border) !important;
+            color: var(--incorrect-text) !important;
+            font-weight: 600;
+        }
+
+        .review-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .review-explanation {
+            font-size: 0.88rem;
+            line-height: 1.45;
+            color: #e2e8f0;
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 3px solid #a855f7;
+            padding: 10px 14px;
+            border-radius: 8px;
+        }
+
+        .review-explanation-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #c084fc;
+            text-transform: uppercase;
+            margin-bottom: 4px;
         }
 
         /* --- SUBJECT SCROLL CONTAINER --- */
@@ -530,6 +621,27 @@
             align-items: center;
             background: transparent;
             overflow: hidden;
+        }
+
+        /* --- FOOTER & COPYRIGHTS --- */
+        .app-footer {
+            text-align: center;
+            padding: 16px 10px 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .app-footer strong {
+            color: #c084fc;
+        }
+
+        .app-footer-sub {
+            margin-top: 4px;
+            font-size: 0.78rem;
+            opacity: 0.8;
+            color: #e2e8f0;
         }
 
         /* --- MODALS --- */
@@ -676,11 +788,6 @@
                 <div id="question-box">
                     <h2 class="question-title" id="question-title">Preparing Quiz...</h2>
                     <div class="options-grid" id="options-grid"></div>
-                    
-                    <div class="explanation-card" id="explanation-card">
-                        <div class="explanation-header">💡 Explanation</div>
-                        <div class="explanation-text" id="explanation-text"></div>
-                    </div>
                 </div>
 
                 <div class="quiz-footer">
@@ -708,9 +815,17 @@
                     </div>
                 </div>
 
-                <button class="btn btn-submit" style="width: 100%;" onclick="tryAnotherSubject()">
-                    Try Another Subject 🔄
-                </button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-share" style="flex: 1; min-width: 140px;" onclick="shareSubjectQuiz()">
+                        📲 Share Subject Quiz
+                    </button>
+                    <button class="btn btn-submit" style="flex: 1; min-width: 140px;" onclick="tryAnotherSubject()">
+                        Try Another Subject 🔄
+                    </button>
+                </div>
+
+                <!-- DETAILED REVIEW SECTION ON RESULT SCREEN -->
+                <div id="review-container" class="review-section"></div>
             </div>
 
             <!-- IN-CARD COMPLETED SUBJECT SCREEN -->
@@ -727,12 +842,15 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" style="flex: 1; min-width: 140px;" onclick="openRankModal()">
-                        🏆 View Rank List
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-share" style="flex: 1; min-width: 120px;" onclick="shareSubjectQuiz()">
+                        📲 Share Quiz
                     </button>
-                    <button class="btn btn-submit" style="flex: 1; min-width: 140px;" onclick="tryAnotherSubject()">
-                        🔄 Try Another Subject
+                    <button class="btn btn-primary" style="flex: 1; min-width: 120px;" onclick="openRankModal()">
+                        🏆 View Ranks
+                    </button>
+                    <button class="btn btn-submit" style="flex: 1; min-width: 120px;" onclick="tryAnotherSubject()">
+                        🔄 Try Another
                     </button>
                 </div>
             </div>
@@ -755,6 +873,12 @@
         <div class="ad-card-wrapper">
             <div id="ad-container" class="ad-container"></div>
         </div>
+
+        <!-- APP FOOTER & COPYRIGHTS -->
+        <footer class="app-footer">
+            <p>© Copyrights Reserved by <strong>laxoshedu</strong></p>
+            <p class="app-footer-sub">Download our app to explore more educational tools and competitive online exams. Thank you!</p>
+        </footer>
 
     </div>
 
@@ -833,8 +957,6 @@
         const progressBar = document.getElementById('progress-bar');
         const questionTitle = document.getElementById('question-title');
         const optionsGrid = document.getElementById('options-grid');
-        const explanationCard = document.getElementById('explanation-card');
-        const explanationText = document.getElementById('explanation-text');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const backendStatus = document.getElementById('backend-status');
@@ -882,6 +1004,37 @@
             }
         }
 
+        // SHARE SUBJECT QUIZ LINK FUNCTIONALITY
+        async function shareSubjectQuiz() {
+            if (!currentSubject) return;
+
+            const shareUrl = `${window.location.origin}${window.location.pathname}?subject=${encodeURIComponent(currentSubject)}`;
+            const shareData = {
+                title: `Daily Quiz - ${currentSubject}`,
+                text: `🔥 Challenge yourself with today's ${currentSubject} Daily Quiz and jump on the leaderboard! 🚀`,
+                url: shareUrl
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error("Error sharing quiz:", err);
+                    }
+                }
+            } else if (navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert(`🔗 Quiz link for ${currentSubject} copied to clipboard! Share it with your friends.`);
+                } catch (err) {
+                    alert(`Share this quiz link: ${shareUrl}`);
+                }
+            } else {
+                alert(`Share this quiz link: ${shareUrl}`);
+            }
+        }
+
         // REAL-TIME COUNTDOWN TIMER TO MIDNIGHT (12:00 AM)
         function startMidnightCountdown() {
             if (countdownTimerInterval) clearInterval(countdownTimerInterval);
@@ -890,7 +1043,6 @@
                 const now = new Date();
                 const currentDateStr = getTodayLocalString();
 
-                // Check if date switched while user is on page
                 if (activeCheckDate && activeCheckDate !== currentDateStr) {
                     activeCheckDate = currentDateStr;
                     clearInterval(countdownTimerInterval);
@@ -975,8 +1127,16 @@
                     backendSubjects = data.subjects;
                     backendStatus.innerText = "Connected";
 
-                    const uncompleted = backendSubjects.find(s => !isSubjectCompletedToday(s));
-                    currentSubject = uncompleted || backendSubjects[0];
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const sharedSub = urlParams.get('subject');
+
+                    if (sharedSub && backendSubjects.some(s => s.toLowerCase() === sharedSub.toLowerCase())) {
+                        const matchedSubject = backendSubjects.find(s => s.toLowerCase() === sharedSub.toLowerCase());
+                        currentSubject = matchedSubject;
+                    } else {
+                        const uncompleted = backendSubjects.find(s => !isSubjectCompletedToday(s));
+                        currentSubject = uncompleted || backendSubjects[0];
+                    }
 
                     renderSubjectChips();
                     selectSubject(currentSubject);
@@ -1078,7 +1238,6 @@
 
             questionTitle.innerText = messages[0];
             optionsGrid.innerHTML = '<div class="spinner"></div>';
-            explanationCard.classList.remove('show');
             prevBtn.disabled = true;
             nextBtn.disabled = true;
 
@@ -1131,7 +1290,6 @@
             progressBar.style.width = `${((currentQuestion + 1) / quizQuestions.length) * 100}%`;
 
             optionsGrid.innerHTML = '';
-            explanationCard.classList.remove('show');
 
             const prefixes = ['A', 'B', 'C', 'D'];
 
@@ -1143,14 +1301,13 @@
                         <span class="option-prefix">${prefixes[idx]}</span>
                         <span>${opt}</span>
                     </div>
-                    <span class="status-icon"></span>
                 `;
                 chip.onclick = () => handleOptionClick(idx);
                 optionsGrid.appendChild(chip);
             });
 
             if (savedAns !== null) {
-                applyAnswerUI(savedAns);
+                applySelectionUI(savedAns);
             }
 
             updateNavButtons();
@@ -1168,30 +1325,22 @@
             if (userAnswers[currentQuestion] !== null) return;
 
             userAnswers[currentQuestion] = index;
-            applyAnswerUI(index);
+            applySelectionUI(index);
             updateNavButtons();
         }
 
-        function applyAnswerUI(selectedIndex) {
-            const q = quizQuestions[currentQuestion];
+        // Highlights user choice cleanly WITHOUT revealing right/wrong during test
+        function applySelectionUI(selectedIndex) {
             const chips = optionsGrid.querySelectorAll('.option-chip');
 
             chips.forEach((chip, idx) => {
                 chip.classList.add('disabled');
-
-                if (idx === q.correct) {
-                    chip.classList.add('correct');
-                    chip.querySelector('.status-icon').innerText = '✓';
-                }
-
-                if (idx === selectedIndex && selectedIndex !== q.correct) {
-                    chip.classList.add('incorrect');
-                    chip.querySelector('.status-icon').innerText = '✕';
+                if (idx === selectedIndex) {
+                    chip.classList.add('selected');
+                } else {
+                    chip.classList.remove('selected');
                 }
             });
-
-            explanationText.innerText = q.explanation;
-            explanationCard.classList.add('show');
         }
 
         function updateNavButtons() {
@@ -1254,8 +1403,63 @@
                 descEl.innerText = "Keep practicing! Review explanations and try another subject.";
             }
 
+            renderReviewSection();
             startMidnightCountdown();
             await submitScoreToBackend(userName, score, quizQuestions.length, totalTimeSec);
+        }
+
+        // RENDERS DETAILED QUESTION REVIEW AFTER QUIZ COMPLETION
+        function renderReviewSection() {
+            const reviewBox = document.getElementById('review-container');
+            if (!reviewBox) return;
+
+            reviewBox.innerHTML = '<h3 class="review-header-title">📋 Detailed Question Review</h3>';
+            const prefixes = ['A', 'B', 'C', 'D'];
+
+            quizQuestions.forEach((q, qIdx) => {
+                const userAns = userAnswers[qIdx];
+                const isCorrect = userAns === q.correct;
+
+                const item = document.createElement('div');
+                item.className = 'review-item';
+
+                let optsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    let optClass = 'review-opt';
+                    let tagText = '';
+
+                    if (optIdx === q.correct) {
+                        optClass += ' is-correct';
+                        tagText = (userAns === optIdx) ? '✓ Your Answer (Correct)' : '✓ Correct Answer';
+                    } else if (optIdx === userAns) {
+                        optClass += ' is-wrong-user';
+                        tagText = '✕ Your Choice';
+                    }
+
+                    optsHtml += `
+                        <div class="${optClass}">
+                            <span><strong>${prefixes[optIdx]}.</strong> ${opt}</span>
+                            ${tagText ? `<span class="review-tag">${tagText}</span>` : ''}
+                        </div>
+                    `;
+                });
+
+                item.innerHTML = `
+                    <div class="review-q-header">
+                        <span><strong>Q${qIdx + 1}:</strong> ${q.question}</span>
+                        <span class="review-status-badge ${isCorrect ? 'correct' : 'incorrect'}">
+                            ${isCorrect ? '✓ Correct' : '✕ Incorrect'}
+                        </span>
+                    </div>
+                    <div class="review-options-list">${optsHtml}</div>
+                    <div class="review-explanation">
+                        <div class="review-explanation-title">💡 Explanation</div>
+                        <div>${q.explanation}</div>
+                    </div>
+                `;
+
+                reviewBox.appendChild(item);
+            });
         }
 
         async function submitScoreToBackend(name, score, total, timeTakenSec) {
