@@ -303,33 +303,6 @@
             border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* --- ADVERTISEMENT CARD --- */
-        .ad-container {
-            margin-top: 20px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px dashed rgba(255, 255, 255, 0.15);
-            border-radius: 16px;
-            text-align: center;
-            min-height: 70px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        .ad-label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            opacity: 0.6;
-            font-weight: 600;
-        }
-
         .btn {
             padding: 12px 26px;
             border-radius: var(--radius-sm);
@@ -375,6 +348,17 @@
 
         .btn-submit:hover:not(:disabled) {
             box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-share {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-share:hover:not(:disabled) {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
             transform: translateY(-2px);
         }
 
@@ -453,6 +437,13 @@
             gap: 12px;
         }
 
+        .countdown-text {
+            font-weight: 800;
+            color: #34d399;
+            font-family: monospace;
+            font-size: 1.05rem;
+        }
+
         /* --- SUBJECT SCROLL CONTAINER --- */
         .subject-nav-container {
             background: transparent;
@@ -529,6 +520,27 @@
         .subject-chip.completed {
             border-color: #10b981;
             color: #34d399;
+        }
+
+        /* --- TRANSPARENT ADVERTISEMENT CARD --- */
+        .ad-card-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 0;
+            background: transparent;
+            margin-top: 4px;
+        }
+
+        .ad-container {
+            width: 320px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            overflow: hidden;
         }
 
         /* --- MODALS --- */
@@ -686,12 +698,6 @@
                     <button class="btn btn-secondary" id="prev-btn" onclick="navigateQuestion(-1)" disabled>Previous</button>
                     <button class="btn btn-primary" id="next-btn" onclick="navigateQuestion(1)" disabled>Next Question</button>
                 </div>
-
-                <!-- ADVERTISEMENT CONTAINER UNDER NAVIGATION BUTTONS -->
-                <div class="ad-container">
-                    <div class="ad-label">ADVERTISEMENT</div>
-                    <script>(function(s){s.dataset.zone='11625706',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-                </div>
             </div>
 
             <!-- RESULT SCREEN (JUST COMPLETED) -->
@@ -709,13 +715,18 @@
                     <span style="font-size: 1.5rem;">📅</span>
                     <div>
                         <strong>Subject Completed For Today!</strong><br>
-                        You have finished your questions for this subject today. Try another subject below or visit tomorrow!
+                        Next day batch unlocks in: <span id="result-countdown" class="countdown-text">00h 00m 00s</span>
                     </div>
                 </div>
 
-                <button class="btn btn-submit" style="width: 100%;" onclick="tryAnotherSubject()">
-                    Try Another Subject 🔄
-                </button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-share" style="flex: 1; min-width: 140px;" onclick="shareSubjectQuiz()">
+                        📲 Share Subject Quiz
+                    </button>
+                    <button class="btn btn-submit" style="flex: 1; min-width: 140px;" onclick="tryAnotherSubject()">
+                        Try Another Subject 🔄
+                    </button>
+                </div>
             </div>
 
             <!-- IN-CARD COMPLETED SUBJECT SCREEN -->
@@ -727,17 +738,20 @@
                 <div class="notice-card">
                     <span style="font-size: 1.5rem;">📅</span>
                     <div>
-                        <strong>Visit Next Day Or Try Another Subject!</strong><br>
-                        Please visit next day for new questions or try another subject below. You can also check your rank in the leaderboard.
+                        <strong>Next Batch Unlocks Soon!</strong><br>
+                        Time remaining for next day questions: <span id="completed-countdown" class="countdown-text">00h 00m 00s</span>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" style="flex: 1; min-width: 140px;" onclick="openRankModal()">
-                        🏆 View Rank List
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-share" style="flex: 1; min-width: 120px;" onclick="shareSubjectQuiz()">
+                        📲 Share Quiz
                     </button>
-                    <button class="btn btn-submit" style="flex: 1; min-width: 140px;" onclick="tryAnotherSubject()">
-                        🔄 Try Another Subject
+                    <button class="btn btn-primary" style="flex: 1; min-width: 120px;" onclick="openRankModal()">
+                        🏆 View Ranks
+                    </button>
+                    <button class="btn btn-submit" style="flex: 1; min-width: 120px;" onclick="tryAnotherSubject()">
+                        🔄 Try Another
                     </button>
                 </div>
             </div>
@@ -754,6 +768,11 @@
             <div class="chips-scroll-container" id="chips-container">
                 <div class="chips-track" id="chips-track"></div>
             </div>
+        </div>
+
+        <!-- TRANSPARENT ADVERTISEMENT CARD CONTAINER -->
+        <div class="ad-card-wrapper">
+            <div id="ad-container" class="ad-container"></div>
         </div>
 
     </div>
@@ -801,7 +820,7 @@
         // =========================================================================
         // ⚠️ DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
         // =========================================================================
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1_5PZkKCcd8poujLOOfNKi2YmMI0ipkXKEbIaC2yBdxomHBtUmHPlRUSA9MqpEuUE/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFsKbR6OiBlO4Wg0iLJkf5C72uIehjPIrBN9jBBgSf0hZUN1jRUCklK0aoYGlKa0Mq/exec";
 
         // Dynamic State Variables
         let currentSubject = "";
@@ -815,6 +834,8 @@
         let quizStartTime = null;
         let pendingAction = null;
         let loadingInterval = null;
+        let countdownTimerInterval = null;
+        let activeCheckDate = "";
 
         // Auto-scroll State
         let isUserInteracting = false;
@@ -838,18 +859,23 @@
         const backendStatus = document.getElementById('backend-status');
         const rankTickerTrack = document.getElementById('rank-ticker-track');
 
-        function getTodayString() {
-            return new Date().toISOString().split('T')[0];
+        // Exact local calendar string (YYYY-MM-DD)
+        function getTodayLocalString() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
         }
 
         function isSubjectCompletedToday(subject) {
             if (!subject) return false;
-            return localStorage.getItem(`quiz_completed_${subject}`) === getTodayString();
+            return localStorage.getItem(`quiz_completed_${subject}`) === getTodayLocalString();
         }
 
         function setSubjectCompletedToday(subject) {
             if (!subject) return;
-            localStorage.setItem(`quiz_completed_${subject}`, getTodayString());
+            localStorage.setItem(`quiz_completed_${subject}`, getTodayLocalString());
         }
 
         function getUserName() {
@@ -875,12 +901,118 @@
             }
         }
 
-        function initApp() {
-            const today = getTodayString();
-            localStorage.setItem('quiz_last_visit_date', today);
+        // SHARE SUBJECT QUIZ LINK FUNCTIONALITY
+        async function shareSubjectQuiz() {
+            if (!currentSubject) return;
 
+            const shareUrl = `${window.location.origin}${window.location.pathname}?subject=${encodeURIComponent(currentSubject)}`;
+            const shareData = {
+                title: `Daily Quiz - ${currentSubject}`,
+                text: `🔥 Challenge yourself with today's ${currentSubject} Daily Quiz and jump on the leaderboard! 🚀`,
+                url: shareUrl
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error("Error sharing quiz:", err);
+                    }
+                }
+            } else if (navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert(`🔗 Quiz link for ${currentSubject} copied to clipboard! Share it with your friends.`);
+                } catch (err) {
+                    alert(`Share this quiz link: ${shareUrl}`);
+                }
+            } else {
+                alert(`Share this quiz link: ${shareUrl}`);
+            }
+        }
+
+        // REAL-TIME COUNTDOWN TIMER TO MIDNIGHT (12:00 AM)
+        function startMidnightCountdown() {
+            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
+
+            function updateCountdownUI() {
+                const now = new Date();
+                const currentDateStr = getTodayLocalString();
+
+                if (activeCheckDate && activeCheckDate !== currentDateStr) {
+                    activeCheckDate = currentDateStr;
+                    clearInterval(countdownTimerInterval);
+                    handleMidnightRollover();
+                    return;
+                }
+
+                const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+                const diffMs = tomorrow - now;
+
+                if (diffMs <= 0) {
+                    clearInterval(countdownTimerInterval);
+                    handleMidnightRollover();
+                    return;
+                }
+
+                const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+                const timeFormatted = `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+
+                const resCountdown = document.getElementById('result-countdown');
+                const compCountdown = document.getElementById('completed-countdown');
+
+                if (resCountdown) resCountdown.innerText = timeFormatted;
+                if (compCountdown) compCountdown.innerText = timeFormatted;
+            }
+
+            updateCountdownUI();
+            countdownTimerInterval = setInterval(updateCountdownUI, 1000);
+        }
+
+        function handleMidnightRollover() {
+            activeCheckDate = getTodayLocalString();
+            renderSubjectChips();
+            if (currentSubject) {
+                selectSubject(currentSubject);
+            }
+        }
+
+        // DYNAMIC ADVERTISEMENT INJECTION
+        function refreshAd() {
+            const adBox = document.getElementById('ad-container');
+            if (!adBox) return;
+
+            adBox.innerHTML = '';
+
+            window.atOptions = {
+                'key' : '04e1533a2d74643ee0271edd3477c5cc',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+            };
+
+            const scriptConf = document.createElement('script');
+            scriptConf.type = 'text/javascript';
+            scriptConf.text = `atOptions = ${JSON.stringify(window.atOptions)};`;
+
+            const scriptSrc = document.createElement('script');
+            scriptSrc.type = 'text/javascript';
+            scriptSrc.src = 'https://www.highperformanceformat.com/04e1533a2d74643ee0271edd3477c5cc/invoke.js';
+
+            adBox.appendChild(scriptConf);
+            adBox.appendChild(scriptSrc);
+        }
+
+        function initApp() {
+            activeCheckDate = getTodayLocalString();
             setupInfiniteScrollEngine();
             fetchBackendSubjects();
+            refreshAd();
         }
 
         async function fetchBackendSubjects() {
@@ -892,8 +1024,17 @@
                     backendSubjects = data.subjects;
                     backendStatus.innerText = "Connected";
 
-                    const uncompleted = backendSubjects.find(s => !isSubjectCompletedToday(s));
-                    currentSubject = uncompleted || backendSubjects[0];
+                    // Check if a specific subject was passed in URL query param
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const sharedSub = urlParams.get('subject');
+
+                    if (sharedSub && backendSubjects.some(s => s.toLowerCase() === sharedSub.toLowerCase())) {
+                        const matchedSubject = backendSubjects.find(s => s.toLowerCase() === sharedSub.toLowerCase());
+                        currentSubject = matchedSubject;
+                    } else {
+                        const uncompleted = backendSubjects.find(s => !isSubjectCompletedToday(s));
+                        currentSubject = uncompleted || backendSubjects[0];
+                    }
 
                     renderSubjectChips();
                     selectSubject(currentSubject);
@@ -974,6 +1115,7 @@
                 resultScreen.style.display = 'none';
                 completedSubjectHeader.innerText = `${subject} - Completed Today!`;
                 alreadyCompletedScreen.style.display = 'block';
+                startMidnightCountdown();
                 return;
             }
 
@@ -981,6 +1123,7 @@
             alreadyCompletedScreen.style.display = 'none';
             resultScreen.style.display = 'none';
             quizView.style.display = 'block';
+            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
 
             // Loading Engagement Sequence
             if (loadingInterval) clearInterval(loadingInterval);
@@ -1011,11 +1154,11 @@
                 if (loadingInterval) clearInterval(loadingInterval);
 
                 if (data.success && data.questions.length > 0) {
-                    // Questions loaded in exact row-by-row sequence from Google Sheets
                     quizQuestions = data.questions;
                     userAnswers = new Array(quizQuestions.length).fill(null);
                     currentQuestion = 0;
                     quizStartTime = Date.now();
+                    refreshAd();
                     loadQuestion();
                 } else {
                     questionTitle.innerText = `No questions added yet under "${subject}".`;
@@ -1031,6 +1174,11 @@
 
         function loadQuestion() {
             if (!quizStartTime) quizStartTime = Date.now();
+
+            // Refresh Ad after every 2 questions
+            if (currentQuestion > 0 && currentQuestion % 2 === 0) {
+                refreshAd();
+            }
 
             const q = quizQuestions[currentQuestion];
             const savedAns = userAnswers[currentQuestion];
@@ -1164,6 +1312,7 @@
                 descEl.innerText = "Keep practicing! Review explanations and try another subject.";
             }
 
+            startMidnightCountdown();
             await submitScoreToBackend(userName, score, quizQuestions.length, totalTimeSec);
         }
 
@@ -1248,6 +1397,7 @@
         function tryAnotherSubject() {
             resultScreen.style.display = 'none';
             alreadyCompletedScreen.style.display = 'none';
+            if (countdownTimerInterval) clearInterval(countdownTimerInterval);
             
             const nextSubject = backendSubjects.find(s => !isSubjectCompletedToday(s));
 
