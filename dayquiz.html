@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Daily</title>
+    <title>Daily Interactive Quiz</title>
     <style>
         /* --- CSS VARIABLES & THEME --- */
         :root {
@@ -239,7 +239,6 @@
             flex-shrink: 0;
         }
 
-        /* Selected State during Quiz */
         .option-chip.selected {
             background: rgba(168, 85, 247, 0.25) !important;
             border-color: #a855f7 !important;
@@ -324,13 +323,37 @@
             transform: translateY(-2px);
         }
 
+        .btn-concept-tab {
+            width: 100%;
+            margin-top: 18px;
+            padding: 10px 18px;
+            border-radius: 14px;
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px dashed rgba(168, 85, 247, 0.5);
+            color: #c084fc;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-concept-tab:hover {
+            background: rgba(168, 85, 247, 0.28);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
         .btn:disabled {
             opacity: 0.35;
             cursor: not-allowed;
             transform: none !important;
         }
 
-        /* --- RESULT & ALREADY COMPLETED SCREENS (INTERNAL SCROLLING) --- */
+        /* --- RESULT SCREEN --- */
         .result-screen {
             display: none;
             text-align: center;
@@ -424,7 +447,7 @@
             font-size: 1.05rem;
         }
 
-        /* --- DETAILED QUESTION REVIEW STYLING --- */
+        /* --- DETAILED QUESTION REVIEW --- */
         .review-section {
             margin-top: 26px;
             text-align: left;
@@ -540,6 +563,129 @@
             color: #c084fc;
             text-transform: uppercase;
             margin-bottom: 4px;
+        }
+
+        /* --- CONCEPT FOLDER TREE VIEW --- */
+        .concept-view {
+            display: none;
+            animation: fadeIn 0.35s ease forwards;
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .concept-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .concept-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #c084fc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-close-concept {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-close-concept:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .tree-root {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tree-folder {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .tree-folder-header {
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 0.94rem;
+            color: #f8fafc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            transition: var(--transition);
+        }
+
+        .tree-folder-header:hover {
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+        }
+
+        .tree-folder-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tree-children {
+            padding: 6px 10px 10px 24px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .tree-children.open {
+            display: flex;
+        }
+
+        .tree-test-item {
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #e2e8f0;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tree-test-item:hover {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: #6366f1;
+            transform: translateX(4px);
+            color: #fff;
+        }
+
+        .test-start-tag {
+            font-size: 0.75rem;
+            background: #6366f1;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 700;
         }
 
         /* --- SUBJECT SCROLL CONTAINER --- */
@@ -815,7 +961,7 @@
                 </div>
             </div>
 
-            <!-- RESULT SCREEN (JUST COMPLETED - SCROLLABLE INSIDE CARD) -->
+            <!-- RESULT SCREEN -->
             <div class="result-screen" id="result-screen">
                 <div class="badge-icon" id="result-badge">✨</div>
                 <div class="score-circle">
@@ -843,7 +989,6 @@
                     </button>
                 </div>
 
-                <!-- DETAILED REVIEW SECTION ON RESULT SCREEN -->
                 <div id="review-container" class="review-section"></div>
             </div>
 
@@ -873,6 +1018,22 @@
                     </button>
                 </div>
             </div>
+
+            <!-- CONCEPT FOLDER NESTED VIEW -->
+            <div class="concept-view" id="concept-view">
+                <div class="concept-header">
+                    <div class="concept-title">📂 Write Test (Concept Wise)</div>
+                    <button class="btn-close-concept" onclick="closeConceptView()">✕ Back to Daily Quiz</button>
+                </div>
+                <div id="concept-tree-container" class="tree-root">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- CONCEPT TEST TAB BUTTON -->
+            <button class="btn-concept-tab" id="concept-tab-btn" onclick="openConceptView()">
+                📂 Write the Test Based on Concept Wise
+            </button>
 
         </div>
 
@@ -944,7 +1105,7 @@
         // =========================================================================
         // ⚠️ DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
         // =========================================================================
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFsKbR6OiBlO4Wg0iLJkf5C72uIehjPIrBN9jBBgSf0hZUN1jRUCklK0aoYGlKa0Mq/exec";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXY5YHqGDaYqBALqKdjcFC2RWstYL1UrFGZH5q3JFY3KbEPHynu7R7wJwZQLf-MSmn/exec";
 
         // Dynamic State Variables
         let currentSubject = "";
@@ -953,6 +1114,7 @@
         let userAnswers = [];
         let backendSubjects = [];
         let todayLeaderboard = [];
+        let conceptFoldersData = [];
 
         // Time Tracking & User State
         let quizStartTime = null;
@@ -970,6 +1132,8 @@
         const quizView = document.getElementById('quiz-view');
         const resultScreen = document.getElementById('result-screen');
         const alreadyCompletedScreen = document.getElementById('already-completed-screen');
+        const conceptView = document.getElementById('concept-view');
+        const conceptTabBtn = document.getElementById('concept-tab-btn');
         const completedSubjectHeader = document.getElementById('completed-subject-header');
         const currentSubjectTitle = document.getElementById('current-subject-title');
         const tracker = document.getElementById('question-tracker');
@@ -981,7 +1145,6 @@
         const backendStatus = document.getElementById('backend-status');
         const rankTickerTrack = document.getElementById('rank-ticker-track');
 
-        // Exact local calendar string (YYYY-MM-DD)
         function getTodayLocalString() {
             const now = new Date();
             const yyyy = now.getFullYear();
@@ -1023,7 +1186,6 @@
             }
         }
 
-        // SHARE SUBJECT QUIZ LINK FUNCTIONALITY
         async function shareSubjectQuiz() {
             if (!currentSubject) return;
 
@@ -1054,7 +1216,6 @@
             }
         }
 
-        // REAL-TIME COUNTDOWN TIMER TO MIDNIGHT (12:00 AM)
         function startMidnightCountdown() {
             if (countdownTimerInterval) clearInterval(countdownTimerInterval);
 
@@ -1103,7 +1264,6 @@
             }
         }
 
-        // DYNAMIC ADVERTISEMENT INJECTION
         function refreshAd() {
             const adBox = document.getElementById('ad-container');
             if (!adBox) return;
@@ -1218,18 +1378,17 @@
             });
         }
 
-        // Handle Subject Selection
         async function selectSubject(subject) {
             if (!subject) return;
             currentSubject = subject;
 
-            // Clear old leaderboard state
+            closeConceptView();
+
             todayLeaderboard = [];
             renderLeaderboardUI();
             renderSubjectChips();
             fetchLeaderboard(currentSubject);
 
-            // Notice if completed today
             if (isSubjectCompletedToday(subject)) {
                 if (loadingInterval) clearInterval(loadingInterval);
                 quizView.style.display = 'none';
@@ -1240,13 +1399,11 @@
                 return;
             }
 
-            // Reset View
             alreadyCompletedScreen.style.display = 'none';
             resultScreen.style.display = 'none';
             quizView.style.display = 'block';
             if (countdownTimerInterval) clearInterval(countdownTimerInterval);
 
-            // Loading Engagement Sequence
             if (loadingInterval) clearInterval(loadingInterval);
             let step = 0;
             const messages = [
@@ -1295,7 +1452,6 @@
         function loadQuestion() {
             if (!quizStartTime) quizStartTime = Date.now();
 
-            // Refresh Ad after every 2 questions
             if (currentQuestion > 0 && currentQuestion % 2 === 0) {
                 refreshAd();
             }
@@ -1348,7 +1504,6 @@
             updateNavButtons();
         }
 
-        // Highlights user choice cleanly WITHOUT revealing right/wrong during test
         function applySelectionUI(selectedIndex) {
             const chips = optionsGrid.querySelectorAll('.option-chip');
 
@@ -1424,14 +1579,11 @@
 
             renderReviewSection();
             startMidnightCountdown();
-
-            // Auto-scroll result card to top when completed
             resultScreen.scrollTop = 0;
 
             await submitScoreToBackend(userName, score, quizQuestions.length, totalTimeSec);
         }
 
-        // RENDERS DETAILED QUESTION REVIEW AFTER QUIZ COMPLETION
         function renderReviewSection() {
             const reviewBox = document.getElementById('review-container');
             if (!reviewBox) return;
@@ -1482,6 +1634,124 @@
                 `;
 
                 reviewBox.appendChild(item);
+            });
+        }
+
+        /* --- CONCEPT FOLDER RENDERING LOGIC --- */
+
+        function openConceptView() {
+            quizView.style.display = 'none';
+            resultScreen.style.display = 'none';
+            alreadyCompletedScreen.style.display = 'none';
+            conceptView.style.display = 'block';
+
+            fetchConceptFolders();
+        }
+
+        function closeConceptView() {
+            conceptView.style.display = 'none';
+            if (isSubjectCompletedToday(currentSubject)) {
+                alreadyCompletedScreen.style.display = 'block';
+            } else {
+                quizView.style.display = 'block';
+            }
+        }
+
+        async function fetchConceptFolders() {
+            const container = document.getElementById('concept-tree-container');
+            container.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const res = await fetch(`${APPS_SCRIPT_URL}?action=getConceptFolders`);
+                const data = await res.json();
+
+                if (data.success && Array.isArray(data.folders) && data.folders.length > 0) {
+                    conceptFoldersData = data.folders;
+                    renderFolderTreeUI(conceptFoldersData, container);
+                } else {
+                    container.innerHTML = '<p style="color:#94a3b8; text-align:center; padding:20px;">No concept folders or tests uploaded yet by admin.</p>';
+                }
+            } catch (err) {
+                console.error("Error fetching concept folders:", err);
+                container.innerHTML = '<p style="color:#f87171; text-align:center; padding:20px;">Failed to load concept folders from backend.</p>';
+            }
+        }
+
+        function renderFolderTreeUI(nodes, containerEl) {
+            containerEl.innerHTML = '';
+
+            nodes.forEach(node => {
+                if (node.type === 'folder') {
+                    const folderDiv = document.createElement('div');
+                    folderDiv.className = 'tree-folder';
+
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'tree-folder-header';
+                    headerDiv.innerHTML = `
+                        <div class="tree-folder-title">
+                            <span>📁</span>
+                            <span>${node.name}</span>
+                        </div>
+                        <span class="toggle-icon">▶</span>
+                    `;
+
+                    const childrenDiv = document.createElement('div');
+                    childrenDiv.className = 'tree-children';
+
+                    headerDiv.onclick = (e) => {
+                        e.stopPropagation();
+                        const isOpen = childrenDiv.classList.contains('open');
+                        if (isOpen) {
+                            childrenDiv.classList.remove('open');
+                            headerDiv.querySelector('.toggle-icon').innerText = '▶';
+                            headerDiv.querySelector('.tree-folder-title span').innerText = '📁';
+                        } else {
+                            childrenDiv.classList.add('open');
+                            headerDiv.querySelector('.toggle-icon').innerText = '▼';
+                            headerDiv.querySelector('.tree-folder-title span').innerText = '📂';
+                        }
+                    };
+
+                    if (node.children && node.children.length > 0) {
+                        renderFolderTreeUI(node.children, childrenDiv);
+                    } else {
+                        childrenDiv.innerHTML = '<p style="font-size:0.8rem; color:#94a3b8; padding:4px;">(Empty folder) Content Will be update as soon as possible </p>';
+                    }
+
+                    folderDiv.appendChild(headerDiv);
+                    folderDiv.appendChild(childrenDiv);
+                    containerEl.appendChild(folderDiv);
+                } else if (node.type === 'test') {
+                    const testDiv = document.createElement('div');
+                    testDiv.className = 'tree-test-item';
+                    testDiv.innerHTML = `
+                        <span>📝 ${node.name}</span>
+                        <span class="test-start-tag">Start Test 🚀</span>
+                    `;
+
+                    // AUTOMATIC LINK REDIRECTION UPON CLICK
+                    testDiv.onclick = () => {
+                        if (node.link && node.link.trim() !== "") {
+                            let targetUrl = node.link.trim();
+                            
+                            // Check if the link corresponds to an internal subject tab name
+                            if (backendSubjects.some(s => s.toLowerCase() === targetUrl.toLowerCase())) {
+                                const subMatch = backendSubjects.find(s => s.toLowerCase() === targetUrl.toLowerCase());
+                                selectSubject(subMatch);
+                            } else {
+                                // Auto-prefix protocol if missing and launch URL redirect
+                                if (!/^https?:\/\//i.test(targetUrl)) {
+                                    targetUrl = 'https://' + targetUrl;
+                                }
+                                window.open(targetUrl, '_blank');
+                            }
+                        } else {
+                            alert(`No test link configured for: ${node.name}`);
+                        }
+                    };
+
+                    containerEl.appendChild(testDiv);
+                }
             });
         }
 
