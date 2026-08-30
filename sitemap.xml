@@ -3,7 +3,7 @@
   <!-- Main Portal Page -->
   <url>
     <loc>https://dailyquizzer.in/</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -11,7 +11,7 @@
   <!-- Embedded Section / Tool Link -->
   <url>
     <loc>https://dailyquizzer.in/?tool=section-dayquizzer</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -19,51 +19,75 @@
   <!-- Featured / Primary Tools -->
   <url>
     <loc>https://dailyquizzer.in/quizkaroo/index.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/dayquiz.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/laxosheduquizmaker.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <!-- Physics Tools -->
   <url>
+    <loc>https://dailyquizzer.in/tools/electromagnetcwavesimulator.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/opticslabadvancedlenses.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/Prisopticsandlightdispersion.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://dailyquizzer.in/tools/typesofmotions.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/Interactivetransparencylab.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/eclipselab.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/light.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/virtualmagnetism.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/electricitylab.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -71,79 +95,103 @@
   <!-- Chemistry Tools -->
   <url>
     <loc>https://dailyquizzer.in/tools/physicalpropertiesofmetalsandnonmetals.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/acidsbasesandsaltslab.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/dischargetubeelectron.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/discoveryofneutron.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/discoveryofproton.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/animatedperiodictable.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/atomicstructuresimulator.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/rutherfordgoldfoilexperiment.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/statesofmatter.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/thermalequilibriumsimulation.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/molecularkinetictheorysimulator.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/idealgas%26gaslawssimulation.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/interactiveflametestsimulator.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/petroleumrefinerysimulation.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/separatingfunnelsimulation.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/solutionsof_true_colloids_suspensions.html</loc>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/diffusionandeffusion.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -151,49 +199,73 @@
   <!-- Academic Tools -->
   <url>
     <loc>https://dailyquizzer.in/tools/examroomsallotingtool.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/schooltimetablegenerator.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/reportgenerator.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/mcqsslideshowgenerator.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/educationalshortvideogenerator.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/englishpranonciator.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/calculatesemestergpa%26cgpa.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/idcardmaker.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/marksmanager.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/frs.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/onlinetudentattendence.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/smartschoolsectionshufflingtool.html</loc>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -201,13 +273,31 @@
   <!-- Other General Tools -->
   <url>
     <loc>https://dailyquizzer.in/tools/expandimageto4apages.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/wordsseparationfrompdftool.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/pdfreader.html</loc>
+    <lastmod>2026-08-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dailyquizzer.in/tools/pdfviewer.html</loc>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://dailyquizzer.in/tools/lightmyhouse.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
