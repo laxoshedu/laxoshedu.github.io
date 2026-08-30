@@ -766,27 +766,6 @@
             color: #34d399;
         }
 
-        /* --- TRANSPARENT ADVERTISEMENT CARD --- */
-        .ad-card-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 8px 0;
-            background: transparent;
-            margin-top: 4px;
-        }
-
-        .ad-container {
-            width: 320px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: transparent;
-            overflow: hidden;
-        }
-
         /* --- FOOTER & COPYRIGHTS --- */
         .app-footer {
             text-align: center;
@@ -1049,11 +1028,6 @@
             </div>
         </div>
 
-        <!-- TRANSPARENT ADVERTISEMENT CARD CONTAINER -->
-        <div class="ad-card-wrapper">
-            <div id="ad-container" class="ad-container"></div>
-        </div>
-
         <!-- APP FOOTER & COPYRIGHTS -->
         <footer class="app-footer">
             <p>© Copyrights Reserved by <strong>laxoshedu</strong></p>
@@ -1103,7 +1077,7 @@
 
     <script>
         // =========================================================================
-        // ⚠️ DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
+        // DEPLOYED GOOGLE APPS SCRIPT WEB APP URL:
         // =========================================================================
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXY5YHqGDaYqBALqKdjcFC2RWstYL1UrFGZH5q3JFY3KbEPHynu7R7wJwZQLf-MSmn/exec";
 
@@ -1264,37 +1238,10 @@
             }
         }
 
-        function refreshAd() {
-            const adBox = document.getElementById('ad-container');
-            if (!adBox) return;
-
-            adBox.innerHTML = '';
-
-            window.atOptions = {
-                'key' : '04e1533a2d74643ee0271edd3477c5cc',
-                'format' : 'iframe',
-                'height' : 50,
-                'width' : 320,
-                'params' : {}
-            };
-
-            const scriptConf = document.createElement('script');
-            scriptConf.type = 'text/javascript';
-            scriptConf.text = `atOptions = ${JSON.stringify(window.atOptions)};`;
-
-            const scriptSrc = document.createElement('script');
-            scriptSrc.type = 'text/javascript';
-            scriptSrc.src = 'https://www.highperformanceformat.com/04e1533a2d74643ee0271edd3477c5cc/invoke.js';
-
-            adBox.appendChild(scriptConf);
-            adBox.appendChild(scriptSrc);
-        }
-
         function initApp() {
             activeCheckDate = getTodayLocalString();
             setupInfiniteScrollEngine();
             fetchBackendSubjects();
-            refreshAd();
         }
 
         async function fetchBackendSubjects() {
@@ -1435,7 +1382,6 @@
                     userAnswers = new Array(quizQuestions.length).fill(null);
                     currentQuestion = 0;
                     quizStartTime = Date.now();
-                    refreshAd();
                     loadQuestion();
                 } else {
                     questionTitle.innerText = `No questions added yet under "${subject}".`;
@@ -1451,10 +1397,6 @@
 
         function loadQuestion() {
             if (!quizStartTime) quizStartTime = Date.now();
-
-            if (currentQuestion > 0 && currentQuestion % 2 === 0) {
-                refreshAd();
-            }
 
             const q = quizQuestions[currentQuestion];
             const savedAns = userAnswers[currentQuestion];
@@ -1729,17 +1671,14 @@
                         <span class="test-start-tag">Start Test 🚀</span>
                     `;
 
-                    // AUTOMATIC LINK REDIRECTION UPON CLICK
                     testDiv.onclick = () => {
                         if (node.link && node.link.trim() !== "") {
                             let targetUrl = node.link.trim();
                             
-                            // Check if the link corresponds to an internal subject tab name
                             if (backendSubjects.some(s => s.toLowerCase() === targetUrl.toLowerCase())) {
                                 const subMatch = backendSubjects.find(s => s.toLowerCase() === targetUrl.toLowerCase());
                                 selectSubject(subMatch);
                             } else {
-                                // Auto-prefix protocol if missing and launch URL redirect
                                 if (!/^https?:\/\//i.test(targetUrl)) {
                                     targetUrl = 'https://' + targetUrl;
                                 }
