@@ -1,4 +1,6 @@
-<head>
+<!DOCTYPE html>
+<html>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -1670,7 +1672,7 @@
                     </div>
                 </div>
 
-                <!-- Tool 4 -->
+                <!-- Tool 3 -->
 
                 <div class="app-card animate-target" id="tool-reportgenerator" data-demo-url="">
                     <div class="card-top-bar">
@@ -1689,7 +1691,7 @@
                     </div>
                 </div>
 
-                <!-- Tool 5 -->
+                <!-- Tool 4 -->
 
                 <div class="app-card animate-target" id="tool-mcqsslideshowgenerator" data-demo-url="">
                     <div class="card-top-bar">
@@ -1708,7 +1710,7 @@
                     </div>
                 </div>
 
-                <!-- Tool 6 -->
+                <!-- Tool 5 -->
 
                 <div class="app-card animate-target" id="tool-educationalshortvideogenerator" data-demo-url="">
                     <div class="card-top-bar">
@@ -1727,7 +1729,7 @@
                     </div>
                 </div>
 
-                <!-- Tool 7 -->
+                <!-- Tool 6 -->
 
                 <div class="app-card animate-target" id="tool-englishpranonciator" data-demo-url="">
                     <div class="card-top-bar">
@@ -1746,7 +1748,7 @@
                     </div>
                 </div>
 
-                <!-- Tool 8 -->
+                <!-- Tool 7 -->
 
                 <div class="app-card animate-target" id="tool-calculatesemestergpa" data-demo-url="">
                     <div class="card-top-bar">
@@ -1765,7 +1767,7 @@
                     </div>
                 </div>
 
-                <!-- Tool 9 -->
+                <!-- Tool 8 -->
 
                 <div class="app-card animate-target" id="tool-idcardmaker" data-demo-url="">
                     <div class="card-top-bar">
@@ -1784,7 +1786,7 @@
                     </div>
                 </div>
 
-                <!-- Tool 10 -->
+                <!-- Tool 9 -->
                 
                 <div class="app-card animate-target" id="tool-marksmanager" data-demo-url="">
                     <div class="card-top-bar">
@@ -1803,7 +1805,7 @@
                     </div>
                 </div>
                 
-                <!-- Tool 11-->
+                <!-- Tool 10-->
                 
                 <div class="app-card animate-target" id="tool-frs" data-demo-url="">
                     <div class="card-top-bar">
@@ -1822,7 +1824,7 @@
                     </div>
                 </div>
                 
-                <!-- Tool 12-->
+                <!-- Tool 11-->
                 
                 <div class="app-card animate-target" id="tool-onlinetudentattendence" data-demo-url="">
                     <div class="card-top-bar">
@@ -1841,7 +1843,7 @@
                     </div>
                 </div>
                 
-                <!-- Tool 13-->
+                <!-- Tool 12-->
                 
                 <div class="app-card animate-target" id="tool-smartschoolsectionshufflingtool" data-demo-url="">
                     <div class="card-top-bar">
@@ -2090,6 +2092,12 @@
 
         let lastClickTimeMap = {};
         function onToolClicked(toolId, toolName) {
+            // BACK-NAVIGATION / POSITION RESTORATION LOGIC:
+            // Update browser state & hash to current tool ID so back navigation targets this exact spot
+            if (toolId && history.replaceState) {
+                history.replaceState(null, null, '#' + toolId);
+            }
+
             const now = Date.now();
             if (lastClickTimeMap[toolId] && (now - lastClickTimeMap[toolId] < 2000)) {
                 return;
@@ -2258,6 +2266,22 @@
             link.addEventListener('click', () => { menuOverlay.style.display = 'none'; });
         });
 
+        // Function to handle smooth scroll to target tool on page load/restore
+        function scrollToHashOrParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetToolId = urlParams.get('tool') || (window.location.hash ? window.location.hash.substring(1) : null);
+            
+            if (targetToolId) {
+                const targetElement = document.getElementById(targetToolId);
+                if (targetElement) {
+                    setTimeout(() => {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetElement.classList.add('highlight-target');
+                    }, 400);
+                }
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             initLogoFallbacks();
             initDemoVideoTags();
@@ -2271,19 +2295,11 @@
                 }, index * 80);
             });
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetToolId = urlParams.get('tool');
-            if (targetToolId) {
-                const targetElement = document.getElementById(targetToolId);
-                if (targetElement) {
-                    setTimeout(() => {
-                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        targetElement.classList.add('highlight-target');
-                        onToolClicked(targetToolId, targetElement.querySelector('h3, .featured-title, .iframe-top-title')?.textContent || targetToolId);
-                    }, 600);
-                }
-            }
+            scrollToHashOrParam();
         });
+
+        // Restore scroll position dynamically if the hash updates on back/forward browser buttons
+        window.addEventListener('popstate', scrollToHashOrParam);
     </script>
 </body>
 </html>
