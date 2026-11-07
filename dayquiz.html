@@ -32,6 +32,19 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
+        /* --- HIDE PAGE SCROLLBAR WHILE MAINTAINING SCROLLABILITY --- */
+        html, body {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE & Edge */
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none; /* Chrome, Safari & Opera */
+            width: 0;
+            height: 0;
+        }
+
         body {
             min-height: 100vh;
             background: var(--bg-gradient);
@@ -323,28 +336,78 @@
             transform: translateY(-2px);
         }
 
+        /* --- ATTRACTIVE CONCEPT TEST TAB BUTTON (BREATHING & FLARE EFFECT) --- */
         .btn-concept-tab {
             width: 100%;
             margin-top: 18px;
-            padding: 10px 18px;
+            padding: 12px 18px;
             border-radius: 14px;
-            background: rgba(168, 85, 247, 0.15);
-            border: 1px dashed rgba(168, 85, 247, 0.5);
-            color: #c084fc;
-            font-size: 0.9rem;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.22) 0%, rgba(99, 102, 241, 0.22) 100%);
+            border: 1.5px solid rgba(192, 132, 252, 0.7);
+            color: #ffffff;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            animation: breathingGlow 3s ease-in-out infinite alternate;
+        }
+
+        /* Glass Flare Light Sweep Effect */
+        .btn-concept-tab::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -75%;
+            width: 50%;
+            height: 200%;
+            background: linear-gradient(
+                90deg, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.45) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(25deg);
+            animation: glassFlareSweep 3.5s infinite;
+            pointer-events: none;
         }
 
         .btn-concept-tab:hover {
-            background: rgba(168, 85, 247, 0.28);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.45) 0%, rgba(99, 102, 241, 0.45) 100%);
+            border-color: #e9d5ff;
             color: #ffffff;
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.65);
+        }
+
+        @keyframes breathingGlow {
+            0% {
+                box-shadow: 0 0 8px rgba(168, 85, 247, 0.3), inset 0 0 6px rgba(168, 85, 247, 0.2);
+                border-color: rgba(192, 132, 252, 0.5);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(168, 85, 247, 0.75), 0 0 30px rgba(99, 102, 241, 0.4), inset 0 0 12px rgba(192, 132, 252, 0.4);
+                border-color: rgba(233, 213, 255, 0.95);
+                transform: scale(1.018);
+            }
+            100% {
+                box-shadow: 0 0 8px rgba(168, 85, 247, 0.3), inset 0 0 6px rgba(168, 85, 247, 0.2);
+                border-color: rgba(192, 132, 252, 0.5);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes glassFlareSweep {
+            0% { left: -75%; }
+            30% { left: 125%; }
+            100% { left: 125%; }
         }
 
         .btn:disabled {
@@ -1009,11 +1072,8 @@
                 </div>
             </div>
 
-            <!-- CONCEPT TEST TAB BUTTON -->
-            <button class="btn-concept-tab" id="concept-tab-btn" onclick="openConceptView()">
-                📂 Write the Test Based on Concept Wise
-            </button>
-
+            <!-- CONCEPT TEST TAB BUTTON WITH ATTRACTIVE EFFECTS -->
+            <button class="btn-concept-tab" id="concept-tab-btn" onclick="openConceptView()">✨Take this Quiz & Win Prize Money</button>
         </div>
 
         <!-- SUBJECT SELECTION SCROLL -->
