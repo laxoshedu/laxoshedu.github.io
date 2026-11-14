@@ -37,13 +37,11 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* DEFAULT PORTRAIT PRINT SETTINGS */
         @page {
             size: A4 portrait;
             margin: 10mm;
         }
 
-        /* LANDSCAPE OVERRIDE ONLY FOR TIMETABLE TAB PRINTING */
         @page landscape-page {
             size: A4 landscape;
             margin: 8mm;
@@ -71,7 +69,6 @@
             cursor: grabbing;
         }
 
-        /* Layout-aware sizer box prevents left/right cropping when zoomed */
         .a4-scale-sizer {
             margin: 0 auto;
             position: relative;
@@ -101,7 +98,6 @@
             flex-shrink: 0;
         }
 
-        /* Print Stylesheet for Official Reports & Grids */
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
@@ -110,12 +106,10 @@
             .page-break { page-break-before: always; }
             .avoid-break { page-break-inside: avoid; }
             
-            /* Hide non-active sections during print */
             section:not(.active-print-view) {
                 display: none !important;
             }
 
-            /* Reset A4 Preview Container for Native Printer Output */
             .a4-viewport {
                 background: transparent !important;
                 padding: 0 !important;
@@ -150,13 +144,11 @@
                 page-break-after: auto;
             }
 
-            /* Print Toggle CSS Rule */
             body.hide-extra-duties-print .extra-duty-print-item,
             body.hide-extra-duties-print .extra-duty-print-stat {
                 display: none !important;
             }
 
-            /* Reset Zoom Transform & Overflow Containers on Print for Full Timetable Rendering */
             #timetable-zoom-wrapper {
                 transform: scale(1) !important;
                 width: 100% !important;
@@ -169,7 +161,6 @@
                 width: 100% !important;
             }
 
-            /* A4 Landscape Specific Timetable Print Formatting */
             #timetable-matrix-table {
                 width: 100% !important;
                 min-width: 0 !important;
@@ -197,7 +188,6 @@
                 width: 100% !important;
             }
 
-            /* BIG VISIBILITY ENHANCEMENTS FOR PRINTED EXTRA WORK ATTACHMENTS */
             .print-extra-attachment {
                 display: block !important;
                 max-width: 100% !important;
@@ -242,30 +232,33 @@
             50% { transform: scale(1.01); }
         }
         .alarm-active-banner {
-            animation: pulseAlert 1.5s infinite ease-in-out;
+            animation: pulseAlert 1.2s infinite ease-in-out;
         }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col relative overflow-x-hidden">
 
-    <!-- LIVE ACTIVE ALARM BANNER -->
-    <div id="live-alarm-banner" class="hidden fixed top-16 left-0 right-0 z-50 bg-amber-500 text-slate-950 shadow-2xl border-b-2 border-amber-700 px-4 py-3 no-print alarm-active-banner">
+    <!-- LIVE ACTIVE ALARM BANNER (Ringing / Repeating Reminder) -->
+    <div id="live-alarm-banner" class="hidden fixed top-16 left-0 right-0 z-50 bg-amber-500 text-slate-950 shadow-2xl border-b-2 border-amber-700 px-4 py-3.5 no-print alarm-active-banner">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-                <div class="p-2.5 bg-slate-900 text-amber-400 rounded-xl shrink-0">
+                <div class="p-3 bg-slate-900 text-amber-400 rounded-xl shrink-0">
                     <i class="fa-solid fa-bell fa-shake text-xl"></i>
                 </div>
                 <div>
-                    <span class="text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-0.5 rounded">Class Period Alert</span>
-                    <p id="live-alarm-text" class="font-extrabold text-sm sm:text-base mt-0.5">Upcoming Class Alert</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span id="live-alarm-badge" class="text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-0.5 rounded">Class Period Alert</span>
+                        <span id="live-alarm-repeat-counter" class="text-[10px] font-extrabold bg-amber-900 text-amber-100 px-2 py-0.5 rounded">Ring 1</span>
+                    </div>
+                    <p id="live-alarm-text" class="font-extrabold text-sm sm:text-base mt-1">Upcoming Class Alert</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-                <button onclick="repeatAlarmSpeech()" class="px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-volume-high"></i> Speak Again
+                <button onclick="repeatAlarmSpeech()" class="px-3 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-volume-high"></i> Speak Now
                 </button>
-                <button onclick="dismissAlarmBanner()" class="px-3.5 py-1.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-black border border-slate-300">
-                    Dismiss
+                <button onclick="dismissAlarmBanner()" class="px-4 py-2 bg-rose-600 text-white hover:bg-rose-700 rounded-xl text-xs font-black shadow">
+                    Stop & Dismiss
                 </button>
             </div>
         </div>
@@ -362,7 +355,27 @@
         </div>
 
         <!-- Drawer Content Body -->
-        <div class="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
+
+            <!-- 12-HOUR (AM/PM) vs 24-HOUR TIME FORMAT TOGGLE -->
+            <div>
+                <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Clock & Time Display Format</h3>
+                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-2 rounded-xl bg-brand-100 text-brand-700">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+                        <div>
+                            <span id="time-format-title" class="block text-xs font-extrabold text-slate-800">12-Hour (AM / PM)</span>
+                            <span id="time-format-sub" class="block text-[10px] text-slate-500">Shows AM & PM selectors</span>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="menu-time-format-toggle" checked onchange="toggleTimeFormatMode()" class="sr-only peer">
+                        <div class="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-600"></div>
+                    </label>
+                </div>
+            </div>
 
             <!-- PERIOD ALARM STATUS CARD INSIDE MENU PANEL -->
             <div>
@@ -380,11 +393,11 @@
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="menu-alarm-toggle" onchange="toggleMasterAlarmFromMenu()" class="sr-only peer">
-                            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                            <div class="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
                         </label>
                     </div>
                     <button onclick="toggleSideMenu(); switchTab('timetable');" class="w-full py-1.5 px-3 bg-white hover:bg-brand-50 text-brand-700 border border-slate-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-clock"></i> Configure Alarm Timings
+                        <i class="fa-solid fa-clock"></i> Open Alarms & Schedule
                     </button>
                 </div>
             </div>
@@ -491,7 +504,7 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 1: DAILY PLANNER & LOGBOOK (DYNAMIC ON-DEMAND ROWS) -->
+        <!-- TAB 1: DAILY PLANNER & LOGBOOK -->
         <!-- ========================================================================= -->
         <section id="view-planner" class="space-y-6 active-print-view">
 
@@ -544,7 +557,7 @@
                 </div>
             </div>
 
-            <!-- COMPACT METADATA BANNER (Homeroom & Attendance) -->
+            <!-- COMPACT METADATA BANNER -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="w-full sm:w-auto flex items-center gap-2 text-xs font-bold text-slate-700 shrink-0">
                     <i class="fa-solid fa-user-check text-emerald-500 text-sm"></i> Homeroom & Attendance:
@@ -561,7 +574,7 @@
                         <h2 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
                             <i class="fa-solid fa-list-check text-brand-600"></i> Period-by-Period Teaching Register
                         </h2>
-                        <p class="text-xs text-slate-500">Click the <strong>+ Add Period Row</strong> button whenever you need to log a period for this day.</p>
+                        <p class="text-xs text-slate-500">Click <strong>+ Add Period Row</strong> to log a class period with From/To times (AM/PM or 24h).</p>
                     </div>
                     <button onclick="addPeriodRow()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 self-start sm:self-auto no-print">
                         <i class="fa-solid fa-plus"></i> Add Period Row
@@ -569,11 +582,11 @@
                 </div>
 
                 <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left border-collapse min-w-[1120px]">
+                    <table class="w-full text-left border-collapse min-w-[1180px]">
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-bold border-b border-slate-200">
                                 <th class="py-3 px-3 w-28">Period</th>
-                                <th class="py-3 px-3 w-44">Time (From - To)</th>
+                                <th class="py-3 px-3 w-56">Time (From - To)</th>
                                 <th class="py-3 px-2 w-28">Class</th>
                                 <th class="py-3 px-2 w-24">Section</th>
                                 <th class="py-3 px-2 w-32">Work Type</th>
@@ -599,7 +612,7 @@
                 </div>
             </div>
 
-            <!-- EXTRA WORK & OVERTIME DUTY PANEL WITH FILE/IMAGE ATTACHMENTS -->
+            <!-- EXTRA WORK & OVERTIME DUTY PANEL -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
                     <div>
@@ -607,7 +620,7 @@
                             <i class="fa-solid fa-user-clock text-amber-500"></i> Extra Work & Overtime Duties
                             <span id="extra-work-date-badge" class="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold ml-2">For Today</span>
                         </h2>
-                        <p class="text-xs text-slate-500">Log duties specific to this date and attach supporting images/documents (Invigilation, Parent Calls, Valuation, Bus Duty, etc.)</p>
+                        <p class="text-xs text-slate-500">Log duties specific to this date and attach supporting images/documents.</p>
                     </div>
 
                     <button onclick="addExtraWorkItem()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 self-start sm:self-auto no-print">
@@ -615,10 +628,7 @@
                     </button>
                 </div>
 
-                <!-- Container for extra duties list -->
-                <div id="extra-work-container" class="space-y-3">
-                    <!-- Dynamic date-isolated extra work entries injected here -->
-                </div>
+                <div id="extra-work-container" class="space-y-3"></div>
             </div>
 
             <!-- Day Notes & Next Day Plan -->
@@ -641,77 +651,155 @@
         </section>
 
         <!-- ========================================================================= -->
-        <!-- TAB 2: WEEKLY TIMETABLE REFERENCE & VOICE ALARM SYSTEM -->
+        <!-- TAB 2: WEEKLY TIMETABLE REFERENCE, VOICE ALARMS & PERSONAL ALARMS -->
         <!-- ========================================================================= -->
         <section id="view-timetable" class="hidden space-y-6">
 
-            <!-- VOICE & BACKGROUND PERIOD ALARM CONFIGURATION CARD -->
-            <div class="bg-gradient-to-r from-brand-900 to-slate-900 text-white p-5 rounded-2xl shadow-md border border-brand-800 no-print space-y-4">
+            <!-- 1. MASTER VOICE & LOCK-SCREEN PERIOD ALARM PANEL -->
+            <div class="bg-gradient-to-br from-brand-900 via-slate-900 to-slate-950 text-white p-5 rounded-2xl shadow-lg border border-brand-800 no-print space-y-5">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div class="flex items-start gap-3">
-                        <div class="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0">
+                        <div class="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0 shadow">
                             <i class="fa-solid fa-bell text-xl"></i>
                         </div>
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="font-bold text-sm sm:text-base">Period Voice Alarm & Smart Class Reminder</h3>
+                                <h3 class="font-bold text-sm sm:text-base">Period Voice Alarm & Offline Lock-Screen Engine</h3>
                                 <span id="alarm-permission-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 border border-amber-500/30">Ready</span>
+                                <span id="alarm-keepalive-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                    <i class="fa-solid fa-shield-halved mr-1"></i>Lock-Screen Audio Guard Active
+                                </span>
                             </div>
-                            <p class="text-xs text-brand-200 mt-0.5">Automatically alerts you with a chime, background notification, and spoken voice announcement (Class, Section & Subject) before your scheduled period.</p>
+                            <p class="text-xs text-brand-200 mt-0.5">Rings & speaks Class, Section & Subject aloud even in offline mode or when screen is locked.</p>
                         </div>
                     </div>
 
                     <!-- Master Alarm Toggle & Test Button -->
-                    <div class="flex flex-wrap items-center gap-3 shrink-0">
+                    <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                         <button onclick="testVoiceAlarm()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl border border-white/20 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-volume-high text-amber-400"></i> Test Voice Alert
+                            <i class="fa-solid fa-volume-high text-amber-400"></i> Test Alarm Now
                         </button>
 
-                        <label class="flex items-center gap-2.5 bg-slate-950/60 px-4 py-2 rounded-xl border border-brand-700 cursor-pointer">
+                        <label class="flex items-center gap-2.5 bg-slate-950/80 px-4 py-2 rounded-xl border border-amber-500/50 cursor-pointer">
                             <input type="checkbox" id="alarm-master-toggle" onchange="toggleMasterAlarm()" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
-                            <span class="text-xs font-extrabold text-amber-300" id="alarm-master-label">Enable Period Alarms</span>
+                            <span class="text-xs font-extrabold text-amber-300" id="alarm-master-label">Enable Alarms</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- Alarm Lead-Time Controls -->
-                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-white/10 items-center text-xs">
-                    <div class="sm:col-span-5">
-                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">Alert Timing (Before Period Start)</label>
+                <!-- Alarm Lead-Time, Repeat Count & Frequency Settings -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-white/10 text-xs">
+                    <!-- Lead Time -->
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">Alert Timing (Before Class)</label>
                         <select id="alarm-offset-preset" onchange="onAlarmOffsetPresetChange()" class="w-full bg-slate-800 border border-brand-700 text-white rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-amber-400">
-                            <option value="0">At Exact Period Time (0 mins before)</option>
-                            <option value="2">2 Minutes Before Class</option>
-                            <option value="5" selected>5 Minutes Before Class</option>
-                            <option value="10">10 Minutes Before Class</option>
-                            <option value="15">15 Minutes Before Class</option>
-                            <option value="custom">Custom Minutes Before...</option>
+                            <option value="0">At Exact Time (0 mins before)</option>
+                            <option value="2">2 Minutes Before</option>
+                            <option value="5" selected>5 Minutes Before</option>
+                            <option value="10">10 Minutes Before</option>
+                            <option value="15">15 Minutes Before</option>
+                            <option value="custom">Custom Minutes...</option>
+                        </select>
+                        <div id="alarm-custom-mins-box" class="hidden mt-1.5 flex items-center gap-2">
+                            <input type="number" id="alarm-custom-mins" min="0" max="60" value="5" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-amber-400 text-white rounded-lg px-2.5 py-1.5 text-xs font-bold outline-none">
+                            <span class="text-[11px] text-amber-300 shrink-0">mins</span>
+                        </div>
+                    </div>
+
+                    <!-- Repeat Count -->
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">How Many Times to Remind</label>
+                        <select id="alarm-repeat-count" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-brand-700 text-white rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-amber-400">
+                            <option value="1">1 Time (Single Alert)</option>
+                            <option value="2">2 Times</option>
+                            <option value="3" selected>3 Times</option>
+                            <option value="5">5 Times</option>
+                            <option value="10">10 Times</option>
+                            <option value="999">Continuous Until Dismissed</option>
                         </select>
                     </div>
 
-                    <div class="sm:col-span-3 hidden" id="alarm-custom-mins-box">
-                        <label class="block text-[10px] uppercase font-bold text-amber-300 mb-1">Custom Minutes Before</label>
-                        <input type="number" id="alarm-custom-mins" min="0" max="60" value="5" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-amber-400 text-white rounded-xl px-3 py-2 text-xs font-bold outline-none">
+                    <!-- Repeat Frequency -->
+                    <div>
+                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">Repeat Interval Frequency</label>
+                        <select id="alarm-repeat-interval" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-brand-700 text-white rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-amber-400">
+                            <option value="15">Every 15 Seconds</option>
+                            <option value="30" selected>Every 30 Seconds</option>
+                            <option value="60">Every 1 Minute</option>
+                            <option value="120">Every 2 Minutes</option>
+                            <option value="300">Every 5 Minutes</option>
+                        </select>
                     </div>
 
-                    <div class="sm:col-span-4 flex flex-col justify-center">
-                        <span class="text-[10px] uppercase font-bold text-brand-200 mb-0.5">Next Upcoming Scheduled Class</span>
-                        <span id="next-upcoming-class-label" class="font-bold text-emerald-300 text-xs">Scanning today's timetable...</span>
+                    <!-- Next Upcoming Class Preview -->
+                    <div class="bg-white/5 rounded-xl p-2.5 border border-white/10 flex flex-col justify-center">
+                        <span class="text-[10px] uppercase font-bold text-amber-300 mb-0.5">Next Upcoming Alert</span>
+                        <span id="next-upcoming-class-label" class="font-bold text-emerald-300 text-[11px] leading-snug">Scanning today's schedule...</span>
+                    </div>
+                </div>
+
+                <!-- LIVE TODAY'S SCHEDULED ALARMS LIST (AUTO-UPDATES + SHOWS COMPLETED ALERTS) -->
+                <div class="pt-4 border-t border-white/10 space-y-2.5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-list-ul"></i> Today's Full Scheduled Alarms List (<span id="alarm-list-day-name">Today</span>)
+                        </h4>
+                        <span class="text-[11px] text-brand-200" id="alarm-list-summary-badge">0 Scheduled</span>
+                    </div>
+
+                    <div id="scheduled-alarms-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-2.5 max-h-72 overflow-y-auto custom-scrollbar pr-1">
+                        <!-- Dynamically rendered scheduled & completed alarms for today -->
                     </div>
                 </div>
             </div>
 
-            <!-- Timetable Builder Controls -->
+            <!-- 2. PERSONAL CUSTOM ALARM PANEL -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 no-print space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-stopwatch text-amber-500"></i> Personal Custom Alarms & Voice Reminders
+                        </h2>
+                        <p class="text-xs text-slate-500">Set custom daily reminders (assembly, staff meeting, lunch bell, bus duty) with your own spoken voice message.</p>
+                    </div>
+                </div>
+
+                <!-- Add Personal Alarm Form -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 items-end">
+                    <div class="sm:col-span-4">
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Alarm Time</label>
+                        <div id="personal-alarm-time-inputs" class="flex items-center gap-1.5">
+                            <!-- Dynamically rendered 12h AM/PM or 24h inputs -->
+                        </div>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Custom Message to Speak & Notify</label>
+                        <input type="text" id="personal-alarm-msg" placeholder="e.g. Time for Staff Meeting in Principal Office" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button onclick="addPersonalAlarm()" class="w-full py-2 px-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Add Alarm
+                        </button>
+                    </div>
+                </div>
+
+                <!-- List of Personal Alarms -->
+                <div id="personal-alarms-list" class="space-y-2">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+
+            <!-- 3. TIMETABLE BUILDER CONTROLS -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 no-print space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
                         <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-table-cells text-brand-600"></i> Weekly Reference Timetable & Alarm Schedule
+                            <i class="fa-solid fa-table-cells text-brand-600"></i> Weekly Reference Timetable
                         </h2>
-                        <p class="text-xs text-slate-500">Set exact start/end times (24-hr or HH:MM format) in column headers so the voice alarm alerts you accurately.</p>
+                        <p class="text-xs text-slate-500">Configure period timings (with AM/PM or 24-hour format) and classes. Updating times immediately updates your scheduled alarms.</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <!-- Zoom Control -->
                         <div class="flex items-center bg-slate-100 rounded-xl p-1 text-xs">
                             <span class="px-2 font-medium text-slate-500">Zoom:</span>
                             <button onclick="adjustTimetableZoom(-10)" class="px-2 py-1 bg-white hover:bg-slate-200 rounded-lg text-slate-700 shadow-sm"><i class="fa-solid fa-minus"></i></button>
@@ -726,7 +814,6 @@
                             <i class="fa-solid fa-plus"></i> Add Period Col
                         </button>
                         
-                        <!-- PRINT TIMETABLE BUTTON -->
                         <button onclick="printTimetable()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
                             <i class="fa-solid fa-print"></i> Print Timetable (Landscape)
                         </button>
@@ -749,7 +836,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto custom-scrollbar p-4">
                     <div id="timetable-zoom-wrapper" class="transition-all transform origin-top-left">
-                        <table id="timetable-matrix-table" class="w-full text-left border-collapse border border-slate-200 min-w-[1000px]">
+                        <table id="timetable-matrix-table" class="w-full text-left border-collapse border border-slate-200 min-w-[1120px]">
                             <!-- Generated dynamically via JavaScript -->
                         </table>
                     </div>
@@ -897,7 +984,6 @@
                 <!-- FLEXIBLE MULTI-TIMEFRAME REPORT CONTROLS -->
                 <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 items-center">
                     
-                    <!-- 1. Scope Type Selector -->
                     <div class="sm:col-span-4">
                         <label class="block text-xs font-bold text-slate-700 mb-1">Report Timeframe Scope</label>
                         <select id="report-scope-type" onchange="onReportScopeTypeChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
@@ -909,15 +995,12 @@
                         </select>
                     </div>
 
-                    <!-- 2. Dynamic Scope Value Selector -->
                     <div class="sm:col-span-4" id="report-scope-value-container">
                         <label class="block text-xs font-bold text-slate-700 mb-1" id="report-scope-value-label">Select Period</label>
                         <select id="report-scope-value" onchange="generateManagementReport()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
-                            <!-- Injected dynamically -->
                         </select>
                     </div>
 
-                    <!-- 3. Print Extra Duty Toggle -->
                     <div class="sm:col-span-4 flex items-center justify-start sm:justify-end gap-3 pt-2 sm:pt-4">
                         <div class="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200">
                             <span class="text-xs font-bold text-slate-700">Extra Duties:</span>
@@ -971,7 +1054,6 @@
                 </div>
             </div>
 
-            <!-- Printable Search Header (Visible on print only) -->
             <div id="search-print-header" class="hidden print-only mb-4 border-b-2 border-slate-800 pb-3">
                 <h1 class="text-xl font-bold uppercase" id="print-search-school">School Name</h1>
                 <h2 class="text-sm font-semibold">Academic Logbook Search Results Report</h2>
@@ -1036,7 +1118,6 @@
     <div id="modal-profile" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-2 sm:p-4">
         <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden my-auto">
             
-            <!-- Header -->
             <div class="flex justify-between items-center p-4 sm:p-5 border-b border-slate-100 shrink-0 bg-white">
                 <div>
                     <h3 class="text-base font-bold text-slate-800">Teacher Profile & Category Setup</h3>
@@ -1047,10 +1128,8 @@
                 </button>
             </div>
 
-            <!-- Scrollable Body -->
             <div class="modal-body-scroll p-4 sm:p-6 space-y-5 custom-scrollbar flex-1">
                 
-                <!-- General Info -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 shrink-0">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Teacher Full Name</label>
@@ -1066,10 +1145,8 @@
                     </div>
                 </div>
 
-                <!-- Configurable Dynamic Lists -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
-                    <!-- 1. Classes List -->
                     <div class="border border-slate-200 rounded-xl p-3 bg-white space-y-3 flex flex-col h-60">
                         <div class="flex justify-between items-center shrink-0">
                             <label class="text-xs font-bold text-slate-700 uppercase">Classes Taught</label>
@@ -1082,7 +1159,6 @@
                         <ul id="config-classes-list" class="space-y-1.5 overflow-y-auto custom-scrollbar text-xs pr-1 flex-1 min-h-0 bg-slate-50/50 p-2 rounded-lg border border-slate-100"></ul>
                     </div>
 
-                    <!-- 2. Sections List -->
                     <div class="border border-slate-200 rounded-xl p-3 bg-white space-y-3 flex flex-col h-60">
                         <div class="flex justify-between items-center shrink-0">
                             <label class="text-xs font-bold text-slate-700 uppercase">Sections</label>
@@ -1095,7 +1171,6 @@
                         <ul id="config-sections-list" class="space-y-1.5 overflow-y-auto custom-scrollbar text-xs pr-1 flex-1 min-h-0 bg-slate-50/50 p-2 rounded-lg border border-slate-100"></ul>
                     </div>
 
-                    <!-- 3. Core Teaching Work Types List -->
                     <div class="border border-slate-200 rounded-xl p-3 bg-white space-y-3 flex flex-col h-60">
                         <div class="flex justify-between items-center shrink-0">
                             <label class="text-xs font-bold text-slate-700 uppercase">Core Period Work Types</label>
@@ -1108,7 +1183,6 @@
                         <ul id="config-worktypes-list" class="space-y-1.5 overflow-y-auto custom-scrollbar text-xs pr-1 flex-1 min-h-0 bg-slate-50/50 p-2 rounded-lg border border-slate-100"></ul>
                     </div>
 
-                    <!-- 4. Extra Duty Types List -->
                     <div class="border border-amber-200 rounded-xl p-3 bg-amber-50/30 space-y-3 flex flex-col h-60">
                         <div class="flex justify-between items-center shrink-0">
                             <label class="text-xs font-bold text-amber-800 uppercase">Extra Work / Duty Types</label>
@@ -1124,7 +1198,6 @@
                 </div>
             </div>
 
-            <!-- Footer -->
             <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end space-x-2 shrink-0">
                 <button onclick="closeModal('modal-profile')" class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl transition">Close</button>
                 <button onclick="saveProfile()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl shadow-sm transition">Save Setup</button>
@@ -1158,14 +1231,14 @@
             return {
                 zoomLevel: 100,
                 columns: [
-                    { id: "col1", timeLabel: "08:30 - 09:15", title: "Period 1", isBreak: false, durationMins: 45 },
-                    { id: "col2", timeLabel: "09:15 - 10:00", title: "Period 2", isBreak: false, durationMins: 45 },
-                    { id: "col3", timeLabel: "10:00 - 10:15", title: "Tea Break", isBreak: true, durationMins: 15 },
-                    { id: "col4", timeLabel: "10:15 - 11:00", title: "Period 3", isBreak: false, durationMins: 45 },
-                    { id: "col5", timeLabel: "11:00 - 11:45", title: "Period 4", isBreak: false, durationMins: 45 },
-                    { id: "col6", timeLabel: "11:45 - 12:30", title: "Lunch Break", isBreak: true, durationMins: 45 },
-                    { id: "col7", timeLabel: "12:30 - 13:15", title: "Period 5", isBreak: false, durationMins: 45 },
-                    { id: "col8", timeLabel: "13:15 - 14:00", title: "Period 6", isBreak: false, durationMins: 45 }
+                    { id: "col1", start24: "08:30", end24: "09:15", timeLabel: "08:30 AM - 09:15 AM", title: "Period 1", isBreak: false, durationMins: 45 },
+                    { id: "col2", start24: "09:15", end24: "10:00", timeLabel: "09:15 AM - 10:00 AM", title: "Period 2", isBreak: false, durationMins: 45 },
+                    { id: "col3", start24: "10:00", end24: "10:15", timeLabel: "10:00 AM - 10:15 AM", title: "Tea Break", isBreak: true, durationMins: 15 },
+                    { id: "col4", start24: "10:15", end24: "11:00", timeLabel: "10:15 AM - 11:00 AM", title: "Period 3", isBreak: false, durationMins: 45 },
+                    { id: "col5", start24: "11:00", end24: "11:45", timeLabel: "11:00 AM - 11:45 AM", title: "Period 4", isBreak: false, durationMins: 45 },
+                    { id: "col6", start24: "11:45", end24: "12:30", timeLabel: "11:45 AM - 12:30 PM", title: "Lunch Break", isBreak: true, durationMins: 45 },
+                    { id: "col7", start24: "12:30", end24: "13:15", timeLabel: "12:30 PM - 01:15 PM", title: "Period 5", isBreak: false, durationMins: 45 },
+                    { id: "col8", start24: "13:15", end24: "14:00", timeLabel: "01:15 PM - 02:00 PM", title: "Period 6", isBreak: false, durationMins: 45 }
                 ],
                 rows: [
                     { id: "row-mon", dayName: "Monday" },
@@ -1177,6 +1250,92 @@
                 ],
                 grid: {}
             };
+        }
+
+        // =========================================================================
+        // 12-HOUR (AM/PM) & 24-HOUR TIME CONVERSION UTILITIES
+        // =========================================================================
+        let use12HourFormat = true;
+
+        function convert24To12Parts(time24) {
+            if (!time24 || !/^\d{1,2}:\d{2}$/.test(time24)) {
+                return { hour12: "08", minute: "30", ampm: "AM" };
+            }
+            let [h, m] = time24.split(':').map(Number);
+            const ampm = h >= 12 ? "PM" : "AM";
+            let h12 = h % 12;
+            if (h12 === 0) h12 = 12;
+            return {
+                hour12: String(h12).padStart(2, '0'),
+                minute: String(m).padStart(2, '0'),
+                ampm: ampm
+            };
+        }
+
+        function convert12PartsTo24(hour12Str, minuteStr, ampm) {
+            let h = parseInt(hour12Str, 10) || 12;
+            let m = parseInt(minuteStr, 10) || 0;
+            h = Math.max(1, Math.min(12, h));
+            m = Math.max(0, Math.min(59, m));
+
+            if (ampm === "PM" && h < 12) h += 12;
+            if (ampm === "AM" && h === 12) h = 0;
+
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+
+        function formatTimeForDisplay(time24) {
+            if (!time24 || !/^\d{1,2}:\d{2}$/.test(time24)) return time24 || "";
+            if (!use12HourFormat) {
+                const [h, m] = time24.split(':');
+                return `${String(parseInt(h, 10)).padStart(2, '0')}:${m}`;
+            }
+            const parts = convert24To12Parts(time24);
+            return `${parts.hour12}:${parts.minute} ${parts.ampm}`;
+        }
+
+        function formatMinutesOfDayForDisplay(totalMins) {
+            const safeMins = ((totalMins % 1440) + 1440) % 1440;
+            const h24 = String(Math.floor(safeMins / 60)).padStart(2, '0');
+            const m = String(safeMins % 60).padStart(2, '0');
+            return formatTimeForDisplay(`${h24}:${m}`);
+        }
+
+        function parse24TimeToMinutes(time24) {
+            if (!time24 || !/^\d{1,2}:\d{2}$/.test(time24)) return null;
+            const [h, m] = time24.split(':').map(Number);
+            if (isNaN(h) || isNaN(m)) return null;
+            return h * 60 + m;
+        }
+
+        function ensureColumn24Times(col) {
+            if (col.start24 && col.end24) return;
+            if (!col.timeLabel) {
+                col.start24 = "08:30";
+                col.end24 = "09:15";
+                return;
+            }
+            const parts = col.timeLabel.split('-').map(s => s.trim());
+            col.start24 = parseFlexibleTimeTokenTo24(parts[0]) || "08:30";
+            col.end24 = parseFlexibleTimeTokenTo24(parts[1]) || "09:15";
+        }
+
+        function parseFlexibleTimeTokenTo24(token) {
+            if (!token) return null;
+            const match = token.match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+            if (!match) return null;
+            let h = parseInt(match[1], 10);
+            const m = parseInt(match[2], 10);
+            const mer = match[3] ? match[3].toUpperCase() : null;
+            if (mer === 'PM' && h < 12) h += 12;
+            else if (mer === 'AM' && h === 12) h = 0;
+            else if (!mer && h >= 1 && h <= 6) h += 12;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+
+        function getColumnFormattedRange(col) {
+            ensureColumn24Times(col);
+            return `${formatTimeForDisplay(col.start24)} - ${formatTimeForDisplay(col.end24)}`;
         }
 
         // DATE UTILITY FUNCTIONS
@@ -1203,7 +1362,6 @@
             return `${y}-${m}-${d}`;
         }
 
-        // TIME PARSING HELPER
         function calculateDurationMinsFromTimeRange(timeFrom, timeTo, fallbackMins = 45) {
             if (!timeFrom || !timeTo) return fallbackMins;
             const [h1, m1] = timeFrom.split(':').map(Number);
@@ -1214,22 +1372,6 @@
             return diff > 0 ? diff : fallbackMins;
         }
 
-        function parseStartMinutesFromLabel(timeLabel) {
-            if (!timeLabel) return null;
-            const match = timeLabel.match(/(\d{1,2}):(\d{2})/);
-            if (!match) return null;
-            let hours = parseInt(match[1], 10);
-            const mins = parseInt(match[2], 10);
-            if (!/am|pm/i.test(timeLabel) && hours >= 1 && hours <= 6) {
-                hours += 12;
-            } else if (/pm/i.test(timeLabel) && hours < 12) {
-                hours += 12;
-            } else if (/am/i.test(timeLabel) && hours === 12) {
-                hours = 0;
-            }
-            return hours * 60 + mins;
-        }
-
         // GLOBAL STATE DATA STRUCTURES
         let currentDateStr = getTodayDateStr();
         let currentTabId = 'planner';
@@ -1237,16 +1379,24 @@
         let profileData = getDefaultProfileData();
         let timetableData = getDefaultTimetableData();
 
-        // ALARM SETTINGS STATE
+        // ALARM SETTINGS & PERSONAL ALARMS STATE
         let alarmSettings = {
             enabled: false,
             offsetMins: 5,
-            preset: "5"
+            preset: "5",
+            repeatCount: 3,
+            repeatIntervalSec: 30,
+            use12HourFormat: true
         };
+        let personalAlarms = [];
         let triggeredAlarmKeys = new Set();
+        let activeRepeatTimer = null;
+        let activeRepeatRemaining = 0;
         let lastSpokenMessage = "";
         let wakeLockSentinel = null;
         let alarmWorker = null;
+        let keepAliveAudioCtx = null;
+        let keepAliveOsc = null;
 
         let includeExtraDutiesInPrint = true;
         let reportZoomPercent = 90;
@@ -1256,19 +1406,102 @@
         // INITIALIZATION ON LOAD
         window.onload = function() {
             loadLocalStorageData();
+            use12HourFormat = alarmSettings.use12HourFormat !== false;
+            syncTimeFormatToggleUI();
+
             updateProfileUIHeadings();
             initDatePicker();
             renderProfileConfigLists();
             loadDateLog();
             renderTimetableBuilder();
+            renderPersonalAlarmTimeInputs();
+            renderPersonalAlarmsList();
             populateSearchDropdowns();
             onReportScopeTypeChange();
             initAlarmSystem();
             initA4TouchPanAndPinchZoom();
+
             window.addEventListener('resize', () => {
                 if (currentTabId === 'report') syncReportSizerDimensions();
             });
         };
+
+        // =========================================================================
+        // 12-HOUR (AM/PM) vs 24-HOUR TIME FORMAT TOGGLE HANDLER
+        // =========================================================================
+        function syncTimeFormatToggleUI() {
+            const toggle = document.getElementById('menu-time-format-toggle');
+            const title = document.getElementById('time-format-title');
+            const sub = document.getElementById('time-format-sub');
+            if (toggle) toggle.checked = use12HourFormat;
+            if (title) title.innerText = use12HourFormat ? "12-Hour (AM / PM)" : "24-Hour Format";
+            if (sub) sub.innerText = use12HourFormat ? "Shows AM & PM selectors" : "Standard 00:00 - 23:59";
+        }
+
+        function toggleTimeFormatMode() {
+            const toggle = document.getElementById('menu-time-format-toggle');
+            use12HourFormat = toggle ? toggle.checked : !use12HourFormat;
+            alarmSettings.use12HourFormat = use12HourFormat;
+            saveLocalStorageData();
+            syncTimeFormatToggleUI();
+
+            // Re-render all time-aware components immediately
+            renderPeriodRows();
+            renderTimetableBuilder();
+            renderPersonalAlarmTimeInputs();
+            renderPersonalAlarmsList();
+            renderScheduledAlarmsList();
+            updateNextUpcomingClassPreview();
+            generateManagementReport();
+
+            showToast(`Switched to ${use12HourFormat ? '12-Hour (AM/PM)' : '24-Hour'} format.`);
+        }
+
+        // Reusable HTML Builder for 12-Hour (HH : MM : AM/PM) or 24-Hour (<input type="time">)
+        function buildTimePickerHTML(time24Val, onChangeCallbackName, arg1, arg2) {
+            if (!use12HourFormat) {
+                return `<input type="time" value="${time24Val || ''}" onchange="${onChangeCallbackName}(${arg1}, '${arg2}', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1 text-[11px] font-semibold text-slate-800 focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">`;
+            }
+
+            const parts = convert24To12Parts(time24Val || "08:30");
+            const hoursOpts = Array.from({ length: 12 }, (_, i) => {
+                const hStr = String(i + 1).padStart(2, '0');
+                return `<option value="${hStr}" ${parts.hour12 === hStr ? 'selected' : ''}>${hStr}</option>`;
+            }).join('');
+
+            const minsOpts = Array.from({ length: 60 }, (_, i) => {
+                const mStr = String(i).padStart(2, '0');
+                return `<option value="${mStr}" ${parts.minute === mStr ? 'selected' : ''}>${mStr}</option>`;
+            }).join('');
+
+            const uid = `tp_${arg1}_${arg2}_${Math.random().toString(36).slice(2, 6)}`;
+            return `
+                <div class="inline-flex items-center gap-0.5 bg-slate-50 border border-slate-200 rounded-lg px-1 py-0.5" id="${uid}">
+                    <select onchange="handle12HrSelectChange('${uid}', ${arg1}, '${arg2}', '${onChangeCallbackName}')" class="bg-transparent text-[11px] font-bold text-slate-800 outline-none cursor-pointer">
+                        ${hoursOpts}
+                    </select>
+                    <span class="text-slate-400 font-bold text-[10px]">:</span>
+                    <select onchange="handle12HrSelectChange('${uid}', ${arg1}, '${arg2}', '${onChangeCallbackName}')" class="bg-transparent text-[11px] font-bold text-slate-800 outline-none cursor-pointer">
+                        ${minsOpts}
+                    </select>
+                    <select onchange="handle12HrSelectChange('${uid}', ${arg1}, '${arg2}', '${onChangeCallbackName}')" class="bg-brand-100 text-brand-800 rounded px-1 py-0.5 text-[10px] font-extrabold outline-none cursor-pointer ml-0.5">
+                        <option value="AM" ${parts.ampm === 'AM' ? 'selected' : ''}>AM</option>
+                        <option value="PM" ${parts.ampm === 'PM' ? 'selected' : ''}>PM</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        function handle12HrSelectChange(containerId, arg1, arg2, callbackFnName) {
+            const box = document.getElementById(containerId);
+            if (!box) return;
+            const selects = box.querySelectorAll('select');
+            if (selects.length < 3) return;
+            const time24 = convert12PartsTo24(selects[0].value, selects[1].value, selects[2].value);
+            if (typeof window[callbackFnName] === 'function') {
+                window[callbackFnName](arg1, arg2, time24);
+            }
+        }
 
         // =========================================================================
         // GLOBAL DATA SYNCHRONIZATION
@@ -1278,12 +1511,12 @@
             renderAnalytics();
             onReportScopeTypeChange();
             executeSearch();
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
         }
 
-        // FACTORY RESET / DELETE ALL DATA
         function factoryResetAllData() {
-            const firstConfirm = confirm("⚠️ FACTORY RESET WARNING:\n\nThis will permanently delete ALL saved daily logs, extra work entries, attachments, custom timetable schedules, and profile settings.\n\nDo you want to proceed?");
+            const firstConfirm = confirm("⚠️ FACTORY RESET WARNING:\n\nThis will permanently delete ALL saved daily logs, extra work entries, attachments, custom timetable schedules, personal alarms, and profile settings.\n\nDo you want to proceed?");
             if (!firstConfirm) return;
 
             const secondConfirm = confirm("Final Confirmation: Erase everything and reset Teacher's Day Book to factory defaults?");
@@ -1293,24 +1526,32 @@
             localStorage.removeItem('teacher_logbook_profile');
             localStorage.removeItem('teacher_logbook_timetable');
             localStorage.removeItem('teacher_logbook_alarms');
+            localStorage.removeItem('teacher_logbook_personal_alarms');
 
             appData = {};
             profileData = getDefaultProfileData();
             timetableData = getDefaultTimetableData();
-            alarmSettings = { enabled: false, offsetMins: 5, preset: "5" };
+            alarmSettings = { enabled: false, offsetMins: 5, preset: "5", repeatCount: 3, repeatIntervalSec: 30, use12HourFormat: true };
+            personalAlarms = [];
+            use12HourFormat = true;
             triggeredAlarmKeys.clear();
+            stopActiveRepeatLoop();
             currentPeriods = [];
             currentExtraWorks = [];
             currentDateStr = getTodayDateStr();
 
+            stopBackgroundAudioKeepAlive();
             releaseScreenWakeLock();
             saveLocalStorageData();
 
             document.getElementById('log-date').value = currentDateStr;
+            syncTimeFormatToggleUI();
             updateProfileUIHeadings();
             renderProfileConfigLists();
             loadDateLog();
             renderTimetableBuilder();
+            renderPersonalAlarmTimeInputs();
+            renderPersonalAlarmsList();
             populateSearchDropdowns();
             initAlarmSystem();
             syncAllDependentViews();
@@ -1367,10 +1608,25 @@
                 }
 
                 const storedTimetable = localStorage.getItem('teacher_logbook_timetable');
-                if (storedTimetable) timetableData = JSON.parse(storedTimetable);
+                if (storedTimetable) {
+                    timetableData = JSON.parse(storedTimetable);
+                    (timetableData.columns || []).forEach(c => ensureColumn24Times(c));
+                }
 
                 const storedAlarms = localStorage.getItem('teacher_logbook_alarms');
-                if (storedAlarms) alarmSettings = JSON.parse(storedAlarms);
+                if (storedAlarms) {
+                    alarmSettings = Object.assign({
+                        enabled: false,
+                        offsetMins: 5,
+                        preset: "5",
+                        repeatCount: 3,
+                        repeatIntervalSec: 30,
+                        use12HourFormat: true
+                    }, JSON.parse(storedAlarms));
+                }
+
+                const storedPersonal = localStorage.getItem('teacher_logbook_personal_alarms');
+                if (storedPersonal) personalAlarms = JSON.parse(storedPersonal);
             } catch (e) {
                 console.error("Local storage error:", e);
             }
@@ -1382,6 +1638,7 @@
                 localStorage.setItem('teacher_logbook_profile', JSON.stringify(profileData));
                 localStorage.setItem('teacher_logbook_timetable', JSON.stringify(timetableData));
                 localStorage.setItem('teacher_logbook_alarms', JSON.stringify(alarmSettings));
+                localStorage.setItem('teacher_logbook_personal_alarms', JSON.stringify(personalAlarms));
             } catch (e) {
                 console.error("Local storage save error:", e);
             }
@@ -1415,18 +1672,22 @@
         }
 
         // =========================================================================
-        // VOICE & BACKGROUND ALARM SYSTEM ENGINE
+        // OFFLINE & LOCK-SCREEN VOICE ALARM ENGINE + PERSONAL ALARMS + LIVE LIST
         // =========================================================================
         function initAlarmSystem() {
             const toggle = document.getElementById('alarm-master-toggle');
             const menuToggle = document.getElementById('menu-alarm-toggle');
             const presetSelect = document.getElementById('alarm-offset-preset');
             const customInput = document.getElementById('alarm-custom-mins');
+            const repeatCountSelect = document.getElementById('alarm-repeat-count');
+            const repeatIntervalSelect = document.getElementById('alarm-repeat-interval');
 
             if (toggle) toggle.checked = alarmSettings.enabled;
             if (menuToggle) menuToggle.checked = alarmSettings.enabled;
             if (presetSelect) presetSelect.value = alarmSettings.preset || "5";
             if (customInput) customInput.value = alarmSettings.offsetMins ?? 5;
+            if (repeatCountSelect) repeatCountSelect.value = String(alarmSettings.repeatCount || 3);
+            if (repeatIntervalSelect) repeatIntervalSelect.value = String(alarmSettings.repeatIntervalSec || 30);
 
             if (alarmSettings.preset === 'custom') {
                 document.getElementById('alarm-custom-mins-box')?.classList.remove('hidden');
@@ -1436,33 +1697,103 @@
 
             updateAlarmUIState();
             startBackgroundTicker();
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
+
+            if (alarmSettings.enabled) {
+                startBackgroundAudioKeepAlive();
+                requestScreenWakeLock();
+            }
 
             document.addEventListener('visibilitychange', () => {
+                checkPeriodAlarms();
+                renderScheduledAlarmsList();
                 if (document.visibilityState === 'visible' && alarmSettings.enabled) {
                     requestScreenWakeLock();
-                    checkPeriodAlarms();
+                    resumeAudioContextIfSuspended();
                 }
             });
         }
 
+        // High-precision 1-second Web Worker + main thread fallback so alarms trigger reliably
         function startBackgroundTicker() {
             if (alarmWorker) return;
             try {
                 const workerBlob = new Blob([`
-                    setInterval(() => { postMessage('tick'); }, 5000);
+                    setInterval(() => { postMessage('tick'); }, 1000);
                 `], { type: 'application/javascript' });
                 alarmWorker = new Worker(URL.createObjectURL(workerBlob));
                 alarmWorker.onmessage = () => {
                     checkPeriodAlarms();
-                    updateNextUpcomingClassPreview();
                 };
             } catch (e) {
                 setInterval(() => {
                     checkPeriodAlarms();
-                    updateNextUpcomingClassPreview();
-                }, 5000);
+                }, 1000);
             }
+
+            // Refresh scheduled list status badges every 15s
+            setInterval(() => {
+                renderScheduledAlarmsList();
+                updateNextUpcomingClassPreview();
+            }, 15000);
+        }
+
+        // Keeps WebView / Mobile audio pipeline alive when screen turns off or device locks
+        function startBackgroundAudioKeepAlive() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!keepAliveAudioCtx) {
+                    keepAliveAudioCtx = new AudioCtx();
+                }
+                if (keepAliveAudioCtx.state === 'suspended') {
+                    keepAliveAudioCtx.resume();
+                }
+                if (!keepAliveOsc) {
+                    const osc = keepAliveAudioCtx.createOscillator();
+                    const gain = keepAliveAudioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(20, keepAliveAudioCtx.currentTime); // Sub-audible 20Hz carrier
+                    gain.gain.setValueAtTime(0.0001, keepAliveAudioCtx.currentTime);
+                    osc.connect(gain);
+                    gain.connect(keepAliveAudioCtx.destination);
+                    osc.start();
+                    keepAliveOsc = osc;
+                }
+
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: "Teacher's Day Book Alarm Guard",
+                        artist: profileData.name || "Class Schedule Active",
+                        album: profileData.school || "Offline Logbook"
+                    });
+                    navigator.mediaSession.playbackState = "playing";
+                }
+                document.getElementById('alarm-keepalive-badge')?.classList.remove('hidden');
+            } catch (e) {}
+        }
+
+        function resumeAudioContextIfSuspended() {
+            try {
+                if (keepAliveAudioCtx && keepAliveAudioCtx.state === 'suspended') {
+                    keepAliveAudioCtx.resume();
+                }
+            } catch (e) {}
+        }
+
+        function stopBackgroundAudioKeepAlive() {
+            try {
+                if (keepAliveOsc) {
+                    keepAliveOsc.stop();
+                    keepAliveOsc.disconnect();
+                    keepAliveOsc = null;
+                }
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = "none";
+                }
+                document.getElementById('alarm-keepalive-badge')?.classList.add('hidden');
+            } catch (e) {}
         }
 
         async function requestScreenWakeLock() {
@@ -1483,6 +1814,46 @@
             }
         }
 
+        // Syncs exact scheduled alarm timestamps with Android/Capacitor/Cordova APK bridges if embedded
+        function syncNativeOfflineAlarmsBridge() {
+            try {
+                const slots = getAllTodayAlarmItems();
+                const payload = JSON.stringify({
+                    enabled: alarmSettings.enabled,
+                    repeatCount: alarmSettings.repeatCount,
+                    repeatIntervalSec: alarmSettings.repeatIntervalSec,
+                    alarms: slots
+                });
+
+                // 1. Custom Android WebView JavascriptInterface hook
+                if (window.AndroidAlarmBridge && typeof window.AndroidAlarmBridge.syncAlarms === 'function') {
+                    window.AndroidAlarmBridge.syncAlarms(payload);
+                }
+
+                // 2. Capacitor LocalNotifications offline scheduling hook
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) {
+                    const LocalNotifications = window.Capacitor.Plugins.LocalNotifications;
+                    if (alarmSettings.enabled) {
+                        const now = new Date();
+                        const notifications = slots
+                            .filter(s => s.status === 'upcoming')
+                            .map((s, idx) => {
+                                const triggerDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Math.floor(s.triggerMins / 60), s.triggerMins % 60, 0);
+                                return {
+                                    id: 1000 + idx,
+                                    title: s.title,
+                                    body: s.voiceMessage,
+                                    schedule: { at: triggerDate, allowWhileIdle: true }
+                                };
+                            });
+                        if (notifications.length > 0) {
+                            LocalNotifications.schedule({ notifications }).catch(() => {});
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
+
         async function applyMasterAlarmState(enabled) {
             alarmSettings.enabled = enabled;
             const mainToggle = document.getElementById('alarm-master-toggle');
@@ -1492,19 +1863,24 @@
 
             if (enabled) {
                 playAlarmChime();
+                startBackgroundAudioKeepAlive();
                 if ('Notification' in window && Notification.permission === 'default') {
                     await Notification.requestPermission();
                 }
                 await requestScreenWakeLock();
-                showToast("Period Voice Alarms Enabled!");
+                showToast("Alarms & Lock-Screen Guard Enabled!");
             } else {
+                stopActiveRepeatLoop();
+                stopBackgroundAudioKeepAlive();
                 releaseScreenWakeLock();
-                showToast("Period Voice Alarms Disabled.", "info");
+                showToast("All Alarms Disabled.", "info");
             }
 
             saveLocalStorageData();
             updateAlarmUIState();
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
         }
 
         function toggleMasterAlarm() {
@@ -1533,15 +1909,24 @@
             triggeredAlarmKeys.clear();
             saveLocalStorageData();
             updateAlarmUIState();
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
         }
 
         function saveAlarmSettings() {
-            alarmSettings.offsetMins = Math.max(0, parseInt(document.getElementById('alarm-custom-mins').value, 10) || 0);
+            if (alarmSettings.preset === 'custom') {
+                alarmSettings.offsetMins = Math.max(0, parseInt(document.getElementById('alarm-custom-mins').value, 10) || 0);
+            }
+            alarmSettings.repeatCount = parseInt(document.getElementById('alarm-repeat-count')?.value, 10) || 3;
+            alarmSettings.repeatIntervalSec = parseInt(document.getElementById('alarm-repeat-interval')?.value, 10) || 30;
+
             triggeredAlarmKeys.clear();
             saveLocalStorageData();
             updateAlarmUIState();
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
         }
 
         function updateAlarmUIState() {
@@ -1554,19 +1939,21 @@
             const menuTitle = document.getElementById('menu-alarm-status-title');
             const menuSub = document.getElementById('menu-alarm-status-sub');
 
+            const repLabel = alarmSettings.repeatCount === 999 ? 'Continuous' : `${alarmSettings.repeatCount}x`;
+
             if (alarmSettings.enabled) {
                 if (label) label.innerText = "Alarms Active (ON)";
                 if (badge) {
-                    badge.innerText = `Active (${alarmSettings.offsetMins}m before)`;
+                    badge.innerText = `ON • ${alarmSettings.offsetMins}m before • ${repLabel}`;
                     badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40";
                 }
                 if (menuCard) menuCard.className = "p-3.5 rounded-2xl border border-amber-300 bg-amber-50/70 space-y-2.5 transition";
                 if (menuIconBox) menuIconBox.className = "p-2 rounded-xl bg-amber-500 text-slate-950";
                 if (menuIcon) menuIcon.className = "fa-solid fa-bell";
                 if (menuTitle) menuTitle.innerText = `Alarms Active (${alarmSettings.offsetMins}m before)`;
-                if (menuSub) menuSub.innerText = "Voice & chime alerts enabled";
+                if (menuSub) menuSub.innerText = `Repeats ${repLabel} every ${alarmSettings.repeatIntervalSec}s`;
             } else {
-                if (label) label.innerText = "Enable Period Alarms";
+                if (label) label.innerText = "Enable Alarms";
                 if (badge) {
                     badge.innerText = "Alarms Off";
                     badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
@@ -1575,57 +1962,284 @@
                 if (menuIconBox) menuIconBox.className = "p-2 rounded-xl bg-slate-200 text-slate-600";
                 if (menuIcon) menuIcon.className = "fa-solid fa-bell-slash";
                 if (menuTitle) menuTitle.innerText = "Alarms Off";
-                if (menuSub) menuSub.innerText = "Voice alerts disabled";
+                if (menuSub) menuSub.innerText = "Voice & lock-screen alerts disabled";
             }
         }
 
-        function getTodayTimetableSlots() {
+        // PERSONAL CUSTOM ALARMS CRUD
+        function renderPersonalAlarmTimeInputs() {
+            const container = document.getElementById('personal-alarm-time-inputs');
+            if (!container) return;
+
+            if (!use12HourFormat) {
+                container.innerHTML = `<input type="time" id="personal-alarm-time-24" value="13:00" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-500">`;
+                return;
+            }
+
+            const hoursOpts = Array.from({ length: 12 }, (_, i) => {
+                const hStr = String(i + 1).padStart(2, '0');
+                return `<option value="${hStr}" ${hStr === '01' ? 'selected' : ''}>${hStr}</option>`;
+            }).join('');
+
+            const minsOpts = Array.from({ length: 60 }, (_, i) => {
+                const mStr = String(i).padStart(2, '0');
+                return `<option value="${mStr}" ${mStr === '00' ? 'selected' : ''}>${mStr}</option>`;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 w-full">
+                    <select id="pa-hour12" class="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer">${hoursOpts}</select>
+                    <span class="font-bold text-slate-400">:</span>
+                    <select id="pa-min12" class="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer">${minsOpts}</select>
+                    <select id="pa-ampm" class="bg-brand-100 text-brand-800 rounded-lg px-2 py-0.5 text-xs font-extrabold outline-none cursor-pointer ml-auto">
+                        <option value="AM">AM</option>
+                        <option value="PM" selected>PM</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        function addPersonalAlarm() {
+            let time24 = "13:00";
+            if (!use12HourFormat) {
+                time24 = document.getElementById('personal-alarm-time-24')?.value || "13:00";
+            } else {
+                const h = document.getElementById('pa-hour12')?.value || "01";
+                const m = document.getElementById('pa-min12')?.value || "00";
+                const mer = document.getElementById('pa-ampm')?.value || "PM";
+                time24 = convert12PartsTo24(h, m, mer);
+            }
+
+            const msgInput = document.getElementById('personal-alarm-msg');
+            const message = (msgInput?.value || '').trim() || "Personal Reminder Alert";
+
+            personalAlarms.push({
+                id: `pa_${Date.now()}`,
+                time24: time24,
+                message: message,
+                enabled: true
+            });
+
+            if (msgInput) msgInput.value = '';
+            triggeredAlarmKeys.clear();
+            saveLocalStorageData();
+            renderPersonalAlarmsList();
+            renderScheduledAlarmsList();
+            updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
+            showToast("Personal alarm added!");
+        }
+
+        function togglePersonalAlarm(index) {
+            if (!personalAlarms[index]) return;
+            personalAlarms[index].enabled = !personalAlarms[index].enabled;
+            triggeredAlarmKeys.clear();
+            saveLocalStorageData();
+            renderPersonalAlarmsList();
+            renderScheduledAlarmsList();
+            updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
+        }
+
+        function deletePersonalAlarm(index) {
+            personalAlarms.splice(index, 1);
+            saveLocalStorageData();
+            renderPersonalAlarmsList();
+            renderScheduledAlarmsList();
+            updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
+            showToast("Personal alarm deleted.", "info");
+        }
+
+        function renderPersonalAlarmsList() {
+            const container = document.getElementById('personal-alarms-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (personalAlarms.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic py-1">No personal alarms added yet. Add a custom time & message above.</p>`;
+                return;
+            }
+
+            personalAlarms.sort((a, b) => a.time24.localeCompare(b.time24)).forEach((pa, idx) => {
+                const row = document.createElement('div');
+                row.className = `p-3 rounded-xl border flex items-center justify-between gap-3 ${pa.enabled ? 'bg-amber-50/50 border-amber-200' : 'bg-slate-50 border-slate-200 opacity-65'}`;
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-amber-300 font-extrabold text-xs shrink-0">
+                            ${formatTimeForDisplay(pa.time24)}
+                        </span>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800">${pa.message}</p>
+                            <span class="text-[10px] text-slate-500">Daily Personal Voice Reminder</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" ${pa.enabled ? 'checked' : ''} onchange="togglePersonalAlarm(${idx})" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
+                        <button onclick="deletePersonalAlarm(${idx})" title="Delete Personal Alarm" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // UNIFIED FULL-DAY SCHEDULED ALARMS BUILDER (CLASS PERIODS + PERSONAL ALARMS)
+        function getAllTodayAlarmItems() {
             const now = new Date();
+            const currentMins = now.getHours() * 60 + now.getMinutes();
             const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const offset = parseInt(alarmSettings.offsetMins, 10) || 0;
+
+            const items = [];
+
+            // 1. Scheduled Class Periods from Today's Timetable
             const targetRow = timetableData.rows.find(r => r.dayName.toLowerCase() === dayName.toLowerCase());
-            if (!targetRow) return [];
+            if (targetRow) {
+                timetableData.columns.forEach(col => {
+                    if (col.isBreak) return;
+                    const cell = timetableData.grid[`${targetRow.id}_${col.id}`] || {};
+                    if (!cell.className && !cell.subject) return;
 
-            const slots = [];
-            timetableData.columns.forEach(col => {
-                if (col.isBreak) return;
-                const cell = timetableData.grid[`${targetRow.id}_${col.id}`] || {};
-                if (!cell.className && !cell.subject) return;
+                    ensureColumn24Times(col);
+                    const startMins = parse24TimeToMinutes(col.start24);
+                    if (startMins === null) return;
 
-                const startMins = parseStartMinutesFromLabel(col.timeLabel);
-                if (startMins === null) return;
+                    const triggerMins = Math.max(0, startMins - offset);
+                    const slotObj = {
+                        colId: col.id,
+                        periodTitle: col.title || 'Period',
+                        timeLabel: getColumnFormattedRange(col),
+                        className: cell.className || '',
+                        section: cell.section || '',
+                        subject: cell.subject || ''
+                    };
 
-                slots.push({
-                    colId: col.id,
-                    periodTitle: col.title || 'Period',
-                    timeLabel: col.timeLabel,
-                    startMins: startMins,
-                    className: cell.className || '',
-                    section: cell.section || '',
-                    subject: cell.subject || '',
-                    workType: cell.workType || ''
+                    items.push({
+                        uniqueId: `class_${col.id}`,
+                        type: 'class',
+                        title: `${slotObj.periodTitle}: ${slotObj.className} ${slotObj.section} (${slotObj.subject || 'Class'})`,
+                        classTimeDisplay: slotObj.timeLabel,
+                        triggerMins: triggerMins,
+                        triggerTimeDisplay: formatMinutesOfDayForDisplay(triggerMins),
+                        status: triggerMins < currentMins ? 'completed' : (triggerMins === currentMins ? 'ringing' : 'upcoming'),
+                        voiceMessage: buildVoiceMessage(slotObj, offset)
+                    });
+                });
+            }
+
+            // 2. Enabled Personal Alarms
+            personalAlarms.forEach(pa => {
+                if (!pa.enabled) return;
+                const triggerMins = parse24TimeToMinutes(pa.time24);
+                if (triggerMins === null) return;
+
+                items.push({
+                    uniqueId: pa.id,
+                    type: 'personal',
+                    title: `Personal Reminder: ${pa.message}`,
+                    classTimeDisplay: formatTimeForDisplay(pa.time24),
+                    triggerMins: triggerMins,
+                    triggerTimeDisplay: formatTimeForDisplay(pa.time24),
+                    status: triggerMins < currentMins ? 'completed' : (triggerMins === currentMins ? 'ringing' : 'upcoming'),
+                    voiceMessage: `Attention ${profileData.name || 'Teacher'}. Personal Reminder: ${pa.message}.`
                 });
             });
-            return slots.sort((a, b) => a.startMins - b.startMins);
+
+            return items.sort((a, b) => a.triggerMins - b.triggerMins);
+        }
+
+        function renderScheduledAlarmsList() {
+            const container = document.getElementById('scheduled-alarms-list-container');
+            const dayLabel = document.getElementById('alarm-list-day-name');
+            const summaryBadge = document.getElementById('alarm-list-summary-badge');
+            if (!container) return;
+
+            const now = new Date();
+            const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+            if (dayLabel) dayLabel.innerText = dayName;
+
+            const items = getAllTodayAlarmItems();
+            const completedCount = items.filter(i => i.status === 'completed').length;
+            const upcomingCount = items.filter(i => i.status !== 'completed').length;
+            if (summaryBadge) {
+                summaryBadge.innerText = `${items.length} Total • ${upcomingCount} Upcoming • ${completedCount} Completed`;
+            }
+
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full p-4 rounded-xl bg-white/5 border border-white/10 text-center text-xs text-brand-200">
+                        No classes or personal alarms scheduled for <strong>${dayName}</strong> yet. Add classes to ${dayName} in the Timetable below or add a Personal Alarm.
+                    </div>
+                `;
+                return;
+            }
+
+            items.forEach(item => {
+                const isCompleted = item.status === 'completed';
+                const isRinging = item.status === 'ringing';
+
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border flex items-center justify-between gap-2.5 transition ${
+                    isCompleted
+                        ? 'bg-white/5 border-white/10 opacity-70'
+                        : isRinging
+                        ? 'bg-amber-500/20 border-amber-400'
+                        : 'bg-white/10 border-white/15'
+                }`;
+
+                card.innerHTML = `
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded ${
+                                item.type === 'personal' ? 'bg-purple-500/30 text-purple-200' : 'bg-brand-500/30 text-brand-200'
+                            }">
+                                ${item.type === 'personal' ? 'Personal' : 'Class'}
+                            </span>
+                            <span class="text-xs font-extrabold text-amber-300">
+                                <i class="fa-regular fa-bell mr-1"></i>Alert at ${item.triggerTimeDisplay}
+                            </span>
+                        </div>
+                        <p class="text-xs font-bold text-white truncate mt-1">${item.title}</p>
+                        <p class="text-[10px] text-brand-200">Slot Time: ${item.classTimeDisplay}</p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        ${
+                            isCompleted
+                                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                    <i class="fa-solid fa-circle-check"></i> Completed Alert
+                                   </span>`
+                                : isRinging
+                                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-400 text-slate-950 animate-pulse">
+                                    <i class="fa-solid fa-bell"></i> Active Now
+                                   </span>`
+                                : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-800 text-amber-200 border border-amber-500/30">
+                                    <i class="fa-regular fa-clock"></i> Scheduled
+                                   </span>`
+                        }
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
         function updateNextUpcomingClassPreview() {
             const label = document.getElementById('next-upcoming-class-label');
             if (!label) return;
 
-            const now = new Date();
-            const currentMins = now.getHours() * 60 + now.getMinutes();
-            const slots = getTodayTimetableSlots();
-
-            const nextSlot = slots.find(s => s.startMins >= currentMins);
-            if (!nextSlot) {
-                label.innerText = "No more scheduled periods remaining today.";
+            const items = getAllTodayAlarmItems();
+            const nextItem = items.find(i => i.status !== 'completed');
+            if (!nextItem) {
+                label.innerText = "All alerts for today are completed.";
                 return;
             }
-
-            const alertAtMins = Math.max(0, nextSlot.startMins - (alarmSettings.offsetMins || 0));
-            const ah = String(Math.floor(alertAtMins / 60)).padStart(2, '0');
-            const am = String(alertAtMins % 60).padStart(2, '0');
-            label.innerText = `${nextSlot.periodTitle}: ${nextSlot.className} ${nextSlot.section} (${nextSlot.subject || 'Class'}) at ${nextSlot.timeLabel} • Alert at ${ah}:${am}`;
+            label.innerText = `${nextItem.title} • Rings at ${nextItem.triggerTimeDisplay}`;
         }
 
         function checkPeriodAlarms() {
@@ -1634,16 +2248,15 @@
             const now = new Date();
             const todayKey = getTodayDateStr();
             const currentMins = now.getHours() * 60 + now.getMinutes();
-            const offset = parseInt(alarmSettings.offsetMins, 10) || 0;
 
-            const slots = getTodayTimetableSlots();
-            slots.forEach(slot => {
-                const targetTriggerMins = slot.startMins - offset;
-                const uniqueKey = `${todayKey}_${slot.colId}_${targetTriggerMins}`;
-
-                if (currentMins === targetTriggerMins && !triggeredAlarmKeys.has(uniqueKey)) {
+            const items = getAllTodayAlarmItems();
+            items.forEach(item => {
+                const uniqueKey = `${todayKey}_${item.uniqueId}_${item.triggerMins}`;
+                // Trigger on exact minute (or within 1-minute catch-up window if device just woke from sleep)
+                if ((currentMins === item.triggerMins || currentMins === item.triggerMins + 1) && !triggeredAlarmKeys.has(uniqueKey)) {
                     triggeredAlarmKeys.add(uniqueKey);
-                    firePeriodAlert(slot, offset);
+                    fireRepeatingAlarmAlert(item);
+                    renderScheduledAlarmsList();
                 }
             });
         }
@@ -1659,32 +2272,82 @@
             return `Attention ${profileData.name || 'Teacher'}. ${timeIntro}${slot.periodTitle}${timePart}. Please go to ${classPart}${secPart}${subjPart}.`;
         }
 
-        function firePeriodAlert(slot, offsetMins) {
-            const message = buildVoiceMessage(slot, offsetMins);
+        function stopActiveRepeatLoop() {
+            if (activeRepeatTimer) {
+                clearInterval(activeRepeatTimer);
+                activeRepeatTimer = null;
+            }
+            activeRepeatRemaining = 0;
+        }
+
+        function fireRepeatingAlarmAlert(item) {
+            stopActiveRepeatLoop();
+
+            const message = item.voiceMessage;
             lastSpokenMessage = message;
+
+            const maxRepeats = parseInt(alarmSettings.repeatCount, 10) || 3;
+            const intervalMs = (parseInt(alarmSettings.repeatIntervalSec, 10) || 30) * 1000;
+            let currentRingNumber = 1;
+            activeRepeatRemaining = maxRepeats - 1;
 
             const banner = document.getElementById('live-alarm-banner');
             const bannerText = document.getElementById('live-alarm-text');
-            if (banner && bannerText) {
-                bannerText.innerText = message;
-                banner.classList.remove('hidden');
-            }
+            const badgeText = document.getElementById('live-alarm-badge');
+            const counterText = document.getElementById('live-alarm-repeat-counter');
 
-            playAlarmChime();
-            setTimeout(() => speakText(message), 900);
+            const triggerSingleRing = () => {
+                if (banner && bannerText) {
+                    bannerText.innerText = message;
+                    if (badgeText) badgeText.innerText = item.type === 'personal' ? 'Personal Reminder' : 'Class Period Alert';
+                    if (counterText) {
+                        counterText.innerText = maxRepeats === 999
+                            ? `Ring #${currentRingNumber} (Repeating)`
+                            : `Ring ${currentRingNumber} of ${maxRepeats}`;
+                    }
+                    banner.classList.remove('hidden');
+                }
 
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try {
-                    const notif = new Notification(`🔔 ${slot.periodTitle}: ${slot.className} ${slot.section}`, {
-                        body: message,
-                        tag: `period-alert-${slot.colId}`,
-                        requireInteraction: true
-                    });
-                    notif.onclick = () => {
-                        window.focus();
-                        notif.close();
-                    };
-                } catch (e) {}
+                // Vibrate mobile device if supported
+                if ('vibrate' in navigator) {
+                    try { navigator.vibrate([400, 200, 400, 200, 600]); } catch (e) {}
+                }
+
+                playAlarmChime();
+                setTimeout(() => speakText(message), 950);
+
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try {
+                        const notif = new Notification(`🔔 ${item.title}`, {
+                            body: message,
+                            tag: `alarm-${item.uniqueId}`,
+                            renotify: true,
+                            requireInteraction: true
+                        });
+                        notif.onclick = () => {
+                            window.focus();
+                            notif.close();
+                        };
+                    } catch (e) {}
+                }
+            };
+
+            // Ring immediately on Ring #1
+            triggerSingleRing();
+
+            // Schedule subsequent repeat reminders based on Repeat Count & Interval Frequency
+            if (activeRepeatRemaining > 0) {
+                activeRepeatTimer = setInterval(() => {
+                    if (activeRepeatRemaining <= 0) {
+                        stopActiveRepeatLoop();
+                        return;
+                    }
+                    currentRingNumber++;
+                    if (maxRepeats !== 999) {
+                        activeRepeatRemaining--;
+                    }
+                    triggerSingleRing();
+                }, intervalMs);
             }
         }
 
@@ -1695,12 +2358,17 @@
             const sampleSlot = {
                 colId: 'test',
                 periodTitle: 'Period 1',
-                timeLabel: '09:00 - 09:45',
+                timeLabel: `${formatTimeForDisplay('09:00')} - ${formatTimeForDisplay('09:45')}`,
                 className: profileData.classes[0] || 'Class 10',
                 section: profileData.sections[0] || 'Section A',
                 subject: profileData.dept || 'Mathematics'
             };
-            firePeriodAlert(sampleSlot, alarmSettings.offsetMins || 5);
+            fireRepeatingAlarmAlert({
+                uniqueId: 'test_alarm',
+                type: 'class',
+                title: 'Test Class Alarm',
+                voiceMessage: buildVoiceMessage(sampleSlot, alarmSettings.offsetMins || 5)
+            });
         }
 
         function repeatAlarmSpeech() {
@@ -1711,26 +2379,30 @@
         }
 
         function dismissAlarmBanner() {
+            stopActiveRepeatLoop();
             document.getElementById('live-alarm-banner')?.classList.add('hidden');
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if ('vibrate' in navigator) {
+                try { navigator.vibrate(0); } catch (e) {}
+            }
         }
 
         function playAlarmChime() {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 const ctx = new AudioCtx();
-                const notes = [587.33, 783.99, 1046.50];
+                const notes = [587.33, 783.99, 1046.50, 1318.51];
                 notes.forEach((freq, idx) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.22);
-                    gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.22);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.22 + 0.6);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.2);
+                    gain.gain.setValueAtTime(0.32, ctx.currentTime + idx * 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.2 + 0.65);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime + idx * 0.22);
-                    osc.stop(ctx.currentTime + idx * 0.22 + 0.65);
+                    osc.start(ctx.currentTime + idx * 0.2);
+                    osc.stop(ctx.currentTime + idx * 0.2 + 0.7);
                 });
             } catch (e) {}
         }
@@ -1891,7 +2563,7 @@
         }
 
         // =========================================================================
-        // DYNAMIC ON-DEMAND PERIOD ROWS RENDERER
+        // DYNAMIC ON-DEMAND PERIOD ROWS RENDERER (WITH 12H AM/PM & 24H SUPPORT)
         // =========================================================================
         function addPeriodRow() {
             const nextNum = currentPeriods.length + 1;
@@ -1908,6 +2580,14 @@
                 activity: '',
                 status: 'Completed'
             });
+            renderPeriodRows();
+            saveLog(false);
+        }
+
+        function updatePeriodTimeField(index, field, value24) {
+            if (!currentPeriods[index]) return;
+            currentPeriods[index][field] = value24;
+            calculateAndDisplayDailyHours();
             renderPeriodRows();
             saveLog(false);
         }
@@ -1963,17 +2643,25 @@
                 const workOpts = profileData.workTypes.map(w => `<option value="${w}" ${p.workType === w ? 'selected' : ''}>${w}</option>`).join('');
                 const durMins = calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
 
+                const fromInputHTML = buildTimePickerHTML(p.timeFrom, 'updatePeriodTimeField', idx, 'timeFrom');
+                const toInputHTML = buildTimePickerHTML(p.timeTo, 'updatePeriodTimeField', idx, 'timeTo');
+
                 tr.innerHTML = `
                     <td class="py-2 px-3 align-top">
                         <input type="text" value="${p.periodLabel || `Period ${idx + 1}`}" oninput="updatePeriodField(${idx}, 'periodLabel', this.value)" placeholder="Period ${idx + 1}" class="w-full font-bold text-brand-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
                     </td>
                     <td class="py-2 px-2 align-top">
-                        <div class="flex items-center gap-1">
-                            <input type="time" value="${p.timeFrom || ''}" onchange="updatePeriodField(${idx}, 'timeFrom', this.value); renderPeriodRows();" title="From Time" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1 text-[11px] focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
-                            <span class="text-slate-400 font-bold">-</span>
-                            <input type="time" value="${p.timeTo || ''}" onchange="updatePeriodField(${idx}, 'timeTo', this.value); renderPeriodRows();" title="To Time" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1 text-[11px] focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-1">
+                                <span class="text-[9px] font-bold text-slate-400 w-7">From</span>
+                                ${fromInputHTML}
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="text-[9px] font-bold text-slate-400 w-7">To</span>
+                                ${toInputHTML}
+                            </div>
                         </div>
-                        <div class="text-[10px] text-slate-400 mt-0.5 text-center">${(p.timeFrom && p.timeTo) ? `${durMins} mins` : 'Default: 45m'}</div>
+                        <div class="text-[10px] text-slate-400 mt-1 text-center">${(p.timeFrom && p.timeTo) ? `${durMins} mins` : 'Default: 45m'}</div>
                     </td>
                     <td class="py-2 px-2 align-top">
                         <select onchange="updatePeriodField(${idx}, 'className', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
@@ -2085,7 +2773,6 @@
                         </div>
                     </div>
 
-                    <!-- FILE / IMAGE ATTACHMENT SECTION -->
                     <div class="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div class="flex items-center space-x-2 no-print">
                             <label class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold cursor-pointer transition flex items-center gap-1.5">
@@ -2249,12 +2936,12 @@
                 if (col.isBreak) return;
                 const cellData = timetableData.grid[`${targetRow.id}_${col.id}`] || {};
                 if (cellData.className || cellData.subject) {
-                    const times = (col.timeLabel || '').split('-').map(s => s.trim());
+                    ensureColumn24Times(col);
                     currentPeriods.push({
                         id: `period_${Date.now()}_${addedCount}`,
                         periodLabel: col.title || `Period ${currentPeriods.length + 1}`,
-                        timeFrom: times[0] && /^\d{2}:\d{2}$/.test(times[0]) ? times[0] : '',
-                        timeTo: times[1] && /^\d{2}:\d{2}$/.test(times[1]) ? times[1] : '',
+                        timeFrom: col.start24 || '',
+                        timeTo: col.end24 || '',
                         className: cellData.className || '',
                         section: cellData.section || '',
                         workType: cellData.workType || 'Teaching',
@@ -2316,8 +3003,22 @@
         }
 
         // =========================================================================
-        // TIMETABLE MATRIX BUILDER
+        // TIMETABLE MATRIX BUILDER (WITH 12H AM/PM & 24H SELECTORS + LIVE ALARM SYNC)
         // =========================================================================
+        function updateColTime24(cIdx, field, value24) {
+            const col = timetableData.columns[cIdx];
+            if (!col) return;
+            ensureColumn24Times(col);
+            col[field] = value24;
+            col.timeLabel = getColumnFormattedRange(col);
+            triggeredAlarmKeys.clear();
+            saveLocalStorageData();
+            renderTimetableBuilder();
+            renderScheduledAlarmsList();
+            updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
+        }
+
         function renderTimetableBuilder() {
             const table = document.getElementById('timetable-matrix-table');
             if (!table) return;
@@ -2334,8 +3035,15 @@
             trHead.appendChild(thCorner);
 
             timetableData.columns.forEach((col, cIdx) => {
+                ensureColumn24Times(col);
+                col.timeLabel = getColumnFormattedRange(col);
+
                 const th = document.createElement('th');
-                th.className = `py-2 px-2 border border-slate-200 min-w-[170px] text-center relative ${col.isBreak ? 'bg-amber-100 text-amber-900 border-amber-300' : ''}`;
+                th.className = `py-2 px-2 border border-slate-200 min-w-[205px] text-center relative ${col.isBreak ? 'bg-amber-100 text-amber-900 border-amber-300' : ''}`;
+
+                const startPicker = buildTimePickerHTML(col.start24, 'updateColTime24', cIdx, 'start24');
+                const endPicker = buildTimePickerHTML(col.end24, 'updateColTime24', cIdx, 'end24');
+
                 th.innerHTML = `
                     <div class="flex items-center justify-between no-print text-[10px] text-slate-400 mb-1">
                         <button onclick="toggleColumnBreak(${cIdx})" title="Toggle Break" class="px-1.5 py-0.5 rounded ${col.isBreak ? 'bg-amber-200 text-amber-800 font-bold' : 'hover:bg-slate-200 text-slate-600'}">
@@ -2345,8 +3053,18 @@
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    <input type="text" value="${col.title}" onchange="updateColHeader(${cIdx}, 'title', this.value)" class="w-full text-center font-bold text-xs bg-transparent border-b border-dashed border-slate-300 focus:outline-none mb-0.5">
-                    <input type="text" value="${col.timeLabel}" onchange="updateColHeader(${cIdx}, 'timeLabel', this.value)" placeholder="HH:MM - HH:MM" class="w-full text-center text-[10px] text-slate-500 bg-transparent focus:outline-none">
+                    <input type="text" value="${col.title}" onchange="updateColHeader(${cIdx}, 'title', this.value)" class="w-full text-center font-bold text-xs bg-transparent border-b border-dashed border-slate-300 focus:outline-none mb-1.5">
+                    <div class="no-print flex flex-col items-center gap-1 normal-case">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[9px] font-bold text-slate-400">From:</span>
+                            ${startPicker}
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="text-[9px] font-bold text-slate-400">To:</span>
+                            ${endPicker}
+                        </div>
+                    </div>
+                    <div class="hidden print-only text-[10px] text-slate-600 font-semibold">${col.timeLabel}</div>
                 `;
                 trHead.appendChild(th);
             });
@@ -2402,6 +3120,7 @@
                 tbody.appendChild(tr);
             });
             table.appendChild(tbody);
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
         }
 
@@ -2419,15 +3138,19 @@
                     if (key.startsWith(`${removedRow.id}_`)) delete timetableData.grid[key];
                 });
             }
-            saveLocalStorageData(); renderTimetableBuilder();
+            saveLocalStorageData(); renderTimetableBuilder(); syncNativeOfflineAlarmsBridge();
         }
 
         function updateRowHeader(index, val) {
-            timetableData.rows[index].dayName = val; saveLocalStorageData(); updateNextUpcomingClassPreview();
+            timetableData.rows[index].dayName = val;
+            saveLocalStorageData();
+            renderScheduledAlarmsList();
+            updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
         }
 
         function addTimetableColumn() {
-            timetableData.columns.push({ id: `col_${Date.now()}`, title: `Period ${timetableData.columns.length + 1}`, timeLabel: "14:00 - 14:45", isBreak: false, durationMins: 45 });
+            timetableData.columns.push({ id: `col_${Date.now()}`, title: `Period ${timetableData.columns.length + 1}`, start24: "14:00", end24: "14:45", timeLabel: "02:00 PM - 02:45 PM", isBreak: false, durationMins: 45 });
             saveLocalStorageData(); renderTimetableBuilder();
         }
 
@@ -2440,26 +3163,31 @@
                     if (key.endsWith(`_${removedCol.id}`)) delete timetableData.grid[key];
                 });
             }
-            saveLocalStorageData(); renderTimetableBuilder();
+            saveLocalStorageData(); renderTimetableBuilder(); syncNativeOfflineAlarmsBridge();
         }
 
         function updateColHeader(index, key, val) {
             timetableData.columns[index][key] = val;
             triggeredAlarmKeys.clear();
             saveLocalStorageData();
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
         }
 
         function toggleColumnBreak(index) {
             timetableData.columns[index].isBreak = !timetableData.columns[index].isBreak;
-            saveLocalStorageData(); renderTimetableBuilder();
+            saveLocalStorageData(); renderTimetableBuilder(); syncNativeOfflineAlarmsBridge();
         }
 
         function updateGridCell(cellKey, field, val) {
             if (!timetableData.grid[cellKey]) timetableData.grid[cellKey] = {};
             timetableData.grid[cellKey][field] = val;
+            triggeredAlarmKeys.clear();
             saveLocalStorageData();
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
+            syncNativeOfflineAlarmsBridge();
         }
 
         function adjustTimetableZoom(delta) {
@@ -2470,8 +3198,10 @@
 
         function saveTimetable(showToastNotification = false) {
             saveLocalStorageData();
+            renderScheduledAlarmsList();
             updateNextUpcomingClassPreview();
-            if (showToastNotification) showToast("Timetable & alarm schedule saved!");
+            syncNativeOfflineAlarmsBridge();
+            if (showToastNotification) showToast("Timetable & scheduled alarms saved!");
         }
 
         // =========================================================================
@@ -2599,7 +3329,6 @@
             let initialPinchDistance = null;
             let initialZoomAtPinch = reportZoomPercent;
 
-            // Mouse drag panning on desktop
             let isMousePanning = false;
             let startMouseX = 0, startMouseY = 0;
             let startScrollLeft = 0, startScrollTop = 0;
@@ -2624,7 +3353,6 @@
                 isMousePanning = false;
             });
 
-            // Two-finger Pinch-to-Zoom on mobile/tablet touchscreens
             viewport.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 2) {
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -2667,7 +3395,7 @@
             if (!viewport || !stage) return;
 
             const availableWidth = Math.max(240, viewport.clientWidth - 36);
-            const naturalWidth = stage.offsetWidth || 794; // 210mm in px (~794px)
+            const naturalWidth = stage.offsetWidth || 794;
             const idealPercent = Math.floor((availableWidth / naturalWidth) * 100);
             reportZoomPercent = Math.max(35, Math.min(115, idealPercent));
             applyReportZoom();
@@ -2868,7 +3596,6 @@
             sheetsList.push(currentSheetObj);
             stage.appendChild(currentSheetObj.sheet);
 
-            // Master Header always starts at top of Page 1
             const mainHeader = document.createElement('div');
             mainHeader.className = "border-b-2 border-slate-900 pb-3 mb-2";
             mainHeader.innerHTML = `
@@ -2890,7 +3617,6 @@
             `;
             currentSheetObj.bodyDiv.appendChild(mainHeader);
 
-            // Real DOM height budget per A4 page (~297mm = 1122px minus top/bottom padding & footer = ~980px)
             const MAX_A4_SHEET_HEIGHT_PX = 1040;
             let hasRenderedAnyDayOnPage1 = false;
 
@@ -2931,7 +3657,6 @@
                 `;
                 currentSheetObj.bodyDiv.appendChild(monthBanner);
 
-                // Only start a new page before month banner if Page 1 already has day records AND this overflows
                 if (hasRenderedAnyDayOnPage1 && currentSheetObj.sheet.scrollHeight > MAX_A4_SHEET_HEIGHT_PX) {
                     currentSheetObj.bodyDiv.removeChild(monthBanner);
                     currentPageIndex++;
@@ -2957,10 +3682,12 @@
                     `;
 
                     const periodRows = (log.periods || []).map((p, idx) => {
-                        const timeDisplay = (p.timeFrom && p.timeTo) ? `<div class="text-[9px] text-slate-500 font-normal">${p.timeFrom} - ${p.timeTo}</div>` : '';
+                        const timeDisplay = (p.timeFrom && p.timeTo)
+                            ? `<div class="text-[9px] text-slate-500 font-normal">${formatTimeForDisplay(p.timeFrom)} - ${formatTimeForDisplay(p.timeTo)}</div>`
+                            : '';
                         return `
                             <tr class="border-b border-slate-200 text-[11px]">
-                                <td class="py-1.5 px-2.5 font-bold text-slate-700 w-24">${p.periodLabel || `Period ${idx + 1}`}${timeDisplay}</td>
+                                <td class="py-1.5 px-2.5 font-bold text-slate-700 w-28">${p.periodLabel || `Period ${idx + 1}`}${timeDisplay}</td>
                                 <td class="py-1.5 px-2.5 font-semibold text-slate-800 w-24">${p.className || '-'} ${p.section || ''}</td>
                                 <td class="py-1.5 px-2.5 text-slate-700 font-medium w-24">${p.workType || 'Teaching'}</td>
                                 <td class="py-1.5 px-2.5 font-bold text-slate-900 w-28">${p.subject || '-'}</td>
@@ -3024,8 +3751,6 @@
 
                     currentSheetObj.bodyDiv.appendChild(dayCard);
 
-                    // Guarantee Page 1 NEVER remains empty: first day card ALWAYS renders on Page 1.
-                    // Subsequent day cards move cleanly to a new A4 sheet if they exceed A4 page height.
                     if (hasRenderedAnyDayOnPage1 && currentSheetObj.sheet.scrollHeight > MAX_A4_SHEET_HEIGHT_PX) {
                         currentSheetObj.bodyDiv.removeChild(dayCard);
                         currentPageIndex++;
@@ -3039,7 +3764,6 @@
                 });
             });
 
-            // Stamp total A4 page count on every sheet footer
             const totalA4Pages = sheetsList.length;
             sheetsList.forEach((sObj, index) => {
                 sObj.footerDiv.innerHTML = `
@@ -3048,7 +3772,6 @@
                 `;
             });
 
-            // Auto-fit full A4 sheet cleanly inside current screen width so nothing is cropped
             fitReportToScreen();
         }
 
@@ -3128,7 +3851,7 @@
                     matchingPeriods.forEach(({ p, origIdx }) => {
                         const item = document.createElement('div');
                         item.className = "p-3 hover:bg-slate-50 border-b border-slate-100 text-xs flex items-start justify-between gap-3";
-                        const timeStr = (p.timeFrom && p.timeTo) ? ` [${p.timeFrom} - ${p.timeTo}]` : '';
+                        const timeStr = (p.timeFrom && p.timeTo) ? ` [${formatTimeForDisplay(p.timeFrom)} - ${formatTimeForDisplay(p.timeTo)}]` : '';
                         item.innerHTML = `
                             <div>
                                 <p class="font-bold text-slate-800">${p.periodLabel || `Period ${origIdx + 1}`}${timeStr}: ${p.subject || 'Class'} (${p.className || 'General'} ${p.section || ''}) - <span class="text-brand-600">${p.workType || 'Teaching'}</span></p>
@@ -3201,7 +3924,7 @@
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function exportDataJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData, profileData, timetableData, alarmSettings }, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData, profileData, timetableData, alarmSettings, personalAlarms }, null, 2));
             const dl = document.createElement('a');
             dl.setAttribute("href", dataStr);
             dl.setAttribute("download", `Teacher_Daybook_Backup_${getTodayDateStr()}.json`);
@@ -3214,7 +3937,7 @@
                 const log = appData[date];
                 (log.periods || []).forEach((p, idx) => {
                     const dur = p.durationMins || calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
-                    csv += `${date},Core,"${p.periodLabel || `Period ${idx + 1}`}","${p.timeFrom || ''}","${p.timeTo || ''}","${p.className || ''}","${p.section || ''}","${p.workType || ''}","${p.subject || ''}","${p.topic || ''}",${dur}\n`;
+                    csv += `${date},Core,"${p.periodLabel || `Period ${idx + 1}`}","${formatTimeForDisplay(p.timeFrom)}","${formatTimeForDisplay(p.timeTo)}","${p.className || ''}","${p.section || ''}","${p.workType || ''}","${p.subject || ''}","${p.topic || ''}",${dur}\n`;
                 });
                 (log.extraWorks || []).forEach(w => {
                     csv += `${date},Extra,N/A,,,"${w.className || ''}",,"${w.category || ''}","Extra Duty","${w.description || ''}",${w.durationMins || 0}\n`;
@@ -3237,9 +3960,12 @@
                     if (imported.profileData) profileData = imported.profileData;
                     if (imported.timetableData) timetableData = imported.timetableData;
                     if (imported.alarmSettings) alarmSettings = imported.alarmSettings;
+                    if (imported.personalAlarms) personalAlarms = imported.personalAlarms;
+                    use12HourFormat = alarmSettings.use12HourFormat !== false;
+                    syncTimeFormatToggleUI();
                     saveLocalStorageData();
                     updateProfileUIHeadings();
-                    renderProfileConfigLists(); renderPeriodRows(); loadDateLog(); renderTimetableBuilder(); populateSearchDropdowns(); onReportScopeTypeChange(); initAlarmSystem();
+                    renderProfileConfigLists(); renderPeriodRows(); loadDateLog(); renderTimetableBuilder(); renderPersonalAlarmTimeInputs(); renderPersonalAlarmsList(); populateSearchDropdowns(); onReportScopeTypeChange(); initAlarmSystem();
                     closeModal('modal-backup');
                     showToast("Backup imported successfully!");
                 } catch (err) { alert("Invalid JSON backup file."); }
@@ -3273,7 +3999,12 @@
             const activeMobBtn = document.getElementById(`mob-tab-${tabId}`);
             if (activeMobBtn) { activeMobBtn.classList.add('text-white'); activeMobBtn.classList.remove('text-brand-200'); }
 
-            if (tabId === 'timetable') renderTimetableBuilder();
+            if (tabId === 'timetable') {
+                renderTimetableBuilder();
+                renderPersonalAlarmTimeInputs();
+                renderPersonalAlarmsList();
+                renderScheduledAlarmsList();
+            }
             if (tabId === 'analytics') renderAnalytics();
             if (tabId === 'report') { 
                 onReportScopeTypeChange(); 
