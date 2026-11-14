@@ -53,6 +53,54 @@
             page: landscape-page;
         }
 
+        /* A4 PAPER SHEET VIEWPORT WITH FULL PAN & PINCH-TO-ZOOM SUPPORT */
+        .a4-viewport {
+            background-color: #cbd5e1;
+            border-radius: 1rem;
+            padding: 1rem;
+            overflow: auto;
+            height: 80vh;
+            width: 100%;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x pan-y;
+            cursor: grab;
+        }
+
+        .a4-viewport:active {
+            cursor: grabbing;
+        }
+
+        /* Layout-aware sizer box prevents left/right cropping when zoomed */
+        .a4-scale-sizer {
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .a4-zoom-stage {
+            transform-origin: top left;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+            width: 210mm;
+        }
+
+        .a4-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            padding: 13mm 14mm;
+            box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.25);
+            border: 1px solid #94a3b8;
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
         /* Print Stylesheet for Official Reports & Grids */
         @media print {
             .no-print { display: none !important; }
@@ -65,6 +113,41 @@
             /* Hide non-active sections during print */
             section:not(.active-print-view) {
                 display: none !important;
+            }
+
+            /* Reset A4 Preview Container for Native Printer Output */
+            .a4-viewport {
+                background: transparent !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                height: auto !important;
+                max-height: none !important;
+                border: none !important;
+            }
+
+            .a4-scale-sizer {
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+            }
+
+            .a4-zoom-stage {
+                transform: scale(1) !important;
+                width: 100% !important;
+                display: block !important;
+            }
+
+            .a4-sheet {
+                width: 100% !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                page-break-after: always;
+            }
+
+            .a4-sheet:last-child {
+                page-break-after: auto;
             }
 
             /* Print Toggle CSS Rule */
@@ -118,7 +201,7 @@
             .print-extra-attachment {
                 display: block !important;
                 max-width: 100% !important;
-                max-height: 480px !important;
+                max-height: 440px !important;
                 width: auto !important;
                 height: auto !important;
                 margin: 8px auto !important;
@@ -139,10 +222,10 @@
             }
         }
         
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
         .break-column {
             background-color: #fef3c7 !important;
@@ -153,9 +236,40 @@
             max-height: calc(85vh - 8rem);
             overflow-y: auto;
         }
+
+        @keyframes pulseAlert {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+        }
+        .alarm-active-banner {
+            animation: pulseAlert 1.5s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- LIVE ACTIVE ALARM BANNER -->
+    <div id="live-alarm-banner" class="hidden fixed top-16 left-0 right-0 z-50 bg-amber-500 text-slate-950 shadow-2xl border-b-2 border-amber-700 px-4 py-3 no-print alarm-active-banner">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-slate-900 text-amber-400 rounded-xl shrink-0">
+                    <i class="fa-solid fa-bell fa-shake text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white px-2 py-0.5 rounded">Class Period Alert</span>
+                    <p id="live-alarm-text" class="font-extrabold text-sm sm:text-base mt-0.5">Upcoming Class Alert</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="repeatAlarmSpeech()" class="px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-volume-high"></i> Speak Again
+                </button>
+                <button onclick="dismissAlarmBanner()" class="px-3.5 py-1.5 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-black border border-slate-300">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Top Navigation Bar -->
     <header class="bg-brand-900 text-white shadow-md no-print sticky top-0 z-30 shrink-0">
@@ -179,7 +293,7 @@
                         <i class="fa-regular fa-calendar-check"></i> Daily Log
                     </button>
                     <button onclick="switchTab('timetable')" id="tab-timetable" class="px-3 py-2 rounded-xl text-xs font-semibold text-brand-100 hover:bg-brand-800 transition flex items-center gap-2">
-                        <i class="fa-solid fa-table-cells"></i> Timetable
+                        <i class="fa-solid fa-table-cells"></i> Timetable & Alarms
                     </button>
                     <button onclick="switchTab('analytics')" id="tab-analytics" class="px-3 py-2 rounded-xl text-xs font-semibold text-brand-100 hover:bg-brand-800 transition flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie"></i> Analytics
@@ -196,7 +310,7 @@
                 <div class="flex items-center space-x-2 shrink-0">
                     <button onclick="saveLog(true)" title="Save Logbook Entry" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 border border-emerald-400/40">
                         <i class="fa-solid fa-floppy-disk"></i>
-                        <span class="inline"></span>
+                        <span class="hidden sm:inline">Save</span>
                     </button>
                     <button onclick="toggleSideMenu()" title="Open System Menu" class="p-2.5 text-brand-100 hover:bg-brand-800 hover:text-white rounded-xl transition flex items-center gap-2 bg-brand-800/60 border border-brand-700/50">
                         <i class="fa-solid fa-bars text-lg"></i>
@@ -249,6 +363,31 @@
 
         <!-- Drawer Content Body -->
         <div class="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
+
+            <!-- PERIOD ALARM STATUS CARD INSIDE MENU PANEL -->
+            <div>
+                <h3 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Period Voice Alarm Status</h3>
+                <div id="menu-alarm-card" class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 space-y-2.5 transition">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div id="menu-alarm-icon-box" class="p-2 rounded-xl bg-slate-200 text-slate-600">
+                                <i class="fa-solid fa-bell-slash" id="menu-alarm-icon"></i>
+                            </div>
+                            <div>
+                                <span id="menu-alarm-status-title" class="block text-xs font-extrabold text-slate-800">Alarms Off</span>
+                                <span id="menu-alarm-status-sub" class="block text-[10px] text-slate-500">Voice alerts disabled</span>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="menu-alarm-toggle" onchange="toggleMasterAlarmFromMenu()" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
+                    </div>
+                    <button onclick="toggleSideMenu(); switchTab('timetable');" class="w-full py-1.5 px-3 bg-white hover:bg-brand-50 text-brand-700 border border-slate-200 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-clock"></i> Configure Alarm Timings
+                    </button>
+                </div>
+            </div>
             
             <!-- Quick Actions Section -->
             <div>
@@ -295,7 +434,7 @@
                         <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
                     </button>
                     <button onclick="toggleSideMenu(); switchTab('timetable');" class="w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition">
-                        <span class="flex items-center gap-2"><i class="fa-solid fa-table-cells text-brand-600"></i> Weekly Timetable</span>
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-table-cells text-brand-600"></i> Weekly Timetable & Alarms</span>
                         <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
                     </button>
                     <button onclick="toggleSideMenu(); switchTab('analytics');" class="w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 transition">
@@ -320,6 +459,20 @@
                 <p class="text-[11px] text-slate-500" id="drawer-dept-name">Mathematics Dept</p>
             </div>
 
+            <!-- DANGER ZONE: FACTORY RESET / DELETE ALL DATA -->
+            <div class="pt-2 border-t border-slate-200">
+                <h3 class="text-[11px] font-bold uppercase tracking-wider text-rose-500 mb-2">Danger Zone</h3>
+                <button onclick="factoryResetAllData()" class="w-full flex items-center space-x-3 p-3 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white font-semibold text-xs rounded-xl border border-rose-200 transition group">
+                    <div class="p-2 bg-white text-rose-600 rounded-lg shadow-sm group-hover:bg-rose-700 group-hover:text-white transition">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="block font-bold">Factory Reset / Delete Data</span>
+                        <span class="text-[10px] opacity-80 font-normal">Erase all logs, schedule & reset app</span>
+                    </div>
+                </button>
+            </div>
+
         </div>
 
         <!-- Drawer Footer -->
@@ -338,14 +491,14 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 1: DAILY PLANNER & LOGBOOK -->
+        <!-- TAB 1: DAILY PLANNER & LOGBOOK (DYNAMIC ON-DEMAND ROWS) -->
         <!-- ========================================================================= -->
         <section id="view-planner" class="space-y-6 active-print-view">
 
             <!-- Date Navigation Header Banner -->
             <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 no-print flex flex-col sm:flex-row items-center justify-between gap-4">
                 
-                <!-- Date Selector & Prev/Next (REPAIRED STABLE DATE NAVIGATION) -->
+                <!-- Date Selector & Prev/Next -->
                 <div class="flex items-center space-x-2 w-full sm:w-auto justify-between sm:justify-start">
                     <button onclick="navigateDate(-1)" class="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition" title="Previous Day">
                         <i class="fa-solid fa-chevron-left"></i>
@@ -381,17 +534,17 @@
 
                     <!-- Main Action Buttons -->
                     <div class="flex items-center space-x-2">
-                        <button onclick="loadFromTimetableForCurrentDate()" class="px-3 py-2 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-xl transition" title="Auto-fill entries from timetable">
-                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Fill Schedule
+                        <button onclick="loadFromTimetableForCurrentDate()" class="px-3 py-2 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 rounded-xl transition" title="Import rows from reference timetable">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Import Schedule
                         </button>
-                        <button onclick="clearCurrentDay()" class="px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl transition" title="Clear current entries">
-                            <i class="fa-regular fa-trash-can mr-1"></i> Clear
+                        <button onclick="clearCurrentDay()" class="px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-xl transition" title="Delete all entries for this date">
+                            <i class="fa-regular fa-trash-can mr-1"></i> Delete Day
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- COMPACT METADATA BANNER (Retained Homeroom & Attendance only) -->
+            <!-- COMPACT METADATA BANNER (Homeroom & Attendance) -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="w-full sm:w-auto flex items-center gap-2 text-xs font-bold text-slate-700 shrink-0">
                     <i class="fa-solid fa-user-check text-emerald-500 text-sm"></i> Homeroom & Attendance:
@@ -401,36 +554,48 @@
                 </div>
             </div>
 
-            <!-- Periods Log Table -->
+            <!-- DYNAMIC ON-DEMAND PERIODS LOG TABLE -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+                <div class="px-5 py-3.5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <h2 class="font-bold text-slate-800 text-sm sm:text-base flex items-center gap-2">
                             <i class="fa-solid fa-list-check text-brand-600"></i> Period-by-Period Teaching Register
                         </h2>
-                        <p class="text-xs text-slate-500">Record lesson plans, topics taught, classwork, and period status.</p>
+                        <p class="text-xs text-slate-500">Click the <strong>+ Add Period Row</strong> button whenever you need to log a period for this day.</p>
                     </div>
-                    <span class="text-xs bg-slate-100 text-slate-600 font-semibold px-2.5 py-1 rounded-full">Core Teaching</span>
+                    <button onclick="addPeriodRow()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 self-start sm:self-auto no-print">
+                        <i class="fa-solid fa-plus"></i> Add Period Row
+                    </button>
                 </div>
 
                 <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left border-collapse min-w-[950px]">
+                    <table class="w-full text-left border-collapse min-w-[1120px]">
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wider font-bold border-b border-slate-200">
-                                <th class="py-3 px-4 w-28">Period</th>
-                                <th class="py-3 px-3 w-32">Class</th>
-                                <th class="py-3 px-3 w-28">Section</th>
-                                <th class="py-3 px-3 w-36">Work Type</th>
-                                <th class="py-3 px-3 w-36">Subject</th>
-                                <th class="py-3 px-3">Topic / Content Taught</th>
-                                <th class="py-3 px-3">Classwork / Homework</th>
-                                <th class="py-3 px-3 w-32">Status</th>
+                                <th class="py-3 px-3 w-28">Period</th>
+                                <th class="py-3 px-3 w-44">Time (From - To)</th>
+                                <th class="py-3 px-2 w-28">Class</th>
+                                <th class="py-3 px-2 w-24">Section</th>
+                                <th class="py-3 px-2 w-32">Work Type</th>
+                                <th class="py-3 px-2 w-32">Subject</th>
+                                <th class="py-3 px-2">Topic / Content Taught</th>
+                                <th class="py-3 px-2 w-44">Classwork / HW</th>
+                                <th class="py-3 px-2 w-32">Status</th>
+                                <th class="py-3 px-2 w-10 text-center no-print">Del</th>
                             </tr>
                         </thead>
                         <tbody id="periods-container" class="divide-y divide-slate-100 text-xs">
-                            <!-- Period rows injected via JS -->
+                            <!-- Dynamic user-added period rows injected via JS -->
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Bottom Quick Add Bar -->
+                <div class="px-5 py-3 bg-slate-50/70 border-t border-slate-100 flex justify-between items-center no-print">
+                    <span class="text-[11px] text-slate-400" id="period-rows-count-label">0 period rows logged today</span>
+                    <button onclick="addPeriodRow()" class="px-3.5 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 font-bold text-xs rounded-xl transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> Add Another Period
+                    </button>
                 </div>
             </div>
 
@@ -445,7 +610,7 @@
                         <p class="text-xs text-slate-500">Log duties specific to this date and attach supporting images/documents (Invigilation, Parent Calls, Valuation, Bus Duty, etc.)</p>
                     </div>
 
-                    <button onclick="addExtraWorkItem()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 self-start sm:self-auto">
+                    <button onclick="addExtraWorkItem()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 self-start sm:self-auto no-print">
                         <i class="fa-solid fa-plus"></i> Add Extra Work Duty
                     </button>
                 </div>
@@ -476,16 +641,73 @@
         </section>
 
         <!-- ========================================================================= -->
-        <!-- TAB 2: WEEKLY TIMETABLE BUILDER -->
+        <!-- TAB 2: WEEKLY TIMETABLE REFERENCE & VOICE ALARM SYSTEM -->
         <!-- ========================================================================= -->
         <section id="view-timetable" class="hidden space-y-6">
+
+            <!-- VOICE & BACKGROUND PERIOD ALARM CONFIGURATION CARD -->
+            <div class="bg-gradient-to-r from-brand-900 to-slate-900 text-white p-5 rounded-2xl shadow-md border border-brand-800 no-print space-y-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <div class="p-3 bg-amber-500 text-slate-950 rounded-2xl shrink-0">
+                            <i class="fa-solid fa-bell text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-bold text-sm sm:text-base">Period Voice Alarm & Smart Class Reminder</h3>
+                                <span id="alarm-permission-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 border border-amber-500/30">Ready</span>
+                            </div>
+                            <p class="text-xs text-brand-200 mt-0.5">Automatically alerts you with a chime, background notification, and spoken voice announcement (Class, Section & Subject) before your scheduled period.</p>
+                        </div>
+                    </div>
+
+                    <!-- Master Alarm Toggle & Test Button -->
+                    <div class="flex flex-wrap items-center gap-3 shrink-0">
+                        <button onclick="testVoiceAlarm()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl border border-white/20 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-volume-high text-amber-400"></i> Test Voice Alert
+                        </button>
+
+                        <label class="flex items-center gap-2.5 bg-slate-950/60 px-4 py-2 rounded-xl border border-brand-700 cursor-pointer">
+                            <input type="checkbox" id="alarm-master-toggle" onchange="toggleMasterAlarm()" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+                            <span class="text-xs font-extrabold text-amber-300" id="alarm-master-label">Enable Period Alarms</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Alarm Lead-Time Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-white/10 items-center text-xs">
+                    <div class="sm:col-span-5">
+                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">Alert Timing (Before Period Start)</label>
+                        <select id="alarm-offset-preset" onchange="onAlarmOffsetPresetChange()" class="w-full bg-slate-800 border border-brand-700 text-white rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-amber-400">
+                            <option value="0">At Exact Period Time (0 mins before)</option>
+                            <option value="2">2 Minutes Before Class</option>
+                            <option value="5" selected>5 Minutes Before Class</option>
+                            <option value="10">10 Minutes Before Class</option>
+                            <option value="15">15 Minutes Before Class</option>
+                            <option value="custom">Custom Minutes Before...</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-3 hidden" id="alarm-custom-mins-box">
+                        <label class="block text-[10px] uppercase font-bold text-amber-300 mb-1">Custom Minutes Before</label>
+                        <input type="number" id="alarm-custom-mins" min="0" max="60" value="5" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-amber-400 text-white rounded-xl px-3 py-2 text-xs font-bold outline-none">
+                    </div>
+
+                    <div class="sm:col-span-4 flex flex-col justify-center">
+                        <span class="text-[10px] uppercase font-bold text-brand-200 mb-0.5">Next Upcoming Scheduled Class</span>
+                        <span id="next-upcoming-class-label" class="font-bold text-emerald-300 text-xs">Scanning today's timetable...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timetable Builder Controls -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 no-print space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
                         <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-table-cells text-brand-600"></i> Weekly Timetable Grid Builder
+                            <i class="fa-solid fa-table-cells text-brand-600"></i> Weekly Reference Timetable & Alarm Schedule
                         </h2>
-                        <p class="text-xs text-slate-500">Configure period columns, break times, and weekly classes.</p>
+                        <p class="text-xs text-slate-500">Set exact start/end times (24-hr or HH:MM format) in column headers so the voice alarm alerts you accurately.</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -636,7 +858,7 @@
         </section>
 
         <!-- ========================================================================= -->
-        <!-- TAB 4: OFFICIAL MANAGEMENT REPORT & PRINT GENERATOR -->
+        <!-- TAB 4: OFFICIAL MANAGEMENT REPORT & A4 PAN / PINCH-TO-ZOOM VIEWER -->
         <!-- ========================================================================= -->
         <section id="view-report" class="hidden space-y-6">
             
@@ -645,14 +867,29 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
                         <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-file-contract text-brand-600"></i> Management Logbook Report Generator
+                            <i class="fa-solid fa-file-contract text-brand-600"></i> Management Logbook Report (A4 Page Preview)
                         </h2>
-                        <p class="text-xs text-slate-500">Generate printable reports by Day, Week, Month, Year, or Complete Logbook History.</p>
+                        <p class="text-xs text-slate-500">Full A4 sheets with finger pan in all directions, pinch-to-zoom, and clean A4 print export.</p>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <!-- A4 ZOOM IN / ZOOM OUT / FIT CONTROLS -->
+                        <div class="flex items-center bg-slate-100 rounded-xl p-1 text-xs border border-slate-200">
+                            <span class="px-2 font-semibold text-slate-500">A4 Zoom:</span>
+                            <button onclick="adjustReportZoom(-10)" title="Zoom Out" class="px-2.5 py-1 bg-white hover:bg-slate-200 rounded-lg text-slate-700 shadow-sm">
+                                <i class="fa-solid fa-magnifying-glass-minus"></i>
+                            </button>
+                            <span id="report-zoom-label" class="px-2.5 font-extrabold text-brand-700 min-w-[48px] text-center">90%</span>
+                            <button onclick="adjustReportZoom(10)" title="Zoom In" class="px-2.5 py-1 bg-white hover:bg-slate-200 rounded-lg text-slate-700 shadow-sm">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i>
+                            </button>
+                            <button onclick="fitReportToScreen()" title="Fit Whole A4 Width" class="ml-1 px-2.5 py-1 bg-brand-600 hover:bg-brand-700 rounded-lg text-[10px] font-bold text-white">
+                                Fit Page
+                            </button>
+                        </div>
+
                         <button onclick="printReport()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
-                            <i class="fa-solid fa-print"></i> Print Official Report (Portrait)
+                            <i class="fa-solid fa-print"></i> Print A4 Report
                         </button>
                     </div>
                 </div>
@@ -694,9 +931,13 @@
                 </div>
             </div>
 
-            <!-- PRINTABLE REPORT DOCUMENT BODY CONTAINER -->
-            <div id="report-document-wrapper" class="bg-white p-6 sm:p-10 rounded-2xl shadow-sm border border-slate-200 space-y-8 print:p-0 print:border-none print:shadow-none">
-                <!-- Dynamically injected report -->
+            <!-- SCROLLABLE, ALL-SIDE PANNABLE & PINCH-TO-ZOOM A4 SHEET VIEWPORT -->
+            <div id="report-a4-viewport" class="a4-viewport custom-scrollbar">
+                <div id="report-a4-scale-sizer" class="a4-scale-sizer">
+                    <div id="report-a4-zoom-stage" class="a4-zoom-stage">
+                        <!-- Dynamically injected A4 paper pages -->
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -790,7 +1031,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL 2: TEACHER PROFILE & WORK CONFIGURATION (WITH INLINE EDIT & FULL CRUD) -->
+    <!-- MODAL 2: TEACHER PROFILE & WORK CONFIGURATION -->
     <!-- ========================================================================= -->
     <div id="modal-profile" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-2 sm:p-4">
         <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden my-auto">
@@ -825,7 +1066,7 @@
                     </div>
                 </div>
 
-                <!-- Configurable Dynamic Lists with EDIT functionality -->
+                <!-- Configurable Dynamic Lists -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
                     <!-- 1. Classes List -->
@@ -900,7 +1141,45 @@
     <!-- APPLICATION JAVASCRIPT ENGINE -->
     <!-- ========================================================================= -->
     <script>
-        // DATE UTILITY FUNCTIONS FOR ROBUST TIMEZONE-SAFE MATH
+        // DEFAULT FACTORY STRUCTURES
+        function getDefaultProfileData() {
+            return { 
+                name: "Sarah Jenkins", 
+                school: "St. Jude High School", 
+                dept: "Mathematics",
+                classes: ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"],
+                sections: ["Sec A", "Sec B", "Sec C", "Sec D"],
+                workTypes: ["Teaching", "Worksheet", "Remedials", "Lab Practical", "Evaluation", "Revision"],
+                extraWorkTypes: ["Invigilation", "Parent Call", "Substitution Duty", "Lab Prep", "Event Duty", "Valuation / Correction", "Admin Work"]
+            };
+        }
+
+        function getDefaultTimetableData() {
+            return {
+                zoomLevel: 100,
+                columns: [
+                    { id: "col1", timeLabel: "08:30 - 09:15", title: "Period 1", isBreak: false, durationMins: 45 },
+                    { id: "col2", timeLabel: "09:15 - 10:00", title: "Period 2", isBreak: false, durationMins: 45 },
+                    { id: "col3", timeLabel: "10:00 - 10:15", title: "Tea Break", isBreak: true, durationMins: 15 },
+                    { id: "col4", timeLabel: "10:15 - 11:00", title: "Period 3", isBreak: false, durationMins: 45 },
+                    { id: "col5", timeLabel: "11:00 - 11:45", title: "Period 4", isBreak: false, durationMins: 45 },
+                    { id: "col6", timeLabel: "11:45 - 12:30", title: "Lunch Break", isBreak: true, durationMins: 45 },
+                    { id: "col7", timeLabel: "12:30 - 13:15", title: "Period 5", isBreak: false, durationMins: 45 },
+                    { id: "col8", timeLabel: "13:15 - 14:00", title: "Period 6", isBreak: false, durationMins: 45 }
+                ],
+                rows: [
+                    { id: "row-mon", dayName: "Monday" },
+                    { id: "row-tue", dayName: "Tuesday" },
+                    { id: "row-wed", dayName: "Wednesday" },
+                    { id: "row-thu", dayName: "Thursday" },
+                    { id: "row-fri", dayName: "Friday" },
+                    { id: "row-sat", dayName: "Saturday" }
+                ],
+                grid: {}
+            };
+        }
+
+        // DATE UTILITY FUNCTIONS
         function getTodayDateStr() {
             const now = new Date();
             const y = now.getFullYear();
@@ -924,45 +1203,54 @@
             return `${y}-${m}-${d}`;
         }
 
+        // TIME PARSING HELPER
+        function calculateDurationMinsFromTimeRange(timeFrom, timeTo, fallbackMins = 45) {
+            if (!timeFrom || !timeTo) return fallbackMins;
+            const [h1, m1] = timeFrom.split(':').map(Number);
+            const [h2, m2] = timeTo.split(':').map(Number);
+            if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return fallbackMins;
+            let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+            if (diff < 0) diff += 12 * 60;
+            return diff > 0 ? diff : fallbackMins;
+        }
+
+        function parseStartMinutesFromLabel(timeLabel) {
+            if (!timeLabel) return null;
+            const match = timeLabel.match(/(\d{1,2}):(\d{2})/);
+            if (!match) return null;
+            let hours = parseInt(match[1], 10);
+            const mins = parseInt(match[2], 10);
+            if (!/am|pm/i.test(timeLabel) && hours >= 1 && hours <= 6) {
+                hours += 12;
+            } else if (/pm/i.test(timeLabel) && hours < 12) {
+                hours += 12;
+            } else if (/am/i.test(timeLabel) && hours === 12) {
+                hours = 0;
+            }
+            return hours * 60 + mins;
+        }
+
         // GLOBAL STATE DATA STRUCTURES
         let currentDateStr = getTodayDateStr();
         let currentTabId = 'planner';
         let appData = {}; 
-        
-        let profileData = { 
-            name: "Sarah Jenkins", 
-            school: "St. Jude High School", 
-            dept: "Mathematics",
-            classes: ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"],
-            sections: ["Sec A", "Sec B", "Sec C", "Sec D"],
-            workTypes: ["Teaching", "Worksheet", "Remedials", "Lab Practical", "Evaluation", "Revision"],
-            extraWorkTypes: ["Invigilation", "Parent Call", "Substitution Duty", "Lab Prep", "Event Duty", "Valuation / Correction", "Admin Work"]
-        };
+        let profileData = getDefaultProfileData();
+        let timetableData = getDefaultTimetableData();
 
-        let timetableData = {
-            zoomLevel: 100,
-            columns: [
-                { id: "col1", timeLabel: "08:30 - 09:15", title: "Period 1", isBreak: false, durationMins: 45 },
-                { id: "col2", timeLabel: "09:15 - 10:00", title: "Period 2", isBreak: false, durationMins: 45 },
-                { id: "col3", timeLabel: "10:00 - 10:15", title: "Tea Break", isBreak: true, durationMins: 15 },
-                { id: "col4", timeLabel: "10:15 - 11:00", title: "Period 3", isBreak: false, durationMins: 45 },
-                { id: "col5", timeLabel: "11:00 - 11:45", title: "Period 4", isBreak: false, durationMins: 45 },
-                { id: "col6", timeLabel: "11:45 - 12:30", title: "Lunch Break", isBreak: true, durationMins: 45 },
-                { id: "col7", timeLabel: "12:30 - 01:15", title: "Period 5", isBreak: false, durationMins: 45 },
-                { id: "col8", timeLabel: "01:15 - 02:00", title: "Period 6", isBreak: false, durationMins: 45 }
-            ],
-            rows: [
-                { id: "row-mon", dayName: "Monday" },
-                { id: "row-tue", dayName: "Tuesday" },
-                { id: "row-wed", dayName: "Wednesday" },
-                { id: "row-thu", dayName: "Thursday" },
-                { id: "row-fri", dayName: "Friday" },
-                { id: "row-sat", dayName: "Saturday" }
-            ],
-            grid: {}
+        // ALARM SETTINGS STATE
+        let alarmSettings = {
+            enabled: false,
+            offsetMins: 5,
+            preset: "5"
         };
+        let triggeredAlarmKeys = new Set();
+        let lastSpokenMessage = "";
+        let wakeLockSentinel = null;
+        let alarmWorker = null;
 
         let includeExtraDutiesInPrint = true;
+        let reportZoomPercent = 90;
+        let currentPeriods = [];
         let currentExtraWorks = [];
 
         // INITIALIZATION ON LOAD
@@ -971,12 +1259,66 @@
             updateProfileUIHeadings();
             initDatePicker();
             renderProfileConfigLists();
-            renderPeriodRows();
             loadDateLog();
             renderTimetableBuilder();
             populateSearchDropdowns();
             onReportScopeTypeChange();
+            initAlarmSystem();
+            initA4TouchPanAndPinchZoom();
+            window.addEventListener('resize', () => {
+                if (currentTabId === 'report') syncReportSizerDimensions();
+            });
         };
+
+        // =========================================================================
+        // GLOBAL DATA SYNCHRONIZATION
+        // =========================================================================
+        function syncAllDependentViews() {
+            calculateAndDisplayDailyHours();
+            renderAnalytics();
+            onReportScopeTypeChange();
+            executeSearch();
+            updateNextUpcomingClassPreview();
+        }
+
+        // FACTORY RESET / DELETE ALL DATA
+        function factoryResetAllData() {
+            const firstConfirm = confirm("⚠️ FACTORY RESET WARNING:\n\nThis will permanently delete ALL saved daily logs, extra work entries, attachments, custom timetable schedules, and profile settings.\n\nDo you want to proceed?");
+            if (!firstConfirm) return;
+
+            const secondConfirm = confirm("Final Confirmation: Erase everything and reset Teacher's Day Book to factory defaults?");
+            if (!secondConfirm) return;
+
+            localStorage.removeItem('teacher_logbook_data');
+            localStorage.removeItem('teacher_logbook_profile');
+            localStorage.removeItem('teacher_logbook_timetable');
+            localStorage.removeItem('teacher_logbook_alarms');
+
+            appData = {};
+            profileData = getDefaultProfileData();
+            timetableData = getDefaultTimetableData();
+            alarmSettings = { enabled: false, offsetMins: 5, preset: "5" };
+            triggeredAlarmKeys.clear();
+            currentPeriods = [];
+            currentExtraWorks = [];
+            currentDateStr = getTodayDateStr();
+
+            releaseScreenWakeLock();
+            saveLocalStorageData();
+
+            document.getElementById('log-date').value = currentDateStr;
+            updateProfileUIHeadings();
+            renderProfileConfigLists();
+            loadDateLog();
+            renderTimetableBuilder();
+            populateSearchDropdowns();
+            initAlarmSystem();
+            syncAllDependentViews();
+
+            toggleSideMenu();
+            switchTab('planner');
+            showToast("All data erased. App restored to factory defaults!");
+        }
 
         function updateProfileUIHeadings() {
             if (profileData.name) {
@@ -1026,6 +1368,9 @@
 
                 const storedTimetable = localStorage.getItem('teacher_logbook_timetable');
                 if (storedTimetable) timetableData = JSON.parse(storedTimetable);
+
+                const storedAlarms = localStorage.getItem('teacher_logbook_alarms');
+                if (storedAlarms) alarmSettings = JSON.parse(storedAlarms);
             } catch (e) {
                 console.error("Local storage error:", e);
             }
@@ -1036,6 +1381,7 @@
                 localStorage.setItem('teacher_logbook_data', JSON.stringify(appData));
                 localStorage.setItem('teacher_logbook_profile', JSON.stringify(profileData));
                 localStorage.setItem('teacher_logbook_timetable', JSON.stringify(timetableData));
+                localStorage.setItem('teacher_logbook_alarms', JSON.stringify(alarmSettings));
             } catch (e) {
                 console.error("Local storage save error:", e);
             }
@@ -1060,7 +1406,6 @@
             loadDateLog();
         }
 
-        // STABLE DATE NAVIGATION ARROW HANDLER
         function navigateDate(offsetDays) {
             let dt = parseLocalDate(currentDateStr);
             dt.setDate(dt.getDate() + offsetDays);
@@ -1070,7 +1415,338 @@
         }
 
         // =========================================================================
-        // PRINT HANDLERS FOR SPECIFIC TAB VIEWS (ISOLATED LANDSCAPE FOR TIMETABLE ONLY)
+        // VOICE & BACKGROUND ALARM SYSTEM ENGINE
+        // =========================================================================
+        function initAlarmSystem() {
+            const toggle = document.getElementById('alarm-master-toggle');
+            const menuToggle = document.getElementById('menu-alarm-toggle');
+            const presetSelect = document.getElementById('alarm-offset-preset');
+            const customInput = document.getElementById('alarm-custom-mins');
+
+            if (toggle) toggle.checked = alarmSettings.enabled;
+            if (menuToggle) menuToggle.checked = alarmSettings.enabled;
+            if (presetSelect) presetSelect.value = alarmSettings.preset || "5";
+            if (customInput) customInput.value = alarmSettings.offsetMins ?? 5;
+
+            if (alarmSettings.preset === 'custom') {
+                document.getElementById('alarm-custom-mins-box')?.classList.remove('hidden');
+            } else {
+                document.getElementById('alarm-custom-mins-box')?.classList.add('hidden');
+            }
+
+            updateAlarmUIState();
+            startBackgroundTicker();
+            updateNextUpcomingClassPreview();
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && alarmSettings.enabled) {
+                    requestScreenWakeLock();
+                    checkPeriodAlarms();
+                }
+            });
+        }
+
+        function startBackgroundTicker() {
+            if (alarmWorker) return;
+            try {
+                const workerBlob = new Blob([`
+                    setInterval(() => { postMessage('tick'); }, 5000);
+                `], { type: 'application/javascript' });
+                alarmWorker = new Worker(URL.createObjectURL(workerBlob));
+                alarmWorker.onmessage = () => {
+                    checkPeriodAlarms();
+                    updateNextUpcomingClassPreview();
+                };
+            } catch (e) {
+                setInterval(() => {
+                    checkPeriodAlarms();
+                    updateNextUpcomingClassPreview();
+                }, 5000);
+            }
+        }
+
+        async function requestScreenWakeLock() {
+            try {
+                if ('wakeLock' in navigator && !wakeLockSentinel) {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    wakeLockSentinel.addEventListener('release', () => {
+                        wakeLockSentinel = null;
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function releaseScreenWakeLock() {
+            if (wakeLockSentinel) {
+                wakeLockSentinel.release().catch(() => {});
+                wakeLockSentinel = null;
+            }
+        }
+
+        async function applyMasterAlarmState(enabled) {
+            alarmSettings.enabled = enabled;
+            const mainToggle = document.getElementById('alarm-master-toggle');
+            const menuToggle = document.getElementById('menu-alarm-toggle');
+            if (mainToggle) mainToggle.checked = enabled;
+            if (menuToggle) menuToggle.checked = enabled;
+
+            if (enabled) {
+                playAlarmChime();
+                if ('Notification' in window && Notification.permission === 'default') {
+                    await Notification.requestPermission();
+                }
+                await requestScreenWakeLock();
+                showToast("Period Voice Alarms Enabled!");
+            } else {
+                releaseScreenWakeLock();
+                showToast("Period Voice Alarms Disabled.", "info");
+            }
+
+            saveLocalStorageData();
+            updateAlarmUIState();
+            updateNextUpcomingClassPreview();
+        }
+
+        function toggleMasterAlarm() {
+            const toggle = document.getElementById('alarm-master-toggle');
+            applyMasterAlarmState(toggle.checked);
+        }
+
+        function toggleMasterAlarmFromMenu() {
+            const menuToggle = document.getElementById('menu-alarm-toggle');
+            applyMasterAlarmState(menuToggle.checked);
+        }
+
+        function onAlarmOffsetPresetChange() {
+            const preset = document.getElementById('alarm-offset-preset').value;
+            const customBox = document.getElementById('alarm-custom-mins-box');
+            alarmSettings.preset = preset;
+
+            if (preset === 'custom') {
+                customBox.classList.remove('hidden');
+                alarmSettings.offsetMins = parseInt(document.getElementById('alarm-custom-mins').value, 10) || 0;
+            } else {
+                customBox.classList.add('hidden');
+                alarmSettings.offsetMins = parseInt(preset, 10) || 0;
+            }
+
+            triggeredAlarmKeys.clear();
+            saveLocalStorageData();
+            updateAlarmUIState();
+            updateNextUpcomingClassPreview();
+        }
+
+        function saveAlarmSettings() {
+            alarmSettings.offsetMins = Math.max(0, parseInt(document.getElementById('alarm-custom-mins').value, 10) || 0);
+            triggeredAlarmKeys.clear();
+            saveLocalStorageData();
+            updateAlarmUIState();
+            updateNextUpcomingClassPreview();
+        }
+
+        function updateAlarmUIState() {
+            const label = document.getElementById('alarm-master-label');
+            const badge = document.getElementById('alarm-permission-badge');
+
+            const menuCard = document.getElementById('menu-alarm-card');
+            const menuIconBox = document.getElementById('menu-alarm-icon-box');
+            const menuIcon = document.getElementById('menu-alarm-icon');
+            const menuTitle = document.getElementById('menu-alarm-status-title');
+            const menuSub = document.getElementById('menu-alarm-status-sub');
+
+            if (alarmSettings.enabled) {
+                if (label) label.innerText = "Alarms Active (ON)";
+                if (badge) {
+                    badge.innerText = `Active (${alarmSettings.offsetMins}m before)`;
+                    badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40";
+                }
+                if (menuCard) menuCard.className = "p-3.5 rounded-2xl border border-amber-300 bg-amber-50/70 space-y-2.5 transition";
+                if (menuIconBox) menuIconBox.className = "p-2 rounded-xl bg-amber-500 text-slate-950";
+                if (menuIcon) menuIcon.className = "fa-solid fa-bell";
+                if (menuTitle) menuTitle.innerText = `Alarms Active (${alarmSettings.offsetMins}m before)`;
+                if (menuSub) menuSub.innerText = "Voice & chime alerts enabled";
+            } else {
+                if (label) label.innerText = "Enable Period Alarms";
+                if (badge) {
+                    badge.innerText = "Alarms Off";
+                    badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+                }
+                if (menuCard) menuCard.className = "p-3.5 rounded-2xl border border-slate-200 bg-slate-50 space-y-2.5 transition";
+                if (menuIconBox) menuIconBox.className = "p-2 rounded-xl bg-slate-200 text-slate-600";
+                if (menuIcon) menuIcon.className = "fa-solid fa-bell-slash";
+                if (menuTitle) menuTitle.innerText = "Alarms Off";
+                if (menuSub) menuSub.innerText = "Voice alerts disabled";
+            }
+        }
+
+        function getTodayTimetableSlots() {
+            const now = new Date();
+            const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const targetRow = timetableData.rows.find(r => r.dayName.toLowerCase() === dayName.toLowerCase());
+            if (!targetRow) return [];
+
+            const slots = [];
+            timetableData.columns.forEach(col => {
+                if (col.isBreak) return;
+                const cell = timetableData.grid[`${targetRow.id}_${col.id}`] || {};
+                if (!cell.className && !cell.subject) return;
+
+                const startMins = parseStartMinutesFromLabel(col.timeLabel);
+                if (startMins === null) return;
+
+                slots.push({
+                    colId: col.id,
+                    periodTitle: col.title || 'Period',
+                    timeLabel: col.timeLabel,
+                    startMins: startMins,
+                    className: cell.className || '',
+                    section: cell.section || '',
+                    subject: cell.subject || '',
+                    workType: cell.workType || ''
+                });
+            });
+            return slots.sort((a, b) => a.startMins - b.startMins);
+        }
+
+        function updateNextUpcomingClassPreview() {
+            const label = document.getElementById('next-upcoming-class-label');
+            if (!label) return;
+
+            const now = new Date();
+            const currentMins = now.getHours() * 60 + now.getMinutes();
+            const slots = getTodayTimetableSlots();
+
+            const nextSlot = slots.find(s => s.startMins >= currentMins);
+            if (!nextSlot) {
+                label.innerText = "No more scheduled periods remaining today.";
+                return;
+            }
+
+            const alertAtMins = Math.max(0, nextSlot.startMins - (alarmSettings.offsetMins || 0));
+            const ah = String(Math.floor(alertAtMins / 60)).padStart(2, '0');
+            const am = String(alertAtMins % 60).padStart(2, '0');
+            label.innerText = `${nextSlot.periodTitle}: ${nextSlot.className} ${nextSlot.section} (${nextSlot.subject || 'Class'}) at ${nextSlot.timeLabel} • Alert at ${ah}:${am}`;
+        }
+
+        function checkPeriodAlarms() {
+            if (!alarmSettings.enabled) return;
+
+            const now = new Date();
+            const todayKey = getTodayDateStr();
+            const currentMins = now.getHours() * 60 + now.getMinutes();
+            const offset = parseInt(alarmSettings.offsetMins, 10) || 0;
+
+            const slots = getTodayTimetableSlots();
+            slots.forEach(slot => {
+                const targetTriggerMins = slot.startMins - offset;
+                const uniqueKey = `${todayKey}_${slot.colId}_${targetTriggerMins}`;
+
+                if (currentMins === targetTriggerMins && !triggeredAlarmKeys.has(uniqueKey)) {
+                    triggeredAlarmKeys.add(uniqueKey);
+                    firePeriodAlert(slot, offset);
+                }
+            });
+        }
+
+        function buildVoiceMessage(slot, offsetMins) {
+            const timeIntro = offsetMins > 0 
+                ? `In ${offsetMins} minute${offsetMins === 1 ? '' : 's'}, ` 
+                : `It is now time for `;
+            const classPart = slot.className ? `${slot.className}` : 'your scheduled class';
+            const secPart = slot.section ? `, ${slot.section}` : '';
+            const subjPart = slot.subject ? `, for ${slot.subject}` : '';
+            const timePart = slot.timeLabel ? ` at ${slot.timeLabel}` : '';
+            return `Attention ${profileData.name || 'Teacher'}. ${timeIntro}${slot.periodTitle}${timePart}. Please go to ${classPart}${secPart}${subjPart}.`;
+        }
+
+        function firePeriodAlert(slot, offsetMins) {
+            const message = buildVoiceMessage(slot, offsetMins);
+            lastSpokenMessage = message;
+
+            const banner = document.getElementById('live-alarm-banner');
+            const bannerText = document.getElementById('live-alarm-text');
+            if (banner && bannerText) {
+                bannerText.innerText = message;
+                banner.classList.remove('hidden');
+            }
+
+            playAlarmChime();
+            setTimeout(() => speakText(message), 900);
+
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    const notif = new Notification(`🔔 ${slot.periodTitle}: ${slot.className} ${slot.section}`, {
+                        body: message,
+                        tag: `period-alert-${slot.colId}`,
+                        requireInteraction: true
+                    });
+                    notif.onclick = () => {
+                        window.focus();
+                        notif.close();
+                    };
+                } catch (e) {}
+            }
+        }
+
+        function testVoiceAlarm() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            const sampleSlot = {
+                colId: 'test',
+                periodTitle: 'Period 1',
+                timeLabel: '09:00 - 09:45',
+                className: profileData.classes[0] || 'Class 10',
+                section: profileData.sections[0] || 'Section A',
+                subject: profileData.dept || 'Mathematics'
+            };
+            firePeriodAlert(sampleSlot, alarmSettings.offsetMins || 5);
+        }
+
+        function repeatAlarmSpeech() {
+            if (lastSpokenMessage) {
+                playAlarmChime();
+                setTimeout(() => speakText(lastSpokenMessage), 700);
+            }
+        }
+
+        function dismissAlarmBanner() {
+            document.getElementById('live-alarm-banner')?.classList.add('hidden');
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        }
+
+        function playAlarmChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                const notes = [587.33, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.22);
+                    gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.22);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.22 + 0.6);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + idx * 0.22);
+                    osc.stop(ctx.currentTime + idx * 0.22 + 0.65);
+                });
+            } catch (e) {}
+        }
+
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // =========================================================================
+        // PRINT HANDLERS FOR SPECIFIC TAB VIEWS
         // =========================================================================
         function printCurrentTab() {
             if (currentTabId === 'timetable') {
@@ -1086,7 +1762,6 @@
             document.body.classList.add('print-timetable-mode');
             setTimeout(() => { 
                 window.print();
-                // Reset page mode after print dialog finishes
                 setTimeout(() => { document.body.classList.remove('print-timetable-mode'); }, 1000);
             }, 150);
         }
@@ -1158,95 +1833,195 @@
         }
 
         function editConfigItem(itemsKey, index) {
-            const currentVal = profileData[itemsKey][index];
-            const newVal = prompt(`Edit entry name:`, currentVal);
+            const oldVal = profileData[itemsKey][index];
+            const newVal = prompt(`Edit entry name:`, oldVal);
             if (newVal !== null && newVal.trim() !== '') {
-                profileData[itemsKey][index] = newVal.trim();
+                const trimmed = newVal.trim();
+                profileData[itemsKey][index] = trimmed;
+
+                Object.keys(appData).forEach(dateKey => {
+                    const log = appData[dateKey];
+                    (log.periods || []).forEach(p => {
+                        if (itemsKey === 'classes' && p.className === oldVal) p.className = trimmed;
+                        if (itemsKey === 'sections' && p.section === oldVal) p.section = trimmed;
+                        if (itemsKey === 'workTypes' && p.workType === oldVal) p.workType = trimmed;
+                    });
+                    (log.extraWorks || []).forEach(w => {
+                        if (itemsKey === 'classes' && w.className === oldVal) w.className = trimmed;
+                        if (itemsKey === 'extraWorkTypes' && w.category === oldVal) w.category = trimmed;
+                    });
+                });
+
+                Object.keys(timetableData.grid || {}).forEach(cellKey => {
+                    const cell = timetableData.grid[cellKey];
+                    if (itemsKey === 'classes' && cell.className === oldVal) cell.className = trimmed;
+                    if (itemsKey === 'sections' && cell.section === oldVal) cell.section = trimmed;
+                    if (itemsKey === 'workTypes' && cell.workType === oldVal) cell.workType = trimmed;
+                });
+
                 saveLocalStorageData();
                 renderProfileConfigLists();
-                renderPeriodRows();
+                loadDateLog();
                 renderTimetableBuilder();
                 populateSearchDropdowns();
-                renderExtraWorkList();
+                syncAllDependentViews();
             }
         }
 
         function removeConfigItem(itemsKey, index) {
-            if (confirm(`Remove "${profileData[itemsKey][index]}"?`)) {
+            const deletedVal = profileData[itemsKey][index];
+            if (confirm(`Remove "${deletedVal}" from setup and clear references to it?`)) {
                 profileData[itemsKey].splice(index, 1);
+
+                Object.keys(timetableData.grid || {}).forEach(cellKey => {
+                    const cell = timetableData.grid[cellKey];
+                    if (itemsKey === 'classes' && cell.className === deletedVal) cell.className = '';
+                    if (itemsKey === 'sections' && cell.section === deletedVal) cell.section = '';
+                    if (itemsKey === 'workTypes' && cell.workType === deletedVal) cell.workType = '';
+                });
+
                 saveLocalStorageData();
                 renderProfileConfigLists();
                 renderPeriodRows();
                 renderTimetableBuilder();
                 populateSearchDropdowns();
                 renderExtraWorkList();
+                syncAllDependentViews();
             }
         }
 
         // =========================================================================
-        // PERIOD ROWS RENDERER
+        // DYNAMIC ON-DEMAND PERIOD ROWS RENDERER
         // =========================================================================
+        function addPeriodRow() {
+            const nextNum = currentPeriods.length + 1;
+            currentPeriods.push({
+                id: `period_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                periodLabel: `Period ${nextNum}`,
+                timeFrom: '',
+                timeTo: '',
+                className: '',
+                section: '',
+                workType: profileData.workTypes[0] || 'Teaching',
+                subject: '',
+                topic: '',
+                activity: '',
+                status: 'Completed'
+            });
+            renderPeriodRows();
+            saveLog(false);
+        }
+
+        function updatePeriodField(index, field, value) {
+            if (!currentPeriods[index]) return;
+            currentPeriods[index][field] = value;
+            calculateAndDisplayDailyHours();
+            autoSave();
+        }
+
+        function deletePeriodRow(index) {
+            currentPeriods.splice(index, 1);
+            renderPeriodRows();
+            saveLog(false);
+            syncAllDependentViews();
+            showToast("Period row deleted from logbook & reports.", "info");
+        }
+
         function renderPeriodRows() {
             const tbody = document.getElementById('periods-container');
+            const countLabel = document.getElementById('period-rows-count-label');
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            const numPeriods = timetableData.columns ? timetableData.columns.length : 8;
+            if (countLabel) {
+                countLabel.innerText = `${currentPeriods.length} period row${currentPeriods.length === 1 ? '' : 's'} logged for ${currentDateStr}`;
+            }
 
-            for (let i = 1; i <= numPeriods; i++) {
-                const colInfo = timetableData.columns[i-1] || { title: `Period ${i}`, timeLabel: '' };
+            if (currentPeriods.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="p-8 text-center text-slate-400">
+                            <i class="fa-regular fa-calendar-plus text-3xl mb-2 text-slate-300 block"></i>
+                            <p class="text-xs font-semibold text-slate-600">No period rows added yet for ${currentDateStr}.</p>
+                            <p class="text-[11px] mt-0.5 mb-3">Click <strong>"+ Add Period Row"</strong> whenever you conduct a class to set its Period, Time (From - To), Class, Section, Work Type, Subject & Topic.</p>
+                            <button onclick="addPeriodRow()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition inline-flex items-center gap-1.5 no-print">
+                                <i class="fa-solid fa-plus"></i> Add First Period Row
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                calculateAndDisplayDailyHours();
+                return;
+            }
+
+            currentPeriods.forEach((p, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition-colors";
 
-                const classOpts = profileData.classes.map(c => `<option value="${c}">${c}</option>`).join('');
-                const secOpts = profileData.sections.map(s => `<option value="${s}">${s}</option>`).join('');
-                const workOpts = profileData.workTypes.map(w => `<option value="${w}">${w}</option>`).join('');
+                const classOpts = profileData.classes.map(c => `<option value="${c}" ${p.className === c ? 'selected' : ''}>${c}</option>`).join('');
+                const secOpts = profileData.sections.map(s => `<option value="${s}" ${p.section === s ? 'selected' : ''}>${s}</option>`).join('');
+                const workOpts = profileData.workTypes.map(w => `<option value="${w}" ${p.workType === w ? 'selected' : ''}>${w}</option>`).join('');
+                const durMins = calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
 
                 tr.innerHTML = `
-                    <td class="py-2.5 px-4 font-semibold text-slate-700 align-top">
-                        <div class="font-bold text-brand-700 text-xs">${colInfo.title}</div>
-                        <div class="text-[10px] text-slate-400 font-normal">${colInfo.timeLabel}</div>
+                    <td class="py-2 px-3 align-top">
+                        <input type="text" value="${p.periodLabel || `Period ${idx + 1}`}" oninput="updatePeriodField(${idx}, 'periodLabel', this.value)" placeholder="Period ${idx + 1}" class="w-full font-bold text-brand-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
                     </td>
                     <td class="py-2 px-2 align-top">
-                        <select id="p${i}-class" onchange="autoSave()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
+                        <div class="flex items-center gap-1">
+                            <input type="time" value="${p.timeFrom || ''}" onchange="updatePeriodField(${idx}, 'timeFrom', this.value); renderPeriodRows();" title="From Time" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1 text-[11px] focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
+                            <span class="text-slate-400 font-bold">-</span>
+                            <input type="time" value="${p.timeTo || ''}" onchange="updatePeriodField(${idx}, 'timeTo', this.value); renderPeriodRows();" title="To Time" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1 text-[11px] focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-0.5 text-center">${(p.timeFrom && p.timeTo) ? `${durMins} mins` : 'Default: 45m'}</div>
+                    </td>
+                    <td class="py-2 px-2 align-top">
+                        <select onchange="updatePeriodField(${idx}, 'className', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
                             <option value="">-- Class --</option>${classOpts}
                         </select>
                     </td>
                     <td class="py-2 px-2 align-top">
-                        <select id="p${i}-section" onchange="autoSave()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
+                        <select onchange="updatePeriodField(${idx}, 'section', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
                             <option value="">-- Sec --</option>${secOpts}
                         </select>
                     </td>
                     <td class="py-2 px-2 align-top">
-                        <select id="p${i}-worktype" onchange="autoSave()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
+                        <select onchange="updatePeriodField(${idx}, 'workType', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
                             <option value="">-- Work --</option>${workOpts}
                         </select>
                     </td>
                     <td class="py-2 px-2 align-top">
-                        <input type="text" id="p${i}-subject" oninput="autoSave()" placeholder="Subject" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
+                        <input type="text" value="${p.subject || ''}" oninput="updatePeriodField(${idx}, 'subject', this.value)" placeholder="Subject" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
                     </td>
                     <td class="py-2 px-2 align-top">
-                        <textarea id="p${i}-topic" oninput="autoSave()" rows="2" placeholder="Topic covered..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none resize-none custom-scrollbar"></textarea>
+                        <textarea oninput="updatePeriodField(${idx}, 'topic', this.value)" rows="2" placeholder="Topic / Content taught..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none resize-none custom-scrollbar">${p.topic || ''}</textarea>
                     </td>
                     <td class="py-2 px-2 align-top">
-                        <textarea id="p${i}-activity" oninput="autoSave()" rows="2" placeholder="Activity / HW..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none resize-none custom-scrollbar"></textarea>
+                        <textarea oninput="updatePeriodField(${idx}, 'activity', this.value)" rows="2" placeholder="Classwork / HW..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none resize-none custom-scrollbar">${p.activity || ''}</textarea>
                     </td>
                     <td class="py-2 px-2 align-top">
-                        <select id="p${i}-status" onchange="autoSave()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
-                            <option value="Completed">Completed</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Free/Planning">Free/Planning</option>
-                            <option value="Substitute">Substitute</option>
-                            <option value="Cancelled">Cancelled</option>
+                        <select onchange="updatePeriodField(${idx}, 'status', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-brand-500 outline-none">
+                            <option value="Completed" ${p.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                            <option value="In Progress" ${p.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="Free/Planning" ${p.status === 'Free/Planning' ? 'selected' : ''}>Free/Planning</option>
+                            <option value="Substitute" ${p.status === 'Substitute' ? 'selected' : ''}>Substitute</option>
+                            <option value="Cancelled" ${p.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                         </select>
+                    </td>
+                    <td class="py-2 px-2 align-top text-center no-print">
+                        <button onclick="deletePeriodRow(${idx})" title="Delete Row Everywhere" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
-            }
+            });
+
+            calculateAndDisplayDailyHours();
         }
 
         // =========================================================================
-        // EXTRA WORK & OVERTIME DUTY LOGGER (WITH IMAGE/FILE ATTACHMENTS & PRINT PREVIEW)
+        // EXTRA WORK & OVERTIME DUTY LOGGER
         // =========================================================================
         function renderExtraWorkList() {
             const container = document.getElementById('extra-work-container');
@@ -1300,11 +2075,11 @@
                             <input type="number" min="5" step="5" value="${item.durationMins || 45}" onchange="updateExtraWorkField(${idx}, 'durationMins', parseInt(this.value) || 0)" class="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-xs font-bold text-amber-800 focus:ring-1 focus:ring-amber-500 outline-none bg-white">
                         </div>
 
-                        <div class="sm:col-span-1 flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-3">
+                        <div class="sm:col-span-1 flex items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-3 no-print">
                             <button onclick="toggleExtraDutyType(${idx})" title="Toggle Duty Tag" class="text-[11px] px-2 py-1 rounded-md font-bold transition ${item.isExtraDuty ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}">
                                 ${item.isExtraDuty ? 'Extra' : 'Core'}
                             </button>
-                            <button onclick="deleteExtraWorkItem(${idx})" class="text-slate-400 hover:text-rose-600 p-1">
+                            <button onclick="deleteExtraWorkItem(${idx})" title="Delete Extra Duty Everywhere" class="text-slate-400 hover:text-rose-600 p-1">
                                 <i class="fa-solid fa-trash-can text-sm"></i>
                             </button>
                         </div>
@@ -1312,7 +2087,7 @@
 
                     <!-- FILE / IMAGE ATTACHMENT SECTION -->
                     <div class="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-2 no-print">
                             <label class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold cursor-pointer transition flex items-center gap-1.5">
                                 <i class="fa-solid fa-paperclip"></i> Attach File / Image
                                 <input type="file" accept="image/*" onchange="handleExtraWorkFileUpload(event, ${idx})" class="hidden">
@@ -1324,7 +2099,7 @@
                             <div class="flex items-center space-x-3 bg-white p-1.5 rounded-lg border border-slate-200">
                                 <img src="${item.attachment}" alt="Attached Document" class="h-10 w-12 object-cover rounded-md border border-slate-200 cursor-pointer" onclick="window.open('${item.attachment}')">
                                 <span class="text-[11px] font-semibold text-slate-600">${item.fileName || 'Image Attached'}</span>
-                                <button onclick="removeExtraWorkAttachment(${idx})" class="text-rose-500 hover:text-rose-700 p-1" title="Remove attachment">
+                                <button onclick="removeExtraWorkAttachment(${idx})" class="text-rose-500 hover:text-rose-700 p-1 no-print" title="Remove attachment">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>
                             </div>
@@ -1346,7 +2121,8 @@
                 currentExtraWorks[idx].attachment = e.target.result;
                 currentExtraWorks[idx].fileName = file.name;
                 renderExtraWorkList();
-                autoSave();
+                saveLog(false);
+                syncAllDependentViews();
                 showToast("File attached successfully!");
             };
             reader.readAsDataURL(file);
@@ -1357,7 +2133,8 @@
                 delete currentExtraWorks[idx].attachment;
                 delete currentExtraWorks[idx].fileName;
                 renderExtraWorkList();
-                autoSave();
+                saveLog(false);
+                syncAllDependentViews();
             }
         }
 
@@ -1372,7 +2149,7 @@
                 isExtraDuty: true
             });
             renderExtraWorkList();
-            autoSave();
+            saveLog(false);
         }
 
         function updateExtraWorkField(index, field, val) {
@@ -1384,16 +2161,19 @@
         function toggleExtraDutyType(index) {
             currentExtraWorks[index].isExtraDuty = !currentExtraWorks[index].isExtraDuty;
             renderExtraWorkList();
-            autoSave();
+            saveLog(false);
+            syncAllDependentViews();
         }
 
         function deleteExtraWorkItem(index) {
             currentExtraWorks.splice(index, 1);
             renderExtraWorkList();
-            autoSave();
+            saveLog(false);
+            syncAllDependentViews();
+            showToast("Extra duty deleted everywhere.", "info");
         }
 
-        // LOAD DATE LOG DATA (ISOLATES EXTRA WORKS FOR CURRENT DATE ONLY)
+        // LOAD DATE LOG DATA
         function loadDateLog() {
             const input = document.getElementById('log-date');
             if (input && input.value) currentDateStr = input.value;
@@ -1404,21 +2184,9 @@
             if (document.getElementById('day-notes')) document.getElementById('day-notes').value = dayLog.dayNotes || '';
             if (document.getElementById('next-day-plan')) document.getElementById('next-day-plan').value = dayLog.nextPlan || '';
 
-            const periods = dayLog.periods || [];
-            const numPeriods = timetableData.columns ? timetableData.columns.length : 8;
+            currentPeriods = Array.isArray(dayLog.periods) ? JSON.parse(JSON.stringify(dayLog.periods)) : [];
+            renderPeriodRows();
 
-            for (let i = 1; i <= numPeriods; i++) {
-                const p = periods[i - 1] || {};
-                if (document.getElementById(`p${i}-class`)) document.getElementById(`p${i}-class`).value = p.className || '';
-                if (document.getElementById(`p${i}-section`)) document.getElementById(`p${i}-section`).value = p.section || '';
-                if (document.getElementById(`p${i}-worktype`)) document.getElementById(`p${i}-worktype`).value = p.workType || '';
-                if (document.getElementById(`p${i}-subject`)) document.getElementById(`p${i}-subject`).value = p.subject || '';
-                if (document.getElementById(`p${i}-topic`)) document.getElementById(`p${i}-topic`).value = p.topic || '';
-                if (document.getElementById(`p${i}-activity`)) document.getElementById(`p${i}-activity`).value = p.activity || '';
-                if (document.getElementById(`p${i}-status`)) document.getElementById(`p${i}-status`).value = p.status || 'Completed';
-            }
-
-            // Reload isolated extra works array for this date only
             currentExtraWorks = Array.isArray(dayLog.extraWorks) ? JSON.parse(JSON.stringify(dayLog.extraWorks)) : [];
             renderExtraWorkList();
         }
@@ -1429,35 +2197,37 @@
             if (input && input.value) currentDateStr = input.value;
             if (!currentDateStr) return;
 
-            const periods = [];
-            const numPeriods = timetableData.columns ? timetableData.columns.length : 8;
+            const homeroomVal = document.getElementById('homeroom-duty') ? document.getElementById('homeroom-duty').value.trim() : '';
+            const dayNotesVal = document.getElementById('day-notes') ? document.getElementById('day-notes').value.trim() : '';
+            const nextPlanVal = document.getElementById('next-day-plan') ? document.getElementById('next-day-plan').value.trim() : '';
 
-            for (let i = 1; i <= numPeriods; i++) {
-                periods.push({
-                    periodNum: i,
-                    className: document.getElementById(`p${i}-class`) ? document.getElementById(`p${i}-class`).value : '',
-                    section: document.getElementById(`p${i}-section`) ? document.getElementById(`p${i}-section`).value : '',
-                    workType: document.getElementById(`p${i}-worktype`) ? document.getElementById(`p${i}-worktype`).value : '',
-                    subject: document.getElementById(`p${i}-subject`) ? document.getElementById(`p${i}-subject`).value : '',
-                    topic: document.getElementById(`p${i}-topic`) ? document.getElementById(`p${i}-topic`).value : '',
-                    activity: document.getElementById(`p${i}-activity`) ? document.getElementById(`p${i}-activity`).value : '',
-                    status: document.getElementById(`p${i}-status`) ? document.getElementById(`p${i}-status`).value : 'Completed'
-                });
+            const normalizedPeriods = currentPeriods.map((p, idx) => ({
+                ...p,
+                periodNum: idx + 1,
+                periodLabel: p.periodLabel || `Period ${idx + 1}`,
+                durationMins: calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45)
+            }));
+
+            if (normalizedPeriods.length === 0 && currentExtraWorks.length === 0 && !homeroomVal && !dayNotesVal && !nextPlanVal) {
+                delete appData[currentDateStr];
+            } else {
+                appData[currentDateStr] = {
+                    homeroom: homeroomVal,
+                    dayNotes: dayNotesVal,
+                    nextPlan: nextPlanVal,
+                    periods: normalizedPeriods,
+                    extraWorks: JSON.parse(JSON.stringify(currentExtraWorks)),
+                    updatedAt: new Date().toISOString()
+                };
             }
-
-            appData[currentDateStr] = {
-                homeroom: document.getElementById('homeroom-duty') ? document.getElementById('homeroom-duty').value.trim() : '',
-                dayNotes: document.getElementById('day-notes') ? document.getElementById('day-notes').value.trim() : '',
-                nextPlan: document.getElementById('next-day-plan') ? document.getElementById('next-day-plan').value.trim() : '',
-                periods: periods,
-                extraWorks: JSON.parse(JSON.stringify(currentExtraWorks)),
-                updatedAt: new Date().toISOString()
-            };
 
             saveLocalStorageData();
             calculateAndDisplayDailyHours();
 
-            if (showToastNotification) showToast("Logbook saved successfully!");
+            if (showToastNotification) {
+                syncAllDependentViews();
+                showToast("Logbook saved successfully!");
+            }
         }
 
         function loadFromTimetableForCurrentDate() {
@@ -1470,22 +2240,37 @@
                 return;
             }
 
-            timetableData.columns.forEach((col, idx) => {
-                const i = idx + 1;
+            if (currentPeriods.length > 0 && !confirm(`Append ${dayName}'s timetable classes to your current log rows?`)) {
+                return;
+            }
+
+            let addedCount = 0;
+            timetableData.columns.forEach((col) => {
+                if (col.isBreak) return;
                 const cellData = timetableData.grid[`${targetRow.id}_${col.id}`] || {};
-                
-                if (col.isBreak) {
-                    if (document.getElementById(`p${i}-status`)) document.getElementById(`p${i}-status`).value = 'Free/Planning';
-                } else if (cellData.className || cellData.subject) {
-                    if (document.getElementById(`p${i}-class`)) document.getElementById(`p${i}-class`).value = cellData.className || '';
-                    if (document.getElementById(`p${i}-section`)) document.getElementById(`p${i}-section`).value = cellData.section || '';
-                    if (document.getElementById(`p${i}-worktype`)) document.getElementById(`p${i}-worktype`).value = cellData.workType || '';
-                    if (document.getElementById(`p${i}-subject`)) document.getElementById(`p${i}-subject`).value = cellData.subject || '';
+                if (cellData.className || cellData.subject) {
+                    const times = (col.timeLabel || '').split('-').map(s => s.trim());
+                    currentPeriods.push({
+                        id: `period_${Date.now()}_${addedCount}`,
+                        periodLabel: col.title || `Period ${currentPeriods.length + 1}`,
+                        timeFrom: times[0] && /^\d{2}:\d{2}$/.test(times[0]) ? times[0] : '',
+                        timeTo: times[1] && /^\d{2}:\d{2}$/.test(times[1]) ? times[1] : '',
+                        className: cellData.className || '',
+                        section: cellData.section || '',
+                        workType: cellData.workType || 'Teaching',
+                        subject: cellData.subject || '',
+                        topic: '',
+                        activity: '',
+                        status: 'Completed'
+                    });
+                    addedCount++;
                 }
             });
 
+            renderPeriodRows();
             saveLog(false);
-            showToast(`Timetable auto-filled for ${dayName}!`);
+            syncAllDependentViews();
+            showToast(`Imported ${addedCount} classes from ${dayName}'s timetable!`);
         }
 
         let autoSaveTimer;
@@ -1495,30 +2280,27 @@
         }
 
         function clearCurrentDay() {
-            if (confirm("Clear all period entries and extra duties for this date?")) {
+            if (confirm(`Delete ALL period entries, extra duties, attachments, and notes for ${currentDateStr}? This will remove it from Reports, Analytics, and Search.`)) {
                 delete appData[currentDateStr];
+                currentPeriods = [];
                 currentExtraWorks = [];
                 saveLocalStorageData();
                 loadDateLog();
-                showToast("Date log cleared.", "info");
+                syncAllDependentViews();
+                showToast(`Deleted all records for ${currentDateStr}.`, "info");
             }
         }
 
         function calculateAndDisplayDailyHours() {
             let coreMins = 0;
             let extraMins = 0;
-            const numPeriods = timetableData.columns ? timetableData.columns.length : 8;
 
-            for (let i = 1; i <= numPeriods; i++) {
-                const status = document.getElementById(`p${i}-status`) ? document.getElementById(`p${i}-status`).value : '';
-                const className = document.getElementById(`p${i}-class`) ? document.getElementById(`p${i}-class`).value : '';
-                const subject = document.getElementById(`p${i}-subject`) ? document.getElementById(`p${i}-subject`).value : '';
-
-                if ((className || subject) && status !== 'Cancelled' && status !== 'Free/Planning') {
-                    const colDuration = (timetableData.columns[i-1] && timetableData.columns[i-1].durationMins) ? timetableData.columns[i-1].durationMins : 45;
-                    coreMins += colDuration;
+            currentPeriods.forEach(p => {
+                if (p.status !== 'Cancelled' && p.status !== 'Free/Planning') {
+                    const dur = calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
+                    coreMins += dur;
                 }
-            }
+            });
 
             currentExtraWorks.forEach(work => {
                 const dur = parseInt(work.durationMins) || 0;
@@ -1564,7 +2346,7 @@
                         </button>
                     </div>
                     <input type="text" value="${col.title}" onchange="updateColHeader(${cIdx}, 'title', this.value)" class="w-full text-center font-bold text-xs bg-transparent border-b border-dashed border-slate-300 focus:outline-none mb-0.5">
-                    <input type="text" value="${col.timeLabel}" onchange="updateColHeader(${cIdx}, 'timeLabel', this.value)" placeholder="Timing..." class="w-full text-center text-[10px] text-slate-500 bg-transparent focus:outline-none">
+                    <input type="text" value="${col.timeLabel}" onchange="updateColHeader(${cIdx}, 'timeLabel', this.value)" placeholder="HH:MM - HH:MM" class="w-full text-center text-[10px] text-slate-500 bg-transparent focus:outline-none">
                 `;
                 trHead.appendChild(th);
             });
@@ -1620,6 +2402,7 @@
                 tbody.appendChild(tr);
             });
             table.appendChild(tbody);
+            updateNextUpcomingClassPreview();
         }
 
         function addTimetableRow() {
@@ -1629,27 +2412,42 @@
 
         function deleteTimetableRow(index) {
             if (timetableData.rows.length <= 1) return alert("At least one day row is required.");
+            const removedRow = timetableData.rows[index];
             timetableData.rows.splice(index, 1);
+            if (removedRow) {
+                Object.keys(timetableData.grid || {}).forEach(key => {
+                    if (key.startsWith(`${removedRow.id}_`)) delete timetableData.grid[key];
+                });
+            }
             saveLocalStorageData(); renderTimetableBuilder();
         }
 
         function updateRowHeader(index, val) {
-            timetableData.rows[index].dayName = val; saveLocalStorageData();
+            timetableData.rows[index].dayName = val; saveLocalStorageData(); updateNextUpcomingClassPreview();
         }
 
         function addTimetableColumn() {
-            timetableData.columns.push({ id: `col_${Date.now()}`, title: `Period ${timetableData.columns.length + 1}`, timeLabel: "00:00 - 00:00", isBreak: false, durationMins: 45 });
-            saveLocalStorageData(); renderTimetableBuilder(); renderPeriodRows(); loadDateLog();
+            timetableData.columns.push({ id: `col_${Date.now()}`, title: `Period ${timetableData.columns.length + 1}`, timeLabel: "14:00 - 14:45", isBreak: false, durationMins: 45 });
+            saveLocalStorageData(); renderTimetableBuilder();
         }
 
         function deleteTimetableColumn(index) {
             if (timetableData.columns.length <= 1) return alert("At least one column is required.");
+            const removedCol = timetableData.columns[index];
             timetableData.columns.splice(index, 1);
-            saveLocalStorageData(); renderTimetableBuilder(); renderPeriodRows(); loadDateLog();
+            if (removedCol) {
+                Object.keys(timetableData.grid || {}).forEach(key => {
+                    if (key.endsWith(`_${removedCol.id}`)) delete timetableData.grid[key];
+                });
+            }
+            saveLocalStorageData(); renderTimetableBuilder();
         }
 
         function updateColHeader(index, key, val) {
-            timetableData.columns[index][key] = val; saveLocalStorageData(); renderPeriodRows(); loadDateLog();
+            timetableData.columns[index][key] = val;
+            triggeredAlarmKeys.clear();
+            saveLocalStorageData();
+            updateNextUpcomingClassPreview();
         }
 
         function toggleColumnBreak(index) {
@@ -1659,7 +2457,9 @@
 
         function updateGridCell(cellKey, field, val) {
             if (!timetableData.grid[cellKey]) timetableData.grid[cellKey] = {};
-            timetableData.grid[cellKey][field] = val; saveLocalStorageData();
+            timetableData.grid[cellKey][field] = val;
+            saveLocalStorageData();
+            updateNextUpcomingClassPreview();
         }
 
         function adjustTimetableZoom(delta) {
@@ -1670,7 +2470,8 @@
 
         function saveTimetable(showToastNotification = false) {
             saveLocalStorageData();
-            if (showToastNotification) showToast("Timetable configuration saved!");
+            updateNextUpcomingClassPreview();
+            if (showToastNotification) showToast("Timetable & alarm schedule saved!");
         }
 
         // =========================================================================
@@ -1699,9 +2500,9 @@
                 let dayCoreMins = 0, dayExtraMins = 0, dayPeriods = 0;
 
                 if (dutyFilter !== 'extra') {
-                    (dayLog.periods || []).forEach((p, idx) => {
-                        if ((p.className || p.subject) && p.status !== 'Cancelled' && p.status !== 'Free/Planning') {
-                            const duration = (timetableData.columns[idx] && timetableData.columns[idx].durationMins) ? timetableData.columns[idx].durationMins : 45;
+                    (dayLog.periods || []).forEach((p) => {
+                        if (p.status !== 'Cancelled' && p.status !== 'Free/Planning') {
+                            const duration = p.durationMins || calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
                             dayCoreMins += duration; dayPeriods++; totalPeriodsCount++;
                             const category = p.workType || 'Teaching';
                             categoryMinutesMap[category] = (categoryMinutesMap[category] || 0) + duration;
@@ -1789,8 +2590,114 @@
         }
 
         // =========================================================================
-        // MANAGEMENT REPORT SYSTEM (WITH LARGE PRINTABLE ATTACHED IMAGES)
+        // MANAGEMENT REPORT SYSTEM (ACCURATE A4 PAGINATION + FIT + TOUCH PAN & PINCH ZOOM)
         // =========================================================================
+        function initA4TouchPanAndPinchZoom() {
+            const viewport = document.getElementById('report-a4-viewport');
+            if (!viewport) return;
+
+            let initialPinchDistance = null;
+            let initialZoomAtPinch = reportZoomPercent;
+
+            // Mouse drag panning on desktop
+            let isMousePanning = false;
+            let startMouseX = 0, startMouseY = 0;
+            let startScrollLeft = 0, startScrollTop = 0;
+
+            viewport.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                isMousePanning = true;
+                startMouseX = e.clientX;
+                startMouseY = e.clientY;
+                startScrollLeft = viewport.scrollLeft;
+                startScrollTop = viewport.scrollTop;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isMousePanning) return;
+                e.preventDefault();
+                viewport.scrollLeft = startScrollLeft - (e.clientX - startMouseX);
+                viewport.scrollTop = startScrollTop - (e.clientY - startMouseY);
+            });
+
+            window.addEventListener('mouseup', () => {
+                isMousePanning = false;
+            });
+
+            // Two-finger Pinch-to-Zoom on mobile/tablet touchscreens
+            viewport.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    initialPinchDistance = Math.hypot(dx, dy);
+                    initialZoomAtPinch = reportZoomPercent;
+                }
+            }, { passive: true });
+
+            viewport.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 2 && initialPinchDistance) {
+                    e.preventDefault();
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const currentDistance = Math.hypot(dx, dy);
+                    const scaleRatio = currentDistance / initialPinchDistance;
+                    const nextZoom = Math.round(Math.max(35, Math.min(180, initialZoomAtPinch * scaleRatio)));
+                    if (nextZoom !== reportZoomPercent) {
+                        reportZoomPercent = nextZoom;
+                        applyReportZoom();
+                    }
+                }
+            }, { passive: false });
+
+            viewport.addEventListener('touchend', (e) => {
+                if (e.touches.length < 2) {
+                    initialPinchDistance = null;
+                }
+            }, { passive: true });
+        }
+
+        function adjustReportZoom(delta) {
+            reportZoomPercent = Math.max(35, Math.min(180, reportZoomPercent + delta));
+            applyReportZoom();
+        }
+
+        function fitReportToScreen() {
+            const viewport = document.getElementById('report-a4-viewport');
+            const stage = document.getElementById('report-a4-zoom-stage');
+            if (!viewport || !stage) return;
+
+            const availableWidth = Math.max(240, viewport.clientWidth - 36);
+            const naturalWidth = stage.offsetWidth || 794; // 210mm in px (~794px)
+            const idealPercent = Math.floor((availableWidth / naturalWidth) * 100);
+            reportZoomPercent = Math.max(35, Math.min(115, idealPercent));
+            applyReportZoom();
+        }
+
+        function syncReportSizerDimensions() {
+            const stage = document.getElementById('report-a4-zoom-stage');
+            const sizer = document.getElementById('report-a4-scale-sizer');
+            if (!stage || !sizer) return;
+
+            const scale = reportZoomPercent / 100;
+            const rawWidth = stage.offsetWidth || 794;
+            const rawHeight = stage.scrollHeight || 1123;
+
+            sizer.style.width = `${Math.ceil(rawWidth * scale)}px`;
+            sizer.style.height = `${Math.ceil(rawHeight * scale)}px`;
+        }
+
+        function applyReportZoom() {
+            const stage = document.getElementById('report-a4-zoom-stage');
+            const label = document.getElementById('report-zoom-label');
+            if (stage) {
+                stage.style.transform = `scale(${reportZoomPercent / 100})`;
+            }
+            if (label) {
+                label.innerText = `${reportZoomPercent}%`;
+            }
+            syncReportSizerDimensions();
+        }
+
         function onReportScopeTypeChange() {
             const scopeType = document.getElementById('report-scope-type').value;
             const container = document.getElementById('report-scope-value-container');
@@ -1870,10 +2777,29 @@
             generateManagementReport();
         }
 
+        function createA4SheetElement(pageNumber, totalPagesHint = '') {
+            const sheet = document.createElement('div');
+            sheet.className = "a4-sheet";
+
+            const bodyDiv = document.createElement('div');
+            bodyDiv.className = "space-y-3.5 flex-1";
+
+            const footerDiv = document.createElement('div');
+            footerDiv.className = "pt-2.5 mt-3 border-t border-slate-300 flex justify-between items-center text-[10px] text-slate-500 shrink-0";
+            footerDiv.innerHTML = `
+                <span>${profileData.school || 'School Name'} &bull; Official Academic Register</span>
+                <span class="font-bold text-slate-700">A4 Sheet &bull; Page ${pageNumber}${totalPagesHint ? ` of ${totalPagesHint}` : ''}</span>
+            `;
+
+            sheet.appendChild(bodyDiv);
+            sheet.appendChild(footerDiv);
+            return { sheet, bodyDiv, footerDiv };
+        }
+
         function generateManagementReport() {
-            const wrapper = document.getElementById('report-document-wrapper');
-            if (!wrapper) return;
-            wrapper.innerHTML = '';
+            const stage = document.getElementById('report-a4-zoom-stage');
+            if (!stage) return;
+            stage.innerHTML = '';
 
             const scopeType = document.getElementById('report-scope-type').value;
             const scopeVal = document.getElementById('report-scope-value') ? document.getElementById('report-scope-value').value : '';
@@ -1896,13 +2822,20 @@
             });
 
             if (filteredDates.length === 0) {
-                wrapper.innerHTML = `
-                    <div class="p-12 text-center text-slate-400">
+                const { sheet, bodyDiv } = createA4SheetElement(1, 1);
+                bodyDiv.innerHTML = `
+                    <div class="border-b-2 border-slate-900 pb-4 mb-6">
+                        <h1 class="text-xl font-black text-slate-900 uppercase">${profileData.school || 'School Name'}</h1>
+                        <p class="text-xs text-slate-500">Teacher: <strong>${profileData.name}</strong> | Department: <strong>${profileData.dept}</strong></p>
+                    </div>
+                    <div class="py-28 text-center text-slate-400">
                         <i class="fa-solid fa-file-excel text-5xl mb-3"></i>
-                        <p class="text-base font-semibold">No Log Data Found</p>
-                        <p class="text-xs">No daily logs or extra work entries recorded for the selected range.</p>
+                        <p class="text-base font-semibold text-slate-600">No Log Data Found</p>
+                        <p class="text-xs mt-1">No daily logs or extra work entries recorded for the selected range.</p>
                     </div>
                 `;
+                stage.appendChild(sheet);
+                fitReportToScreen();
                 return;
             }
 
@@ -1911,9 +2844,9 @@
 
             filteredDates.forEach(d => {
                 const log = appData[d];
-                (log.periods || []).forEach((p, idx) => {
-                    if ((p.className || p.subject) && p.status !== 'Cancelled' && p.status !== 'Free/Planning') {
-                        const dur = (timetableData.columns[idx] && timetableData.columns[idx].durationMins) ? timetableData.columns[idx].durationMins : 45;
+                (log.periods || []).forEach((p) => {
+                    if (p.status !== 'Cancelled' && p.status !== 'Free/Planning') {
+                        const dur = p.durationMins || calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
                         grandCoreMins += dur;
                     }
                 });
@@ -1923,34 +2856,43 @@
                 });
             });
 
-            // Scope Heading String
             let scopeTitleStr = "COMPLETE ACADEMIC LOGBOOK REPORT";
             if (scopeType === 'month') scopeTitleStr = `MONTHLY LOGBOOK REPORT (${scopeVal})`;
             if (scopeType === 'day') scopeTitleStr = `DAILY LOGBOOK REPORT (${scopeVal})`;
             if (scopeType === 'week') scopeTitleStr = `WEEKLY LOGBOOK REPORT (7 Days to ${scopeVal})`;
             if (scopeType === 'year') scopeTitleStr = `ANNUAL ACADEMIC REPORT (${scopeVal})`;
 
-            // Master Header
+            const sheetsList = [];
+            let currentPageIndex = 1;
+            let currentSheetObj = createA4SheetElement(currentPageIndex);
+            sheetsList.push(currentSheetObj);
+            stage.appendChild(currentSheetObj.sheet);
+
+            // Master Header always starts at top of Page 1
             const mainHeader = document.createElement('div');
-            mainHeader.className = "border-b-2 border-slate-900 pb-5 mb-6";
+            mainHeader.className = "border-b-2 border-slate-900 pb-3 mb-2";
             mainHeader.innerHTML = `
-                <div class="flex justify-between items-start">
+                <div class="flex justify-between items-start gap-4">
                     <div>
-                        <h1 class="text-2xl font-black text-slate-900 uppercase tracking-tight">${profileData.school || 'School Name'}</h1>
-                        <h2 class="text-sm font-bold text-slate-700">${scopeTitleStr}</h2>
-                        <p class="text-xs text-slate-500 mt-1">Teacher: <strong class="text-slate-800">${profileData.name}</strong> | Department: <strong class="text-slate-800">${profileData.dept}</strong></p>
+                        <h1 class="text-xl font-black text-slate-900 uppercase tracking-tight">${profileData.school || 'School Name'}</h1>
+                        <h2 class="text-xs font-bold text-slate-700 mt-0.5">${scopeTitleStr}</h2>
+                        <p class="text-[11px] text-slate-500 mt-1">Teacher: <strong class="text-slate-800">${profileData.name}</strong> | Department: <strong class="text-slate-800">${profileData.dept}</strong></p>
                     </div>
-                    <div class="text-right">
-                        <div class="bg-slate-100 p-3 rounded-xl border border-slate-300">
-                            <span class="text-[10px] uppercase font-extrabold text-slate-500 block">Report Total Hours</span>
-                            <span class="text-lg font-black text-slate-900">${formatHM(grandCoreMins + (includeExtraDutiesInPrint ? grandExtraMins : 0))}</span>
+                    <div class="text-right shrink-0">
+                        <div class="bg-slate-100 p-2.5 rounded-xl border border-slate-300">
+                            <span class="text-[9px] uppercase font-extrabold text-slate-500 block">Report Total Hours</span>
+                            <span class="text-base font-black text-slate-900">${formatHM(grandCoreMins + (includeExtraDutiesInPrint ? grandExtraMins : 0))}</span>
                             <span class="text-[10px] font-bold text-emerald-700 block">Core: ${formatHM(grandCoreMins)}</span>
                             ${includeExtraDutiesInPrint ? `<span class="text-[10px] font-bold text-amber-700 block extra-duty-print-stat">Extra Duty: ${formatHM(grandExtraMins)}</span>` : ''}
                         </div>
                     </div>
                 </div>
             `;
-            wrapper.appendChild(mainHeader);
+            currentSheetObj.bodyDiv.appendChild(mainHeader);
+
+            // Real DOM height budget per A4 page (~297mm = 1122px minus top/bottom padding & footer = ~980px)
+            const MAX_A4_SHEET_HEIGHT_PX = 1040;
+            let hasRenderedAnyDayOnPage1 = false;
 
             const monthsGroup = {};
             filteredDates.forEach(dateStr => {
@@ -1967,9 +2909,9 @@
 
                 datesInMonth.forEach(d => {
                     const log = appData[d];
-                    (log.periods || []).forEach((p, idx) => {
-                        if ((p.className || p.subject) && p.status !== 'Cancelled' && p.status !== 'Free/Planning') {
-                            monthCoreMins += (timetableData.columns[idx] && timetableData.columns[idx].durationMins) ? timetableData.columns[idx].durationMins : 45;
+                    (log.periods || []).forEach((p) => {
+                        if (p.status !== 'Cancelled' && p.status !== 'Free/Planning') {
+                            monthCoreMins += p.durationMins || calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
                         }
                     });
                     (log.extraWorks || []).forEach(w => {
@@ -1978,17 +2920,26 @@
                     });
                 });
 
-                const monthSection = document.createElement('div');
-                monthSection.className = "space-y-5 pt-4 border-t border-slate-300 first:border-none first:pt-0";
-                monthSection.innerHTML = `
-                    <div class="bg-slate-900 text-white px-4 py-2 rounded-xl flex justify-between items-center uppercase font-bold text-xs">
-                        <span><i class="fa-solid fa-calendar text-brand-400 mr-2"></i> MONTH: ${monthName}</span>
-                        <span class="font-extrabold text-amber-300">
-                            Total: ${formatHM(monthCoreMins + (includeExtraDutiesInPrint ? monthExtraMins : 0))}
-                            (Core: ${formatHM(monthCoreMins)}${includeExtraDutiesInPrint ? ` | Extra: ${formatHM(monthExtraMins)}` : ''})
-                        </span>
-                    </div>
+                const monthBanner = document.createElement('div');
+                monthBanner.className = "bg-slate-900 text-white px-3.5 py-2 rounded-lg flex justify-between items-center uppercase font-bold text-[11px]";
+                monthBanner.innerHTML = `
+                    <span><i class="fa-solid fa-calendar text-brand-400 mr-1.5"></i> MONTH: ${monthName}</span>
+                    <span class="font-extrabold text-amber-300">
+                        Total: ${formatHM(monthCoreMins + (includeExtraDutiesInPrint ? monthExtraMins : 0))}
+                        (Core: ${formatHM(monthCoreMins)}${includeExtraDutiesInPrint ? ` | Extra: ${formatHM(monthExtraMins)}` : ''})
+                    </span>
                 `;
+                currentSheetObj.bodyDiv.appendChild(monthBanner);
+
+                // Only start a new page before month banner if Page 1 already has day records AND this overflows
+                if (hasRenderedAnyDayOnPage1 && currentSheetObj.sheet.scrollHeight > MAX_A4_SHEET_HEIGHT_PX) {
+                    currentSheetObj.bodyDiv.removeChild(monthBanner);
+                    currentPageIndex++;
+                    currentSheetObj = createA4SheetElement(currentPageIndex);
+                    sheetsList.push(currentSheetObj);
+                    stage.appendChild(currentSheetObj.sheet);
+                    currentSheetObj.bodyDiv.appendChild(monthBanner);
+                }
 
                 datesInMonth.forEach(dateStr => {
                     const log = appData[dateStr];
@@ -1996,66 +2947,68 @@
                     const dayFullStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
 
                     const dayCard = document.createElement('div');
-                    dayCard.className = "bg-white border border-slate-300 rounded-xl overflow-hidden avoid-break space-y-0";
+                    dayCard.className = "bg-white border border-slate-300 rounded-lg overflow-hidden avoid-break";
 
                     dayCard.innerHTML = `
-                        <div class="bg-slate-100 px-4 py-2 border-b border-slate-300 flex justify-between items-center">
-                            <span class="font-bold text-xs text-slate-800 uppercase tracking-wide">${dayFullStr}</span>
-                            ${log.homeroom ? `<span class="text-xs text-slate-600 font-medium">Duty: ${log.homeroom}</span>` : ''}
+                        <div class="bg-slate-100 px-3 py-1.5 border-b border-slate-300 flex justify-between items-center">
+                            <span class="font-bold text-[11px] text-slate-800 uppercase tracking-wide">${dayFullStr}</span>
+                            ${log.homeroom ? `<span class="text-[11px] text-slate-600 font-medium">Duty: ${log.homeroom}</span>` : ''}
                         </div>
                     `;
 
-                    const periodRows = (log.periods || []).filter(p => p.className || p.subject || p.topic).map(p => `
-                        <tr class="border-b border-slate-200 text-xs">
-                            <td class="py-2 px-3 font-bold text-slate-700 w-24">Period ${p.periodNum}</td>
-                            <td class="py-2 px-3 font-semibold text-slate-800 w-28">${p.className || '-'} ${p.section || ''}</td>
-                            <td class="py-2 px-3 text-slate-700 font-medium w-28">${p.workType || 'Teaching'}</td>
-                            <td class="py-2 px-3 font-bold text-slate-900 w-36">${p.subject || '-'}</td>
-                            <td class="py-2 px-3 text-slate-700">${p.topic || '-'} ${p.activity ? `<span class="text-slate-500 font-normal">(${p.activity})</span>` : ''}</td>
-                        </tr>
-                    `).join('');
+                    const periodRows = (log.periods || []).map((p, idx) => {
+                        const timeDisplay = (p.timeFrom && p.timeTo) ? `<div class="text-[9px] text-slate-500 font-normal">${p.timeFrom} - ${p.timeTo}</div>` : '';
+                        return `
+                            <tr class="border-b border-slate-200 text-[11px]">
+                                <td class="py-1.5 px-2.5 font-bold text-slate-700 w-24">${p.periodLabel || `Period ${idx + 1}`}${timeDisplay}</td>
+                                <td class="py-1.5 px-2.5 font-semibold text-slate-800 w-24">${p.className || '-'} ${p.section || ''}</td>
+                                <td class="py-1.5 px-2.5 text-slate-700 font-medium w-24">${p.workType || 'Teaching'}</td>
+                                <td class="py-1.5 px-2.5 font-bold text-slate-900 w-28">${p.subject || '-'}</td>
+                                <td class="py-1.5 px-2.5 text-slate-700">${p.topic || '-'} ${p.activity ? `<span class="text-slate-500 font-normal">(${p.activity})</span>` : ''}</td>
+                            </tr>
+                        `;
+                    }).join('');
 
                     const extraWorkRows = (log.extraWorks || []).map(w => `
-                        <tr class="border-b border-amber-200 bg-amber-50/50 text-xs extra-duty-print-item">
-                            <td class="py-2 px-3 font-bold text-amber-800"><i class="fa-solid fa-user-clock text-amber-600 mr-1"></i> Extra Duty</td>
-                            <td class="py-2 px-3 font-semibold text-amber-900">${w.className || 'General'}</td>
-                            <td class="py-2 px-3 text-amber-800 font-bold">${w.category || 'Special Duty'}</td>
-                            <td class="py-2 px-3 font-bold text-amber-900">${w.durationMins || 0} Mins</td>
-                            <td class="py-2 px-3 text-amber-900">${w.description || '-'}</td>
+                        <tr class="border-b border-amber-200 bg-amber-50/50 text-[11px] extra-duty-print-item">
+                            <td class="py-1.5 px-2.5 font-bold text-amber-800"><i class="fa-solid fa-user-clock text-amber-600 mr-1"></i> Extra Duty</td>
+                            <td class="py-1.5 px-2.5 font-semibold text-amber-900">${w.className || 'General'}</td>
+                            <td class="py-1.5 px-2.5 text-amber-800 font-bold">${w.category || 'Special Duty'}</td>
+                            <td class="py-1.5 px-2.5 font-bold text-amber-900">${w.durationMins || 0} Mins</td>
+                            <td class="py-1.5 px-2.5 text-amber-900">${w.description || '-'}</td>
                         </tr>
                     `).join('');
 
                     dayCard.innerHTML += `
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 text-[10px] text-slate-500 uppercase border-b border-slate-200">
-                                    <th class="py-1.5 px-3">Slot</th>
-                                    <th class="py-1.5 px-3">Class</th>
-                                    <th class="py-1.5 px-3">Category</th>
-                                    <th class="py-1.5 px-3">Subject</th>
-                                    <th class="py-1.5 px-3">Topic / Work Content</th>
+                                <tr class="bg-slate-50 text-[9px] text-slate-500 uppercase border-b border-slate-200">
+                                    <th class="py-1 px-2.5">Slot & Time</th>
+                                    <th class="py-1 px-2.5">Class</th>
+                                    <th class="py-1 px-2.5">Category</th>
+                                    <th class="py-1 px-2.5">Subject</th>
+                                    <th class="py-1 px-2.5">Topic / Work Content</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${periodRows || '<tr><td colspan="5" class="p-3 text-xs text-slate-400 italic text-center">No core periods logged.</td></tr>'}
+                                ${periodRows || '<tr><td colspan="5" class="p-2.5 text-[11px] text-slate-400 italic text-center">No core periods logged.</td></tr>'}
                                 ${includeExtraDutiesInPrint ? extraWorkRows : ''}
                             </tbody>
                         </table>
                     `;
 
-                    // RENDER BIG ATTACHED IMAGES FOR EXTRA WORKS IN PRINT MODE
                     if (includeExtraDutiesInPrint && (log.extraWorks || []).some(w => w.attachment)) {
                         const attachmentsHtml = (log.extraWorks || []).filter(w => w.attachment).map(w => `
                             <div class="print-attachment-container my-2 text-center">
-                                <div class="text-[11px] font-bold text-slate-700 mb-1">
+                                <div class="text-[10px] font-bold text-slate-700 mb-1">
                                     Attachment for Extra Work (${w.category}): ${w.description || 'Document'}
                                 </div>
-                                <img src="${w.attachment}" class="print-extra-attachment mx-auto rounded-lg shadow-sm max-h-96" style="max-height: 480px; width: auto;" />
+                                <img src="${w.attachment}" onload="syncReportSizerDimensions()" class="print-extra-attachment mx-auto rounded-lg shadow-sm" style="max-height: 280px; width: auto;" />
                             </div>
                         `).join('');
 
                         dayCard.innerHTML += `
-                            <div class="p-3 bg-amber-50/30 border-t border-amber-200 extra-duty-print-item">
+                            <div class="p-2.5 bg-amber-50/30 border-t border-amber-200 extra-duty-print-item">
                                 ${attachmentsHtml}
                             </div>
                         `;
@@ -2063,17 +3016,40 @@
 
                     if (log.dayNotes) {
                         dayCard.innerHTML += `
-                            <div class="px-4 py-2 bg-slate-50 border-t border-slate-200 text-xs text-slate-600">
+                            <div class="px-3 py-1.5 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-600">
                                 <strong class="text-slate-700">Day Notes:</strong> ${log.dayNotes}
                             </div>
                         `;
                     }
 
-                    monthSection.appendChild(dayCard);
-                });
+                    currentSheetObj.bodyDiv.appendChild(dayCard);
 
-                wrapper.appendChild(monthSection);
+                    // Guarantee Page 1 NEVER remains empty: first day card ALWAYS renders on Page 1.
+                    // Subsequent day cards move cleanly to a new A4 sheet if they exceed A4 page height.
+                    if (hasRenderedAnyDayOnPage1 && currentSheetObj.sheet.scrollHeight > MAX_A4_SHEET_HEIGHT_PX) {
+                        currentSheetObj.bodyDiv.removeChild(dayCard);
+                        currentPageIndex++;
+                        currentSheetObj = createA4SheetElement(currentPageIndex);
+                        sheetsList.push(currentSheetObj);
+                        stage.appendChild(currentSheetObj.sheet);
+                        currentSheetObj.bodyDiv.appendChild(dayCard);
+                    }
+
+                    hasRenderedAnyDayOnPage1 = true;
+                });
             });
+
+            // Stamp total A4 page count on every sheet footer
+            const totalA4Pages = sheetsList.length;
+            sheetsList.forEach((sObj, index) => {
+                sObj.footerDiv.innerHTML = `
+                    <span>${profileData.school || 'School Name'} &bull; Official Academic Register</span>
+                    <span class="font-bold text-slate-700">A4 Sheet &bull; Page ${index + 1} of ${totalA4Pages}</span>
+                `;
+            });
+
+            // Auto-fit full A4 sheet cleanly inside current screen width so nothing is cropped
+            fitReportToScreen();
         }
 
         // =========================================================================
@@ -2084,6 +3060,36 @@
             const worktypeSelect = document.getElementById('search-worktype');
             if (classSelect) classSelect.innerHTML = '<option value="">All Classes</option>' + profileData.classes.map(c => `<option value="${c}">${c}</option>`).join('');
             if (worktypeSelect) worktypeSelect.innerHTML = '<option value="">All Categories</option>' + profileData.workTypes.map(w => `<option value="${w}">${w}</option>`).join('');
+        }
+
+        function deletePeriodFromSearch(dateStr, periodIndex) {
+            if (!appData[dateStr] || !appData[dateStr].periods) return;
+            if (!confirm(`Delete this period entry from ${dateStr} across all logs, analytics, and reports?`)) return;
+
+            appData[dateStr].periods.splice(periodIndex, 1);
+            const log = appData[dateStr];
+            if ((log.periods || []).length === 0 && (log.extraWorks || []).length === 0 && !log.homeroom && !log.dayNotes && !log.nextPlan) {
+                delete appData[dateStr];
+            }
+            saveLocalStorageData();
+            if (dateStr === currentDateStr) loadDateLog();
+            syncAllDependentViews();
+            showToast("Period entry deleted everywhere.", "info");
+        }
+
+        function deleteExtraWorkFromSearch(dateStr, extraIndex) {
+            if (!appData[dateStr] || !appData[dateStr].extraWorks) return;
+            if (!confirm(`Delete this extra duty entry from ${dateStr} across all logs, analytics, and reports?`)) return;
+
+            appData[dateStr].extraWorks.splice(extraIndex, 1);
+            const log = appData[dateStr];
+            if ((log.periods || []).length === 0 && (log.extraWorks || []).length === 0 && !log.homeroom && !log.dayNotes && !log.nextPlan) {
+                delete appData[dateStr];
+            }
+            saveLocalStorageData();
+            if (dateStr === currentDateStr) loadDateLog();
+            syncAllDependentViews();
+            showToast("Extra work entry deleted everywhere.", "info");
         }
 
         function executeSearch() {
@@ -2098,14 +3104,14 @@
             Object.keys(appData).sort().reverse().forEach(date => {
                 const log = appData[date];
 
-                const matchingPeriods = (log.periods || []).filter(p => {
-                    const matchKwd = !keyword || (p.topic && p.topic.toLowerCase().includes(keyword)) || (p.activity && p.activity.toLowerCase().includes(keyword));
+                const matchingPeriods = (log.periods || []).map((p, origIdx) => ({ p, origIdx })).filter(({ p }) => {
+                    const matchKwd = !keyword || (p.topic && p.topic.toLowerCase().includes(keyword)) || (p.activity && p.activity.toLowerCase().includes(keyword)) || (p.subject && p.subject.toLowerCase().includes(keyword));
                     const matchClass = !classFilter || (p.className && p.className.toLowerCase().includes(classFilter));
                     const matchWorktype = !worktypeFilter || (p.workType && p.workType.toLowerCase().includes(worktypeFilter));
-                    return matchKwd && matchClass && matchWorktype && (p.className || p.subject || p.topic);
+                    return matchKwd && matchClass && matchWorktype;
                 });
 
-                const matchingExtraWorks = (log.extraWorks || []).filter(w => {
+                const matchingExtraWorks = (log.extraWorks || []).map((w, origIdx) => ({ w, origIdx })).filter(({ w }) => {
                     const matchKwd = !keyword || (w.description && w.description.toLowerCase().includes(keyword));
                     const matchClass = !classFilter || (w.className && w.className.toLowerCase().includes(classFilter));
                     const matchWorktype = !worktypeFilter || (w.category && w.category.toLowerCase().includes(worktypeFilter));
@@ -2119,20 +3125,34 @@
                     dateHeader.innerHTML = `<span><i class="fa-regular fa-calendar-days text-brand-600 mr-2"></i> ${date}</span><button onclick="jumpToDate('${date}')" class="text-brand-600 hover:underline no-print">Open Log &rrarr;</button>`;
                     container.appendChild(dateHeader);
 
-                    matchingPeriods.forEach(p => {
+                    matchingPeriods.forEach(({ p, origIdx }) => {
                         const item = document.createElement('div');
-                        item.className = "p-3 hover:bg-slate-50 border-b border-slate-100 text-xs";
-                        item.innerHTML = `<p class="font-bold text-slate-800">Period ${p.periodNum}: ${p.subject} (${p.className || 'General'}) - <span class="text-brand-600">${p.workType || 'Teaching'}</span></p><p class="text-slate-600">Topic: ${p.topic || 'N/A'}</p>`;
+                        item.className = "p-3 hover:bg-slate-50 border-b border-slate-100 text-xs flex items-start justify-between gap-3";
+                        const timeStr = (p.timeFrom && p.timeTo) ? ` [${p.timeFrom} - ${p.timeTo}]` : '';
+                        item.innerHTML = `
+                            <div>
+                                <p class="font-bold text-slate-800">${p.periodLabel || `Period ${origIdx + 1}`}${timeStr}: ${p.subject || 'Class'} (${p.className || 'General'} ${p.section || ''}) - <span class="text-brand-600">${p.workType || 'Teaching'}</span></p>
+                                <p class="text-slate-600">Topic: ${p.topic || 'N/A'}</p>
+                            </div>
+                            <button onclick="deletePeriodFromSearch('${date}', ${origIdx})" title="Delete Entry Everywhere" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition no-print shrink-0">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        `;
                         container.appendChild(item);
                     });
 
-                    matchingExtraWorks.forEach(w => {
+                    matchingExtraWorks.forEach(({ w, origIdx }) => {
                         const item = document.createElement('div');
                         item.className = "p-3 bg-amber-50/40 hover:bg-amber-50 border-b border-amber-100 text-xs space-y-2";
                         item.innerHTML = `
-                            <div>
-                                <p class="font-bold text-amber-900"><i class="fa-solid fa-user-clock mr-1"></i> Extra Work: ${w.category} (${w.durationMins} Mins)</p>
-                                <p class="text-amber-800">${w.description || '-'}</p>
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="font-bold text-amber-900"><i class="fa-solid fa-user-clock mr-1"></i> Extra Work: ${w.category} (${w.durationMins} Mins)</p>
+                                    <p class="text-amber-800">${w.description || '-'}</p>
+                                </div>
+                                <button onclick="deleteExtraWorkFromSearch('${date}', ${origIdx})" title="Delete Extra Duty Everywhere" class="text-amber-600 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition no-print shrink-0">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
                             </div>
                             ${w.attachment ? `<div class="mt-2"><img src="${w.attachment}" class="max-h-64 rounded-md border border-amber-200" /></div>` : ''}
                         `;
@@ -2172,6 +3192,7 @@
             renderTimetableBuilder();
             populateSearchDropdowns();
             renderExtraWorkList();
+            syncAllDependentViews();
             closeModal('modal-profile');
             showToast("Profile settings saved successfully!");
         }
@@ -2180,7 +3201,7 @@
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function exportDataJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData, profileData, timetableData }, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ appData, profileData, timetableData, alarmSettings }, null, 2));
             const dl = document.createElement('a');
             dl.setAttribute("href", dataStr);
             dl.setAttribute("download", `Teacher_Daybook_Backup_${getTodayDateStr()}.json`);
@@ -2188,14 +3209,15 @@
         }
 
         function exportDataCSV() {
-            let csv = "data:text/csv;charset=utf-8,Date,Type,Period,Class,WorkType,Subject,Topic,DurationMins\n";
+            let csv = "data:text/csv;charset=utf-8,Date,Type,Period,TimeFrom,TimeTo,Class,Section,WorkType,Subject,Topic,DurationMins\n";
             Object.keys(appData).sort().forEach(date => {
                 const log = appData[date];
-                (log.periods || []).forEach(p => {
-                    csv += `${date},Core,${p.periodNum},"${p.className || ''}","${p.workType || ''}","${p.subject || ''}","${p.topic || ''}",45\n`;
+                (log.periods || []).forEach((p, idx) => {
+                    const dur = p.durationMins || calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
+                    csv += `${date},Core,"${p.periodLabel || `Period ${idx + 1}`}","${p.timeFrom || ''}","${p.timeTo || ''}","${p.className || ''}","${p.section || ''}","${p.workType || ''}","${p.subject || ''}","${p.topic || ''}",${dur}\n`;
                 });
                 (log.extraWorks || []).forEach(w => {
-                    csv += `${date},Extra,N/A,"${w.className || ''}","${w.category || ''}","Extra Duty","${w.description || ''}",${w.durationMins || 0}\n`;
+                    csv += `${date},Extra,N/A,,,"${w.className || ''}",,"${w.category || ''}","Extra Duty","${w.description || ''}",${w.durationMins || 0}\n`;
                 });
             });
             const link = document.createElement('a');
@@ -2214,9 +3236,10 @@
                     if (imported.appData) appData = imported.appData;
                     if (imported.profileData) profileData = imported.profileData;
                     if (imported.timetableData) timetableData = imported.timetableData;
+                    if (imported.alarmSettings) alarmSettings = imported.alarmSettings;
                     saveLocalStorageData();
                     updateProfileUIHeadings();
-                    renderProfileConfigLists(); renderPeriodRows(); loadDateLog(); renderTimetableBuilder(); populateSearchDropdowns(); onReportScopeTypeChange();
+                    renderProfileConfigLists(); renderPeriodRows(); loadDateLog(); renderTimetableBuilder(); populateSearchDropdowns(); onReportScopeTypeChange(); initAlarmSystem();
                     closeModal('modal-backup');
                     showToast("Backup imported successfully!");
                 } catch (err) { alert("Invalid JSON backup file."); }
@@ -2252,7 +3275,10 @@
 
             if (tabId === 'timetable') renderTimetableBuilder();
             if (tabId === 'analytics') renderAnalytics();
-            if (tabId === 'report') { onReportScopeTypeChange(); }
+            if (tabId === 'report') { 
+                onReportScopeTypeChange(); 
+                setTimeout(fitReportToScreen, 40);
+            }
             if (tabId === 'search') executeSearch();
         }
 
