@@ -229,43 +229,9 @@
             max-height: calc(85vh - 8rem);
             overflow-y: auto;
         }
-
-        @keyframes pulseAlert {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.01); }
-        }
-        .alarm-active-banner {
-            animation: pulseAlert 1.2s infinite ease-in-out;
-        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col relative overflow-x-hidden">
-
-    <!-- FULL-SCREEN / TOP LOCK-SCREEN STYLE ALARM RINGING OVERLAY -->
-    <div id="live-alarm-banner" class="hidden fixed inset-x-0 top-0 z-50 bg-amber-500 text-slate-950 shadow-2xl border-b-4 border-slate-900 px-4 py-4 no-print alarm-active-banner">
-        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3.5">
-                <div class="p-3 bg-slate-900 text-amber-400 rounded-2xl shrink-0 shadow-lg">
-                    <i class="fa-solid fa-bell fa-shake text-2xl"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span id="live-alarm-badge" class="text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white px-2.5 py-0.5 rounded-full">Alarm Ringing</span>
-                        <span id="live-alarm-repeat-counter" class="text-[10px] font-extrabold bg-white/80 text-slate-900 px-2 py-0.5 rounded-full">Alert 1 of 1</span>
-                    </div>
-                    <p id="live-alarm-text" class="font-extrabold text-sm sm:text-base mt-1 leading-snug">Scheduled Class Alert</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
-                <button onclick="repeatAlarmSpeech()" class="px-3.5 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow">
-                    <i class="fa-solid fa-volume-high"></i> Repeat Voice
-                </button>
-                <button onclick="dismissAlarmBanner()" class="px-4 py-2 bg-white text-slate-900 hover:bg-slate-100 rounded-xl text-xs font-black border-2 border-slate-900 shadow">
-                    Stop & Dismiss
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Top Navigation Bar -->
     <header class="bg-brand-900 text-white shadow-md no-print sticky top-0 z-30 shrink-0">
@@ -302,8 +268,12 @@
                     </button>
                 </nav>
 
-                <!-- Action Controls: Save Log Button + Hamburger Menu Button -->
+                <!-- Action Controls: Stop Ringing (when active) + Save Log Button + Hamburger Menu Button -->
                 <div class="flex items-center space-x-2 shrink-0">
+                    <button id="header-stop-ring-btn" onclick="stopContinuousAlarm()" class="hidden px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs rounded-xl shadow-md transition flex items-center gap-1.5 animate-pulse">
+                        <i class="fa-solid fa-bell-slash"></i>
+                        <span>Stop Alarm</span>
+                    </button>
                     <button onclick="saveLog(true)" title="Save Logbook Entry" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 border border-emerald-400/40">
                         <i class="fa-solid fa-floppy-disk"></i>
                         <span class="hidden sm:inline">Save</span>
@@ -386,7 +356,7 @@
                             </div>
                             <div>
                                 <span id="menu-alarm-status-title" class="block text-xs font-extrabold text-slate-800">Alarms Off</span>
-                                <span id="menu-alarm-status-sub" class="block text-[10px] text-slate-500">Voice & lock-screen alerts off</span>
+                                <span id="menu-alarm-status-sub" class="block text-[10px] text-slate-500">System notification alerts off</span>
                             </div>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -596,7 +566,6 @@
                             </tr>
                         </thead>
                         <tbody id="periods-container" class="divide-y divide-slate-100 text-xs">
-                            <!-- Dynamic user-added period rows injected via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -626,7 +595,6 @@
                     </button>
                 </div>
 
-                <!-- Container for extra duties list -->
                 <div id="extra-work-container" class="space-y-3"></div>
             </div>
 
@@ -663,18 +631,22 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="font-bold text-sm sm:text-base">Period Voice Alarm & Lock-Screen Class Alert System</h3>
+                                <h3 class="font-bold text-sm sm:text-base">Period Voice Alarm & System Notification Alert System</h3>
                                 <span id="alarm-permission-badge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-300 border border-amber-500/30">Ready</span>
                                 <span id="android-bridge-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-800/80 text-brand-200 border border-brand-600/40">Offline Alarm Engine</span>
                             </div>
-                            <p class="text-xs text-brand-200 mt-0.5">Rings, vibrates, speaks your class details aloud, and posts high-priority lock-screen notifications even when your device screen is locked or turned off.</p>
+                            <p class="text-xs text-brand-200 mt-0.5">Delivers system-level lock-screen notifications with continuous alarm tone & voice announcement until dismissed. Automatically updates whenever you edit any timetable timing.</p>
                         </div>
                     </div>
 
                     <!-- Master Alarm Toggle & Test Button -->
                     <div class="flex flex-wrap items-center gap-3 shrink-0">
                         <button onclick="testVoiceAlarm()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl border border-white/20 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-volume-high text-amber-400"></i> Test Alarm
+                            <i class="fa-solid fa-volume-high text-amber-400"></i> Test Notification Alarm
+                        </button>
+
+                        <button id="panel-stop-ring-btn" onclick="stopContinuousAlarm()" class="hidden px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-black rounded-xl border border-rose-400 transition flex items-center gap-1.5 animate-pulse">
+                            <i class="fa-solid fa-bell-slash"></i> Stop Ringing
                         </button>
 
                         <label class="flex items-center gap-2.5 bg-slate-950/70 px-4 py-2 rounded-xl border border-brand-700 cursor-pointer">
@@ -704,18 +676,18 @@
                     </div>
 
                     <div class="lg:col-span-3">
-                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">Repeat Alarm Count</label>
+                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">Voice Repeat Count</label>
                         <select id="alarm-repeat-count" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-brand-700 text-white rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-amber-400">
-                            <option value="1">1 Time (Ring Once)</option>
-                            <option value="2" selected>2 Times (Initial + 1 Reminder)</option>
-                            <option value="3">3 Times (Initial + 2 Reminders)</option>
-                            <option value="4">4 Times (Initial + 3 Reminders)</option>
-                            <option value="5">5 Times (Persistent Reminder)</option>
+                            <option value="1">1 Time (Continuous Tone + 1 Voice)</option>
+                            <option value="2" selected>2 Times (Continuous Tone + 2 Voice)</option>
+                            <option value="3">3 Times (Continuous Tone + 3 Voice)</option>
+                            <option value="4">4 Times (Continuous Tone + 4 Voice)</option>
+                            <option value="5">5 Times (Continuous Tone + 5 Voice)</option>
                         </select>
                     </div>
 
                     <div class="lg:col-span-3">
-                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">Repeat Frequency Interval</label>
+                        <label class="block text-[10px] uppercase font-bold text-brand-200 mb-1">Voice Repeat Frequency</label>
                         <select id="alarm-repeat-interval" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-brand-700 text-white rounded-xl px-3 py-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-amber-400">
                             <option value="15">Every 15 Seconds</option>
                             <option value="30" selected>Every 30 Seconds</option>
@@ -740,7 +712,6 @@
                         <span class="text-[11px] text-brand-200" id="alarm-list-summary-count">0 scheduled classes today</span>
                     </div>
                     <div id="scheduled-class-alarms-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                        <!-- Dynamically populated live list of all today's class alarms + Completed Alert status -->
                     </div>
                 </div>
             </div>
@@ -752,7 +723,7 @@
                         <h3 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-stopwatch text-amber-500"></i> Personal Voice Alarms & Custom Reminders
                         </h3>
-                        <p class="text-xs text-slate-500">Set personal alarms (e.g., Assembly, Staff Meeting, Bus Duty, Bell Reminder) with a custom spoken voice message & notification.</p>
+                        <p class="text-xs text-slate-500">Set personal alarms (e.g., Assembly, Staff Meeting, Bus Duty, Bell Reminder) that ring continuously in system notifications until dismissed.</p>
                     </div>
                 </div>
 
@@ -761,7 +732,6 @@
                     <div class="sm:col-span-3">
                         <label class="block text-[10px] uppercase font-bold text-slate-500 mb-1">Alarm Time (<span id="personal-alarm-format-hint">12h AM/PM</span>)</label>
                         <div id="personal-alarm-time-inputs" class="flex items-center gap-1">
-                            <!-- Rendered dynamically according to 12h AM/PM or 24h mode -->
                         </div>
                     </div>
 
@@ -787,7 +757,6 @@
 
                 <!-- List of Personal Alarms -->
                 <div id="personal-alarms-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Dynamically populated personal alarms -->
                 </div>
             </div>
 
@@ -798,7 +767,7 @@
                         <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-table-cells text-brand-600"></i> Weekly Reference Timetable (<span id="tt-time-mode-badge">12-Hour AM/PM</span>)
                         </h2>
-                        <p class="text-xs text-slate-500">Set Start & End times with AM/PM (or 24h) in column headers. Any edit immediately updates the Scheduled Class Alarms above.</p>
+                        <p class="text-xs text-slate-500">Edit any Start or End time below — the Scheduled Class Alarms list above updates automatically on every change.</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -840,7 +809,6 @@
                 <div class="overflow-x-auto custom-scrollbar p-4">
                     <div id="timetable-zoom-wrapper" class="transition-all transform origin-top-left">
                         <table id="timetable-matrix-table" class="w-full text-left border-collapse border border-slate-200 min-w-[1120px]">
-                            <!-- Generated dynamically via JavaScript -->
                         </table>
                     </div>
                 </div>
@@ -1265,7 +1233,7 @@
                 preset: "5",
                 repeatCount: 2,
                 repeatIntervalSec: 30,
-                timeFormat: "12h", // '12h' (AM/PM) or '24h'
+                timeFormat: "12h",
                 personalAlarms: []
             };
         }
@@ -1384,15 +1352,13 @@
             return diff > 0 ? diff : fallbackMins;
         }
 
-        // Builds an inline 12h (Hour : Min + AM/PM) or 24h selector widget
-        function buildTimeInputHTML(time24, onChangeExpr, darkTheme = false) {
+        // Direct Data-Attribute Time Input Builder (Zero eval(), guaranteed immediate sync)
+        function buildTimeWidgetHTML(time24, targetType, indexA, fieldName) {
             const parsed = from24HourString(time24 || '08:30');
-            const baseCls = darkTheme
-                ? "bg-slate-800 border border-brand-700 text-white rounded-lg px-1.5 py-1.5 text-xs font-bold outline-none"
-                : "bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-1 py-1 text-[11px] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-brand-500";
+            const baseCls = "bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-1 py-1 text-[11px] font-bold outline-none focus:bg-white focus:ring-1 focus:ring-brand-500";
 
             if (alarmSettings.timeFormat === '24h') {
-                return `<input type="time" value="${time24 || '08:30'}" onchange="${onChangeExpr}(this.value)" class="${baseCls} w-full">`;
+                return `<input type="time" value="${time24 || '08:30'}" data-target="${targetType}" data-idx="${indexA}" data-field="${fieldName}" onchange="onDirect24TimeChange(this)" class="${baseCls} w-full">`;
             }
 
             const hourOpts = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -1401,11 +1367,11 @@
                 .map(m => `<option value="${m}" ${parsed.minute === m ? 'selected' : ''}>${String(m).padStart(2, '0')}</option>`).join('');
 
             return `
-                <div class="inline-flex items-center gap-0.5" data-time-group="1">
-                    <select onchange="handle12hSelectChange(this, '${onChangeExpr}')" data-part="h" class="${baseCls}">${hourOpts}</select>
+                <div class="inline-flex items-center gap-0.5" data-time-group="1" data-target="${targetType}" data-idx="${indexA}" data-field="${fieldName}">
+                    <select onchange="onDirect12TimeChange(this)" data-part="h" class="${baseCls}">${hourOpts}</select>
                     <span class="font-bold text-slate-400">:</span>
-                    <select onchange="handle12hSelectChange(this, '${onChangeExpr}')" data-part="m" class="${baseCls}">${minOpts}</select>
-                    <select onchange="handle12hSelectChange(this, '${onChangeExpr}')" data-part="mer" class="${baseCls} ${darkTheme ? 'text-amber-300' : 'text-brand-700'}">
+                    <select onchange="onDirect12TimeChange(this)" data-part="m" class="${baseCls}">${minOpts}</select>
+                    <select onchange="onDirect12TimeChange(this)" data-part="mer" class="${baseCls} text-brand-700">
                         <option value="AM" ${parsed.ampm === 'AM' ? 'selected' : ''}>AM</option>
                         <option value="PM" ${parsed.ampm === 'PM' ? 'selected' : ''}>PM</option>
                     </select>
@@ -1413,18 +1379,29 @@
             `;
         }
 
-        function handle12hSelectChange(selectEl, callbackName) {
+        function applyTimeChangeByTarget(targetType, indexA, fieldName, time24) {
+            if (targetType === 'timetable') {
+                updateColTime(parseInt(indexA, 10), fieldName, time24);
+            } else if (targetType === 'period') {
+                updatePeriodField(parseInt(indexA, 10), fieldName, time24);
+            } else if (targetType === 'personal') {
+                tempPersonalAlarmTime24 = time24;
+            }
+        }
+
+        function onDirect12TimeChange(selectEl) {
             const wrapper = selectEl.closest('[data-time-group="1"]');
             if (!wrapper) return;
             const h = wrapper.querySelector('[data-part="h"]').value;
             const m = wrapper.querySelector('[data-part="m"]').value;
             const mer = wrapper.querySelector('[data-part="mer"]').value;
             const time24 = to24HourString(h, m, mer);
-            if (typeof window[callbackName] === 'function') {
-                window[callbackName](time24);
-            } else {
-                eval(`${callbackName}('${time24}')`);
-            }
+            applyTimeChangeByTarget(wrapper.dataset.target, wrapper.dataset.idx, wrapper.dataset.field, time24);
+        }
+
+        function onDirect24TimeChange(inputEl) {
+            if (!inputEl || !inputEl.value) return;
+            applyTimeChangeByTarget(inputEl.dataset.target, inputEl.dataset.idx, inputEl.dataset.field, inputEl.value);
         }
 
         // GLOBAL STATE DATA STRUCTURES
@@ -1435,9 +1412,11 @@
         let timetableData = getDefaultTimetableData();
         let alarmSettings = getDefaultAlarmSettings();
 
-        let triggeredAlarmHistory = {}; // { uniqueKey: { count: number, lastFiredMs: number, dismissed: boolean } }
+        let triggeredAlarmHistory = {};
         let activeRepeatTimers = [];
-        let lastSpokenMessage = "";
+        let continuousAlarmToneTimer = null;
+        let isContinuousAlarmRinging = false;
+        let activeSystemNotification = null;
         let lastNextClassNotificationKey = "";
         let wakeLockSentinel = null;
         let alarmWorker = null;
@@ -1511,17 +1490,13 @@
                 }
             }
 
-            // Re-render Personal Alarm time input widget
             const pContainer = document.getElementById('personal-alarm-time-inputs');
             if (pContainer) {
-                pContainer.innerHTML = buildTimeInputHTML('08:00', 'setTempPersonalAlarmTime', false);
+                pContainer.innerHTML = buildTimeWidgetHTML(tempPersonalAlarmTime24 || '08:00', 'personal', 0, 'time24');
             }
         }
 
         let tempPersonalAlarmTime24 = '08:00';
-        function setTempPersonalAlarmTime(val24) {
-            tempPersonalAlarmTime24 = val24;
-        }
 
         // FACTORY RESET / DELETE ALL DATA
         function factoryResetAllData() {
@@ -1541,7 +1516,7 @@
             timetableData = getDefaultTimetableData();
             alarmSettings = getDefaultAlarmSettings();
             triggeredAlarmHistory = {};
-            clearAllRepeatTimers();
+            stopContinuousAlarm();
             currentPeriods = [];
             currentExtraWorks = [];
             currentDateStr = getTodayDateStr();
@@ -1660,8 +1635,7 @@
         }
 
         // =========================================================================
-        // OFFLINE ANDROID ALARM, SCHEDULED CLASS LIST & PERSONAL ALARM ENGINE
-        // (ZERO CONTINUOUS MEDIA LOOPS — USES EXACT TIMESTAMP + NATIVE OS BRIDGES)
+        // SYSTEM-NOTIFICATION CONTINUOUS ALARM ENGINE & LIVE TIMETABLE SYNC
         // =========================================================================
         function initAlarmSystem() {
             const toggle = document.getElementById('alarm-master-toggle');
@@ -1691,7 +1665,6 @@
             startExactAlarmScheduler();
             syncNativeAndroidAlarms();
 
-            // Immediately check for any missed/due alarms when device screen unlocks or app resumes
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     if (alarmSettings.enabled) requestScreenWakeLock();
@@ -1708,7 +1681,6 @@
         function startExactAlarmScheduler() {
             if (alarmWorker) return;
             try {
-                // Lightweight 2-second timestamp checker (no audio/video playback loop)
                 const workerBlob = new Blob([`
                     setInterval(() => { postMessage('tick'); }, 2000);
                 `], { type: 'application/javascript' });
@@ -1751,19 +1723,19 @@
             if (menuToggle) menuToggle.checked = enabled;
 
             if (enabled) {
-                playAlarmChime();
+                playSingleAlarmChimePulse();
                 if ('Notification' in window && Notification.permission === 'default') {
                     await Notification.requestPermission();
                 }
                 await requestScreenWakeLock();
                 syncNativeAndroidAlarms();
-                postNextClassLockScreenNotification(true);
-                showToast("Period & Lock-Screen Alarms Enabled!");
+                postNextClassLockScreenNotification();
+                showToast("System Notification Alarms Enabled!");
             } else {
                 releaseScreenWakeLock();
-                clearAllRepeatTimers();
+                stopContinuousAlarm();
                 cancelNativeAndroidAlarms();
-                showToast("Period Voice Alarms Disabled.");
+                showToast("Period Alarms Disabled.");
             }
 
             saveLocalStorageData();
@@ -1823,23 +1795,22 @@
             const menuTitle = document.getElementById('menu-alarm-status-title');
             const menuSub = document.getElementById('menu-alarm-status-sub');
 
-            // Detect native Android APK environment
             const hasAndroidNative = Boolean(window.AndroidAlarmBridge || window.Capacitor?.Plugins?.LocalNotifications || window.cordova?.plugins?.notification?.local);
             if (bridgeBadge) {
-                bridgeBadge.innerText = hasAndroidNative ? "Android OS AlarmManager Active" : "Offline Exact-Time Scheduler";
+                bridgeBadge.innerText = hasAndroidNative ? "Android OS AlarmManager Active" : "System Notification Alarm Engine";
             }
 
             if (alarmSettings.enabled) {
                 if (label) label.innerText = "Alarms Active (ON)";
                 if (badge) {
-                    badge.innerText = `ON • ${alarmSettings.offsetMins}m before • ${alarmSettings.repeatCount}x`;
+                    badge.innerText = `ON • ${alarmSettings.offsetMins}m before • Continuous Ring`;
                     badge.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40";
                 }
                 if (menuCard) menuCard.className = "p-3.5 rounded-2xl border border-amber-300 bg-amber-50/70 space-y-2.5 transition";
                 if (menuIconBox) menuIconBox.className = "p-2 rounded-xl bg-amber-500 text-slate-950";
                 if (menuIcon) menuIcon.className = "fa-solid fa-bell";
                 if (menuTitle) menuTitle.innerText = `Alarms ON (${alarmSettings.offsetMins}m before)`;
-                if (menuSub) menuSub.innerText = `Repeats ${alarmSettings.repeatCount}x every ${alarmSettings.repeatIntervalSec}s`;
+                if (menuSub) menuSub.innerText = `System notifications active`;
             } else {
                 if (label) label.innerText = "Enable Period Alarms";
                 if (badge) {
@@ -1850,11 +1821,11 @@
                 if (menuIconBox) menuIconBox.className = "p-2 rounded-xl bg-slate-200 text-slate-600";
                 if (menuIcon) menuIcon.className = "fa-solid fa-bell-slash";
                 if (menuTitle) menuTitle.innerText = "Alarms Off";
-                if (menuSub) menuSub.innerText = "Voice & lock-screen alerts off";
+                if (menuSub) menuSub.innerText = "System notification alerts off";
             }
         }
 
-        // Returns ALL scheduled classes for today with exact trigger times & live status
+        // Reads directly from timetableData.columns and timetableData.grid on every call
         function getTodayTimetableSlots() {
             const now = new Date();
             const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
@@ -1877,7 +1848,8 @@
                 const endMins = parseStartMinutesFromTime24(col.endTime);
                 const alertTriggerMins = Math.max(0, startMins - offset);
                 const todayKey = getTodayDateStr();
-                const uniqueKey = `class_${todayKey}_${col.id}_${alertTriggerMins}`;
+                // Key includes exact col.startTime & alertTriggerMins so editing time immediately creates a fresh active slot
+                const uniqueKey = `class_${todayKey}_${col.id}_${col.startTime}_${alertTriggerMins}`;
 
                 const historyEntry = triggeredAlarmHistory[uniqueKey];
                 const isCompleted = Boolean(historyEntry) || (currentMins > alertTriggerMins && (currentMins - alertTriggerMins) > 2);
@@ -1904,7 +1876,6 @@
             return slots.sort((a, b) => a.startMins - b.startMins);
         }
 
-        // Updates the live list under the Alarm Panel immediately whenever timetable/alarm settings change
         function refreshScheduledClassAlarmsList() {
             const container = document.getElementById('scheduled-class-alarms-list');
             const dayLabel = document.getElementById('alarm-list-day-name');
@@ -1926,18 +1897,17 @@
 
             if (nextLabel) {
                 if (nextSlot) {
-                    nextLabel.innerText = `${nextSlot.periodTitle}: ${nextSlot.className} ${nextSlot.section} (${nextSlot.subject || 'Class'}) • Alert at ${nextSlot.formattedAlertTime}`;
+                    nextLabel.innerText = `${nextSlot.periodTitle}: ${nextSlot.className} ${nextSlot.section} (${nextSlot.formattedRange}) • Alert at ${nextSlot.formattedAlertTime}`;
                 } else {
                     nextLabel.innerText = slots.length > 0 ? "All scheduled alerts completed for today." : "No classes scheduled for today.";
                 }
             }
 
-            // Keep lock-screen notification updated with Next Scheduled Class
             if (alarmSettings.enabled && nextSlot) {
-                const notifKey = `${getTodayDateStr()}_${nextSlot.colId}_${nextSlot.alertTriggerMins}`;
+                const notifKey = `${getTodayDateStr()}_${nextSlot.colId}_${nextSlot.startTime24}_${nextSlot.alertTriggerMins}`;
                 if (lastNextClassNotificationKey !== notifKey) {
                     lastNextClassNotificationKey = notifKey;
-                    postNextClassLockScreenNotification(false);
+                    postNextClassLockScreenNotification();
                 }
             }
 
@@ -1947,7 +1917,7 @@
             if (slots.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full p-4 rounded-xl bg-slate-950/50 border border-white/10 text-xs text-brand-200 text-center">
-                        No classes assigned in the timetable for <strong>${dayName}</strong> yet. Assign classes below to schedule automatic voice alarms.
+                        No classes assigned in the timetable for <strong>${dayName}</strong> yet. Assign classes below to schedule automatic alarms.
                     </div>
                 `;
                 return;
@@ -1965,7 +1935,7 @@
                                 <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                                     <i class="fa-solid fa-circle-check mr-1"></i>Completed Alert
                                 </span>
-                                <span class="text-[11px] font-bold text-slate-300">${slot.formattedAlertTime}</span>
+                                <span class="text-[11px] font-bold text-slate-300">Alert: ${slot.formattedAlertTime}</span>
                             </div>
                             <p class="text-xs font-bold text-white mt-1 truncate">${slot.periodTitle}: ${slot.className} ${slot.section}</p>
                             <p class="text-[11px] text-slate-400 truncate">${slot.subject || 'General'} (${slot.formattedRange})</p>
@@ -1979,7 +1949,7 @@
                                 <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-slate-950">
                                     <i class="fa-solid fa-bell mr-1"></i>Next Alert
                                 </span>
-                                <span class="text-[11px] font-extrabold text-amber-300">${slot.formattedAlertTime}</span>
+                                <span class="text-[11px] font-extrabold text-amber-300">Alert: ${slot.formattedAlertTime}</span>
                             </div>
                             <p class="text-xs font-extrabold text-white mt-1 truncate">${slot.periodTitle}: ${slot.className} ${slot.section}</p>
                             <p class="text-[11px] text-amber-100/80 truncate">${slot.subject || 'General'} (${slot.formattedRange})</p>
@@ -1993,7 +1963,7 @@
                                 <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-brand-700/60 text-brand-200">
                                     Upcoming
                                 </span>
-                                <span class="text-[11px] font-bold text-brand-200">${slot.formattedAlertTime}</span>
+                                <span class="text-[11px] font-bold text-brand-200">Alert: ${slot.formattedAlertTime}</span>
                             </div>
                             <p class="text-xs font-bold text-white mt-1 truncate">${slot.periodTitle}: ${slot.className} ${slot.section}</p>
                             <p class="text-[11px] text-slate-400 truncate">${slot.subject || 'General'} (${slot.formattedRange})</p>
@@ -2120,27 +2090,26 @@
         }
 
         // =========================================================================
-        // EXACT ALARM TRIGGERING, REPEAT FREQUENCY & ANDROID OS BRIDGE SYNC
+        // SYSTEM NOTIFICATION CONTINUOUS RINGTONE ALARM (NO IN-APP POPUP BANNER)
         // =========================================================================
         function checkDueAlarmsNow() {
             const now = new Date();
             const todayKey = getTodayDateStr();
             const currentMins = now.getHours() * 60 + now.getMinutes();
 
-            // 1. Check Scheduled Class Alarms (when master switch is ON)
+            // 1. Check Scheduled Class Alarms
             if (alarmSettings.enabled) {
                 const slots = getTodayTimetableSlots();
                 slots.forEach(slot => {
-                    // Fire if we are at exact trigger minute OR within a 3-minute wake-up window (handles Android Doze wake delay)
                     const diffFromTrigger = currentMins - slot.alertTriggerMins;
                     if (diffFromTrigger >= 0 && diffFromTrigger <= 3 && !triggeredAlarmHistory[slot.uniqueKey]) {
                         const message = buildClassVoiceMessage(slot, alarmSettings.offsetMins || 0);
-                        triggerRepeatingAlarm(slot.uniqueKey, `Class Alert: ${slot.periodTitle}`, message);
+                        triggerSystemNotificationAlarm(slot.uniqueKey, `🔔 ${slot.periodTitle}: ${slot.className} ${slot.section}`, message);
                     }
                 });
             }
 
-            // 2. Check Personal Alarms (independent toggle per personal alarm)
+            // 2. Check Personal Alarms
             (alarmSettings.personalAlarms || []).forEach(pAlarm => {
                 if (!pAlarm.enabled) return;
                 const targetMins = parseStartMinutesFromTime24(pAlarm.time24);
@@ -2150,7 +2119,7 @@
                 const diffFromTrigger = currentMins - targetMins;
                 if (diffFromTrigger >= 0 && diffFromTrigger <= 3 && !triggeredAlarmHistory[uniqueKey]) {
                     const spokenMsg = `Personal Reminder for ${profileData.name || 'Teacher'} at ${formatTimeForDisplay(pAlarm.time24)}. ${pAlarm.message}`;
-                    triggerRepeatingAlarm(uniqueKey, `Personal Alarm (${formatTimeForDisplay(pAlarm.time24)})`, spokenMsg);
+                    triggerSystemNotificationAlarm(uniqueKey, `⏰ Personal Alarm (${formatTimeForDisplay(pAlarm.time24)})`, spokenMsg);
 
                     if (pAlarm.repeatMode === 'once') {
                         pAlarm.enabled = false;
@@ -2161,8 +2130,8 @@
             });
         }
 
-        function triggerRepeatingAlarm(uniqueKey, title, message) {
-            const maxRepeats = Math.max(1, parseInt(alarmSettings.repeatCount, 10) || 2);
+        function triggerSystemNotificationAlarm(uniqueKey, title, message) {
+            const maxVoiceRepeats = Math.max(1, parseInt(alarmSettings.repeatCount, 10) || 2);
             const intervalMs = Math.max(5, parseInt(alarmSettings.repeatIntervalSec, 10) || 30) * 1000;
 
             triggeredAlarmHistory[uniqueKey] = {
@@ -2171,53 +2140,86 @@
                 dismissed: false
             };
 
-            executeSingleAlarmRing(uniqueKey, title, message, 1, maxRepeats);
+            // Start continuous alarm tone + vibration + system notification until dismissed
+            startContinuousAlarmTone();
+            speakText(message);
+            postSystemAlarmNotification(title, message, uniqueKey);
+
             refreshScheduledClassAlarmsList();
             renderPersonalAlarmsList();
 
-            // Schedule subsequent repeat alerts according to Repeat Count & Frequency Interval
-            for (let attempt = 2; attempt <= maxRepeats; attempt++) {
+            // Repeat voice announcement while system notification remains undismissed
+            for (let attempt = 2; attempt <= maxVoiceRepeats; attempt++) {
                 const timerId = setTimeout(() => {
                     const rec = triggeredAlarmHistory[uniqueKey];
-                    if (!rec || rec.dismissed) return;
+                    if (!rec || rec.dismissed || !isContinuousAlarmRinging) return;
                     rec.count = attempt;
-                    executeSingleAlarmRing(uniqueKey, title, message, attempt, maxRepeats);
+                    speakText(message);
+                    postSystemAlarmNotification(title, message, uniqueKey);
                 }, (attempt - 1) * intervalMs);
                 activeRepeatTimers.push(timerId);
             }
         }
 
-        function executeSingleAlarmRing(uniqueKey, title, message, currentAttempt, maxRepeats) {
-            lastSpokenMessage = message;
+        // Rings alarm tone + vibration continuously every 2.2 seconds until user dismisses/stops notification
+        function startContinuousAlarmTone() {
+            stopContinuousAlarm();
+            isContinuousAlarmRinging = true;
+            updateStopAlarmButtonsVisibility(true);
 
-            const banner = document.getElementById('live-alarm-banner');
-            const bannerBadge = document.getElementById('live-alarm-badge');
-            const bannerCounter = document.getElementById('live-alarm-repeat-counter');
-            const bannerText = document.getElementById('live-alarm-text');
+            const ringPulse = () => {
+                if (!isContinuousAlarmRinging) return;
+                playSingleAlarmChimePulse();
+                if ('vibrate' in navigator) {
+                    try { navigator.vibrate([600, 250, 600, 250]); } catch (e) {}
+                }
+            };
 
-            if (banner && bannerText) {
-                if (bannerBadge) bannerBadge.innerText = title;
-                if (bannerCounter) bannerCounter.innerText = `Alert ${currentAttempt} of ${maxRepeats}`;
-                bannerText.innerText = message;
-                banner.classList.remove('hidden');
-            }
-
-            // Vibrate Android device in alarm pattern
-            if ('vibrate' in navigator) {
-                try { navigator.vibrate([500, 250, 500, 250, 700]); } catch (e) {}
-            }
-
-            // Ring chime + Speak voice message
-            playAlarmChime();
-            setTimeout(() => speakText(message), 850);
-
-            // Post High-Priority Lock-Screen System Notification
-            postSystemNotification(title, message, `${uniqueKey}_ring_${currentAttempt}`, true);
+            ringPulse();
+            continuousAlarmToneTimer = setInterval(ringPulse, 2400);
         }
 
-        function clearAllRepeatTimers() {
+        function stopContinuousAlarm() {
+            isContinuousAlarmRinging = false;
+            updateStopAlarmButtonsVisibility(false);
+
+            if (continuousAlarmToneTimer) {
+                clearInterval(continuousAlarmToneTimer);
+                continuousAlarmToneTimer = null;
+            }
             activeRepeatTimers.forEach(id => clearTimeout(id));
             activeRepeatTimers = [];
+
+            Object.keys(triggeredAlarmHistory).forEach(k => {
+                triggeredAlarmHistory[k].dismissed = true;
+            });
+
+            if (activeSystemNotification) {
+                try { activeSystemNotification.close(); } catch (e) {}
+                activeSystemNotification = null;
+            }
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if ('vibrate' in navigator) {
+                try { navigator.vibrate(0); } catch (e) {}
+            }
+            try {
+                if (window.AndroidAlarmBridge && typeof window.AndroidAlarmBridge.stopRinging === 'function') {
+                    window.AndroidAlarmBridge.stopRinging();
+                }
+            } catch (e) {}
+        }
+
+        function updateStopAlarmButtonsVisibility(isRinging) {
+            const headerBtn = document.getElementById('header-stop-ring-btn');
+            const panelBtn = document.getElementById('panel-stop-ring-btn');
+            if (headerBtn) {
+                if (isRinging) headerBtn.classList.remove('hidden');
+                else headerBtn.classList.add('hidden');
+            }
+            if (panelBtn) {
+                if (isRinging) panelBtn.classList.remove('hidden');
+                else panelBtn.classList.add('hidden');
+            }
         }
 
         function buildClassVoiceMessage(slot, offsetMins) {
@@ -2231,62 +2233,74 @@
             return `Attention ${profileData.name || 'Teacher'}. ${timeIntro}${slot.periodTitle}${timePart}. Please go to ${classPart}${secPart}${subjPart}.`;
         }
 
-        function postNextClassLockScreenNotification(forceNow = false) {
+        function postNextClassLockScreenNotification() {
             const slots = getTodayTimetableSlots();
             const nextSlot = slots.find(s => !s.isCompleted);
             if (!nextSlot) return;
 
             const title = `📅 Next Class: ${nextSlot.periodTitle} (${formatTimeForDisplay(nextSlot.startTime24)})`;
             const body = `${nextSlot.className} ${nextSlot.section} • ${nextSlot.subject || 'Subject'} | Alarm at ${nextSlot.formattedAlertTime}`;
-            postSystemNotification(title, body, 'next-class-schedule-sticky', false);
+            postSystemAlarmNotification(title, body, 'next-class-schedule-sticky', false);
         }
 
-        function postSystemNotification(title, body, tag, requireInteraction) {
-            // 1. Native Android APK Notification Bridge (Capacitor / Cordova / Custom Bridge)
+        function postSystemAlarmNotification(title, body, tag, isUrgentAlarm = true) {
+            // 1. Native Android APK Notification Bridge (Continuous Alarm Channel until dismissed)
             try {
-                if (window.AndroidAlarmBridge && typeof window.AndroidAlarmBridge.showNotification === 'function') {
-                    window.AndroidAlarmBridge.showNotification(title, body, tag, requireInteraction);
+                if (window.AndroidAlarmBridge && typeof window.AndroidAlarmBridge.triggerContinuousAlarm === 'function' && isUrgentAlarm) {
+                    window.AndroidAlarmBridge.triggerContinuousAlarm(title, body, tag);
+                } else if (window.AndroidAlarmBridge && typeof window.AndroidAlarmBridge.showNotification === 'function') {
+                    window.AndroidAlarmBridge.showNotification(title, body, tag, isUrgentAlarm);
                 } else if (window.Capacitor?.Plugins?.LocalNotifications) {
                     window.Capacitor.Plugins.LocalNotifications.schedule({
                         notifications: [{
-                            id: Math.floor(Math.random() * 100000),
+                            id: isUrgentAlarm ? 9991 : 9992,
                             title,
                             body,
-                            schedule: { at: new Date(Date.now() + 200), allowWhileIdle: true },
+                            schedule: { at: new Date(Date.now() + 150), allowWhileIdle: true },
+                            ongoing: isUrgentAlarm,
+                            autoCancel: !isUrgentAlarm,
                             sound: 'default'
                         }]
                     });
                 } else if (window.cordova?.plugins?.notification?.local) {
                     window.cordova.plugins.notification.local.schedule({
-                        id: Math.floor(Math.random() * 100000),
+                        id: isUrgentAlarm ? 9991 : 9992,
                         title,
                         text: body,
                         foreground: true,
                         wakeup: true,
-                        lockscreen: true
+                        lockscreen: true,
+                        sticky: isUrgentAlarm,
+                        sound: true
                     });
                 }
             } catch (e) {}
 
-            // 2. Standard Android WebView / System Notification API
+            // 2. OS / System Notification API (Persists until dismissed; dismissing or tapping stops the alarm tone)
             if ('Notification' in window && Notification.permission === 'granted') {
                 try {
                     const notif = new Notification(title, {
-                        body,
+                        body: isUrgentAlarm ? `${body}\n(Tap or dismiss notification to stop alarm)` : body,
                         tag,
                         renotify: true,
-                        requireInteraction: requireInteraction,
-                        vibrate: [400, 200, 400]
+                        requireInteraction: isUrgentAlarm,
+                        vibrate: isUrgentAlarm ? [600, 250, 600, 250] : undefined
                     });
-                    notif.onclick = () => {
-                        window.focus();
-                        notif.close();
-                    };
+                    if (isUrgentAlarm) {
+                        activeSystemNotification = notif;
+                        notif.onclick = () => {
+                            stopContinuousAlarm();
+                            window.focus();
+                        };
+                        notif.onclose = () => {
+                            stopContinuousAlarm();
+                        };
+                    }
                 } catch (e) {}
             }
         }
 
-        // Syncs all upcoming Class Alarms + Personal Alarms with Android OS AlarmManager (setExactAndAllowWhileIdle)
+        // Syncs exact edited Timetable & Personal Alarm timings with Android OS AlarmManager
         function syncNativeAndroidAlarms() {
             const payload = [];
             const now = new Date();
@@ -2301,6 +2315,7 @@
                             timestampMs: triggerDate.getTime(),
                             title: `🔔 ${s.periodTitle}: ${s.className} ${s.section}`,
                             message: buildClassVoiceMessage(s, alarmSettings.offsetMins || 0),
+                            continuousUntilDismissed: true,
                             repeatCount: alarmSettings.repeatCount || 2,
                             repeatIntervalSec: alarmSettings.repeatIntervalSec || 30
                         });
@@ -2318,6 +2333,7 @@
                             timestampMs: triggerDate.getTime(),
                             title: `⏰ Personal Alarm (${formatTimeForDisplay(a.time24)})`,
                             message: a.message,
+                            continuousUntilDismissed: true,
                             repeatCount: alarmSettings.repeatCount || 2,
                             repeatIntervalSec: alarmSettings.repeatIntervalSec || 30
                         });
@@ -2325,7 +2341,6 @@
                 }
             });
 
-            // Pass exact alarm schedule to native Android wrapper if present
             try {
                 if (window.AndroidAlarmBridge && typeof window.AndroidAlarmBridge.scheduleAlarms === 'function') {
                     window.AndroidAlarmBridge.scheduleAlarms(JSON.stringify(payload));
@@ -2336,6 +2351,7 @@
                             title: p.title,
                             body: p.message,
                             schedule: { at: new Date(p.timestampMs), allowWhileIdle: true },
+                            ongoing: true,
                             sound: 'default'
                         }))
                     });
@@ -2348,6 +2364,7 @@
                             trigger: { at: new Date(p.timestampMs) },
                             wakeup: true,
                             lockscreen: true,
+                            sticky: true,
                             foreground: true
                         }))
                     );
@@ -2363,11 +2380,12 @@
             } catch (e) {}
         }
 
-        function testVoiceAlarm() {
+        async function testVoiceAlarm() {
             if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
+                await Notification.requestPermission();
             }
-            const sampleSlot = {
+            const slots = getTodayTimetableSlots();
+            const sampleSlot = slots[0] || {
                 colId: 'test',
                 periodTitle: 'Period 1',
                 formattedRange: `${formatTimeForDisplay('09:00')} - ${formatTimeForDisplay('09:45')}`,
@@ -2376,44 +2394,26 @@
                 subject: profileData.dept || 'Mathematics'
             };
             const testMsg = buildClassVoiceMessage(sampleSlot, alarmSettings.offsetMins || 5);
-            triggerRepeatingAlarm(`test_${Date.now()}`, "Test Class Alarm", testMsg);
+            triggerSystemNotificationAlarm(`test_${Date.now()}`, `🔔 ${sampleSlot.periodTitle}: ${sampleSlot.className} ${sampleSlot.section}`, testMsg);
+            showToast("System notification alarm triggered! Dismiss notification or tap Stop Alarm to silence.");
         }
 
-        function repeatAlarmSpeech() {
-            if (lastSpokenMessage) {
-                playAlarmChime();
-                setTimeout(() => speakText(lastSpokenMessage), 700);
-            }
-        }
-
-        function dismissAlarmBanner() {
-            document.getElementById('live-alarm-banner')?.classList.add('hidden');
-            Object.keys(triggeredAlarmHistory).forEach(k => {
-                triggeredAlarmHistory[k].dismissed = true;
-            });
-            clearAllRepeatTimers();
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            if ('vibrate' in navigator) {
-                try { navigator.vibrate(0); } catch (e) {}
-            }
-        }
-
-        function playAlarmChime() {
+        function playSingleAlarmChimePulse() {
             try {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
                 const ctx = new AudioCtx();
-                const notes = [587.33, 783.99, 1046.50, 1318.51];
+                const notes = [659.25, 880.00, 1046.50, 1318.51];
                 notes.forEach((freq, idx) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.2);
-                    gain.gain.setValueAtTime(0.3, ctx.currentTime + idx * 0.2);
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.2 + 0.55);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.16);
+                    gain.gain.setValueAtTime(0.32, ctx.currentTime + idx * 0.16);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.16 + 0.45);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
-                    osc.start(ctx.currentTime + idx * 0.2);
-                    osc.stop(ctx.currentTime + idx * 0.2 + 0.6);
+                    osc.start(ctx.currentTime + idx * 0.16);
+                    osc.stop(ctx.currentTime + idx * 0.16 + 0.48);
                 });
             } catch (e) {}
         }
@@ -2649,8 +2649,8 @@
                 const workOpts = profileData.workTypes.map(w => `<option value="${w}" ${p.workType === w ? 'selected' : ''}>${w}</option>`).join('');
                 const durMins = calculateDurationMinsFromTimeRange(p.timeFrom, p.timeTo, 45);
 
-                const fromWidget = buildTimeInputHTML(p.timeFrom || '08:30', `(val) => updatePeriodField(${idx}, 'timeFrom', val)`, false);
-                const toWidget = buildTimeInputHTML(p.timeTo || '09:15', `(val) => updatePeriodField(${idx}, 'timeTo', val)`, false);
+                const fromWidget = buildTimeWidgetHTML(p.timeFrom || '08:30', 'period', idx, 'timeFrom');
+                const toWidget = buildTimeWidgetHTML(p.timeTo || '09:15', 'period', idx, 'timeTo');
 
                 tr.innerHTML = `
                     <td class="py-2 px-3 align-top">
@@ -3008,7 +3008,7 @@
         }
 
         // =========================================================================
-        // TIMETABLE MATRIX BUILDER (WITH 12h AM/PM & 24h TIME PICKERS + LIVE SYNC)
+        // TIMETABLE MATRIX BUILDER (WITH DIRECT BINDING TO LIVE ALARM SCHEDULE)
         // =========================================================================
         function renderTimetableBuilder() {
             const table = document.getElementById('timetable-matrix-table');
@@ -3032,8 +3032,8 @@
                 const th = document.createElement('th');
                 th.className = `py-2 px-2 border border-slate-200 min-w-[205px] text-center relative ${col.isBreak ? 'bg-amber-100 text-amber-900 border-amber-300' : ''}`;
 
-                const startTimeWidget = buildTimeInputHTML(col.startTime, `(val) => updateColTime(${cIdx}, 'startTime', val)`, false);
-                const endTimeWidget = buildTimeInputHTML(col.endTime, `(val) => updateColTime(${cIdx}, 'endTime', val)`, false);
+                const startTimeWidget = buildTimeWidgetHTML(col.startTime, 'timetable', cIdx, 'startTime');
+                const endTimeWidget = buildTimeWidgetHTML(col.endTime, 'timetable', cIdx, 'endTime');
 
                 th.innerHTML = `
                     <div class="flex items-center justify-between no-print text-[10px] text-slate-400 mb-1">
@@ -3056,7 +3056,7 @@
                             ${endTimeWidget}
                         </div>
                     </div>
-                    <div class="hidden print-only text-[9px] text-slate-600 font-semibold">${col.timeLabel}</div>
+                    <div class="hidden print-only text-[9px] text-slate-600 font-semibold" id="print-col-timelabel-${cIdx}">${col.timeLabel}</div>
                 `;
                 trHead.appendChild(th);
             });
@@ -3186,6 +3186,9 @@
             col.timeLabel = `${formatTimeForDisplay(col.startTime)} - ${formatTimeForDisplay(col.endTime)}`;
             col.durationMins = calculateDurationMinsFromTimeRange(col.startTime, col.endTime, 45);
 
+            const printLabel = document.getElementById(`print-col-timelabel-${index}`);
+            if (printLabel) printLabel.innerText = col.timeLabel;
+
             saveLocalStorageData();
             refreshScheduledClassAlarmsList();
             syncNativeAndroidAlarms();
@@ -3202,7 +3205,6 @@
             if (!timetableData.grid[cellKey]) timetableData.grid[cellKey] = {};
             timetableData.grid[cellKey][field] = val;
             saveLocalStorageData();
-            // Immediately update the live Scheduled Class Alarms list & OS alarm schedule
             refreshScheduledClassAlarmsList();
             syncNativeAndroidAlarms();
         }
@@ -3217,7 +3219,7 @@
             saveLocalStorageData();
             refreshScheduledClassAlarmsList();
             syncNativeAndroidAlarms();
-            if (showToastNotification) showToast("Timetable & alarms updated!");
+            if (showToastNotification) showToast("Timetable & alarm schedule updated!");
         }
 
         // =========================================================================
